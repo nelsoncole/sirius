@@ -1,1 +1,1 @@
-# Sirius2
+# Sirius Operating System
