@@ -241,7 +241,7 @@ VOID task_switch(VOID){
     	// Se caímos no final da lista vinculada, 
     	// comece novamente do início.
     	if (!current_thread)
-    	current_thread = thread_ready_queue;
+    	current_thread = thread_ready_queue->next;
 
     	}
 

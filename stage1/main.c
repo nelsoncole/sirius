@@ -142,6 +142,9 @@ VOID main()
 
 	print("Unique Disk ID 0x%x\nBoot Device Number %d\n",UID,HDN);
 
+	UINT32 addr;
+   	__asm__ __volatile__("movl %%cr4,%%eax" :"=a" (addr):);
+
 
 	if(read_sector(HDN,1,0,mbr) )
 		print("Read MBR error\n");

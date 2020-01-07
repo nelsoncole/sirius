@@ -13,7 +13,7 @@ clean: move
 mount:
 	sudo ./kmbr bin/stage0.bin /dev/sdb
 test:
-	sudo qemu-system-i386 -m 64 -vga vmware -drive file=/dev/sdb,format=raw
+	sudo qemu-system-i386 -m 64 -drive file=/dev/sdb,format=raw
 
 clearscreen:
 	clear

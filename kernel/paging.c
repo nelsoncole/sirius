@@ -60,10 +60,12 @@ VOID __native_flush_tlb_single(UINT32 addr)
 
 VOID flush_tlb()
 {
-    UINT32 addr;
+  	UINT32 addr;
    	__asm__ __volatile__("movl %%cr3,%%eax" :"=a" (addr):);
    	__asm__ __volatile__("movl %%eax,%%cr3" ::"a" (addr));
 	wait_ns(120);
+
+	
 }
 
 VOID page_install(VOID)
@@ -82,7 +84,7 @@ VOID page_install(VOID)
 
 	
 	// PTE de identidade 48 MiB
-	for(i =0; i < (1024*KERNEL_OF_NUM_PAGE_TABLE); i++){
+	for(i =0; i < (1024*KERNEL_OF_NUM_PAGE_TABLE); i++) {
 		
 		pt->p = 1;
 		pt->rw= 1;
@@ -103,10 +105,11 @@ VOID page_install(VOID)
 		pd++;
 	}
 
+
 	load_page_diretory(kernel_page_directory);
 	
 	page_enable();
 
 	// Espera o MMU, completar a primeira traducao 
-	wait_ns(400);
+	wait_ns(90000000);
 }

@@ -83,6 +83,8 @@ UINTN ram_initialize()
 	// Mask first 48 MiB, reserved KERNEL_OF_NUM_PAGE_TABLE
 	setmem((UINT8*)RamBMP,(KERNEL_OF_NUM_PAGE_TABLE*RAM_BLOCK_SIZE)/8,-1);
 
+	index_mem_map_pt = 0;
+
 
 	return ((UINTN)RamBMP);
 
@@ -345,14 +347,11 @@ UINTN mem_map(	IN PHYSICAL_ADDRESS phy_addr,
 	UINT32 table_addr = 0;
 
 
-	UINTN _s = size/0x1000;
-	if(size%0x1000)_s += 1;
 
-
-	setmem((PAGE_TABLE*)pt,sizeof(PAGE_TABLE)*_s,0);
+	setmem(pt,sizeof(PAGE_TABLE)*size,0);
 
 	// PTE de identidade 
-	for(i =0; i < _s; i++){
+	for(i =0; i < size; i++){
 		
 		pt->p = flag &1;
 		pt->rw= (flag >>1)&1;
@@ -366,8 +365,8 @@ UINTN mem_map(	IN PHYSICAL_ADDRESS phy_addr,
 
 
 
-	UINTN __s = _s/1024;
-	if(_s%1024)__s += 1;
+	UINTN __s = size/1024;
+	if(size%1024)__s += 1;
 
 	// PDE de identidade
 	for(i =0; i < __s; i++){
@@ -386,6 +385,7 @@ UINTN mem_map(	IN PHYSICAL_ADDRESS phy_addr,
 	*(VIRTUAL_ADDRESS*)(virt_addr) = phy_addr;
 
 	flush_tlb(); // Actualiza TLB
+
 
 
 	return 0;

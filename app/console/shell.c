@@ -241,13 +241,13 @@ UINTN cmd_info(INTN argc,CHAR8 *argv[])
 UINTN cmd_mov(INTN argc,CHAR8 *argv[])
 {
 
-	whd->X = whd->X - 40;
+	whd->X = whd->X - 300;
     	return 0;
 }
 
 UINTN cmd_new(INTN argc,CHAR8 *argv[])
 {
-	whd->X = whd->X + 40;
+	whd->X = whd->X + 300;
 
     	return 0;
 }

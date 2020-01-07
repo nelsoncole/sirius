@@ -89,7 +89,7 @@ UINTN apic_initialize(UINTN _lapicbase) {
 	*(volatile UINT32*)(lapicbase + APIC_LVT_TIMER) = APIC_CONFIG_DATA_LVT(0,1/*Masked*/,0,0,0,NULL,0x20/*Vetor*/);
 	
 	// Performance counter interrupt, to disable performance counter interrupts
-	*(volatile UINT32*)(lapicbase + APIC_LVT_PERFORMANCE) = APIC_CONFIG_DATA_LVT(NULL,1/*Masked*/,0,0,0,0,0x21/*Vetor*/);
+	*(volatile UINT32*)(lapicbase + APIC_LVT_PERFORMANCE) = APIC_CONFIG_DATA_LVT(NULL,0/*No Masked*/,0,0,0,0,0x21/*Vetor*/);
 	
 	// Local interrupt 0, to enable normal external interrupts, Trigger Mode = Level
 	*(volatile UINT32*)(lapicbase + APIC_LVT_LINT0) = APIC_CONFIG_DATA_LVT(NULL,1/*Masked*/,NULL,NULL,1,7,0x22/*Vetor*/);

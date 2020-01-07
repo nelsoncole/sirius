@@ -59,13 +59,41 @@ GraphicInitialize(GUI *Graphic)
 
 VOID thread_main()
 {
+	UINTN pid;
 
 	debug("Initialize thread main\n");
 
 	while(TRUE) {
 
-	
-	__asm__ __volatile__("hlt");
+		// foco
+		if(key_msg_focos) {
+		 	cli();
+		 	msg_set_focus();
+
+			sti();	
+
+		}
+
+		// execute console
+		if(key_msg_exec_console) {
+
+			
+
+			cli();
+
+			pid = do_exec("CONSOLE.SYS",1);
+
+
+			set_focus(pid);
+
+			key_msg_exec_console = 0;
+
+			sti();	
+
+
+
+		}
+
 
 
 	}
@@ -75,7 +103,7 @@ VOID thread_main()
 UINTN main(BOOT_INFO *boot_info)
 {	
 
-	UINTN pid;
+	//UINTN pid;
 	UINTN local_apic_virtual_addr;
 
 	UID = boot_info->UID;
@@ -90,13 +118,18 @@ UINTN main(BOOT_INFO *boot_info)
  *	a se inicializar, para evitar possíveis erros com o Display Console 
 
  */
+
+	
 	page_install();
+
+
 	ram_initialize();
 	alloc_pages_initialize();
 
+	
 	// Mapear o  Linear Frame Buffer e alocar memoria virtal para o Bank Buffer
 	mem_map((PHYSICAL_ADDRESS)G->FrameBuffer,\
-	(VIRTUAL_ADDRESS *)&G->FrameBuffer,0x1000*1024/*4MiB*/,0x13+0x4);
+	(VIRTUAL_ADDRESS *)&G->FrameBuffer,1024/*4MiB*/,0x13+0x4);
 
 
 	alloc_pages(0,1024/*4 MiB*/,(VIRTUAL_ADDRESS *)&G->BankBuffer);
@@ -109,6 +142,8 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 	font = (CHAR8 *)(font8x16);
+
+	
 
 	// clear screen
 	// Limpar o BankBuffer
@@ -143,7 +178,8 @@ UINTN main(BOOT_INFO *boot_info)
 	
 	print("Initialize Kernel: Sirius v2.0...\n");
 
-	
+		
+
 	print("Install GDTR\n",gdt_install());
 	print("Install TSS\n",tss_install());
 	print("Install IDTR\n",idt_install());
@@ -152,7 +188,7 @@ UINTN main(BOOT_INFO *boot_info)
 
 	// Mapear o Local APIC BASE
 	mem_map((PHYSICAL_ADDRESS)0xFEC00000/*IA32_LOCAL_APIC_BASE_ADDR*/,\
-	(VIRTUAL_ADDRESS *)&local_apic_virtual_addr,0x1000*1024/*4MiB*/,0x13);
+	(VIRTUAL_ADDRESS *)&local_apic_virtual_addr,1024/*4MiB*/,0x13);
 	
 	apic_initialize(IA32_LOCAL_APIC_BASE_ADDR/*local_apic_virtual_addr*/);
 	print("Install APIC Timer\n",apic_timer());
@@ -192,7 +228,7 @@ UINTN main(BOOT_INFO *boot_info)
 	print("Initialize focus\n",initialize_focus());
 	
 	// testing thread
-	//create_thread(&thread_main,kernel_page_directory,0,0,0,0,(UINT32)malloc(0x2000),0,2);
+	create_thread(&thread_main,kernel_page_directory,0,0,0,0,(UINT32)malloc(0x2000),0,2);
 
 
 
@@ -232,7 +268,7 @@ UINTN main(BOOT_INFO *boot_info)
 
 	// USER
 	do_exec("GSERVER.SYS",1);
-	do_exec("MSGBOX.SYS",1);
+	//do_exec("MSGBOX.SYS",1);
 	do_exec("TASK.SYS",1);
 
 
@@ -243,6 +279,8 @@ UINTN main(BOOT_INFO *boot_info)
 	//clearscreen();
 	BitMAP(	(UINTN*)0xA00000,260,50,G->BankBuffer);
 	refreshrate();
+
+	
 
 	sti(); //Enable eflag interrupt
 
@@ -263,33 +301,7 @@ UINTN main(BOOT_INFO *boot_info)
 
 	while(TRUE)/* Thread 0*/ {
 
-		// foco
-		if(key_msg_focos) {
-		 	cli();
-		 	msg_set_focus();
-			sti();	
-
-		}
-
-		// execute console
-		if(key_msg_exec_console) {
-
-			
-
-			cli();
-
-			pid = do_exec("CONSOLE.SYS",1);
-
-
-			set_focus(pid);
-
-			key_msg_exec_console = 0;
-
-			sti();	
-
-
-
-		}
+		__asm__ __volatile__("hlt");
 	
 	}
 

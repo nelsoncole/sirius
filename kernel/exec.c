@@ -104,7 +104,6 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 
 	load_page_diretory(pd);
 	flush_tlb();
-	
 
 		//FIXME
 
