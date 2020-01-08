@@ -82,13 +82,13 @@ INTN main() {
 
 
 
-		_cpy(_st,clock_table[clock[2] &0x2f],2);
+		_cpy(_st,clock_table[clock[2] &0x3f],2);
 		_st++; _st++; _st++;
 		
-		_cpy(_st,clock_table[clock[1] &0x2f],2);
+		_cpy(_st,clock_table[clock[1] &0x3f],2);
 		_st++; _st++; _st++;
 
-		_cpy(_st,clock_table[clock[0] &0x2f],2);	
+		_cpy(_st,clock_table[clock[0] &0x3f],2);	
 	
 		
 		_st = string_clock;
