@@ -1,5 +1,5 @@
 /*
- * File Name: task.c
+ * File Name: files.c
  *
  *
  * BSD 3-Clause License
@@ -34,75 +34,18 @@
  *
  */
  
+
 #include <io.h>
 
 
-UINT8 *clock = (UINT8*) 0x101104;
-
-
-CHAR8 *clock_table[60] = {
-"00","01","02","03","04","05","06","07","08","09",
-"10","11","12","13","14","15","16","17","18","19",
-"20","21","22","23","24","25","26","27","28","29",
-"30","31","32","33","34","35","36","37","38","39",
-"40","41","42","43","44","45","46","47","48","49",
-"50","51","52","53","54","55","56","57","58","59",
-};
-
-
-UINTN _cpy(CHAR8 *Destination,CHAR8 *Source,UINTN count)
-{
-    	UINTN i;
-	CHAR8 *des = Destination;
-	CHAR8 *src = Source;
-
-	for(i =0;i <count;i++)
-	*des++ = *src++;
-	
-    	return i;
-}
-
 INTN main() {
 
-	
-	CHAR8 *_st, string_clock[8] = "00:00:00";
 
-	GW_HAND *task_handle = CreateTask(0,0,1024,32, 
-	GW_STYLE(FORE_GROUND(GW_GRAY) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);
+	GW_HAND *gw = CreateWindow(TEXT(" Files "),NULL,50,50,900,600, 
+	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY) | BACK_GROUND_STYLE(GW_BLUE)),GW_FLAG_VISIBLE);
 
 
-	GW_HAND *box_handle = CreateBox(task_handle,task_handle->Area.Width - 8*10,8,8*8,task_handle->Area.Height - 2,
-	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);
-
-	
-
-	while(TRUE) {
-
-		_st = string_clock;
-
-
-
-		_cpy(_st,clock_table[clock[2] &0x2f],2);
-		_st++; _st++; _st++;
-		
-		_cpy(_st,clock_table[clock[1] &0x2f],2);
-		_st++; _st++; _st++;
-
-		_cpy(_st,clock_table[clock[0] &0x2f],2);	
-	
-		
-		_st = string_clock;
-
-		TASK_Clearscreen();
-
-		UpdateTask(task_handle);
-
-		UpdateBoxDrawString(box_handle,_st);
-	
-		TASK_RefreshRate();	
-
-	}
-
+	for(;;)WindowFocus(gw);
 
 	return 0;
 

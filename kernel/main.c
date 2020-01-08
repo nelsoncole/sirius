@@ -270,6 +270,7 @@ UINTN main(BOOT_INFO *boot_info)
 	do_exec("GSERVER.SYS",1);
 	//do_exec("MSGBOX.SYS",1);
 	do_exec("TASK.SYS",1);
+	do_exec("FILES.SYS",1);
 
 
 

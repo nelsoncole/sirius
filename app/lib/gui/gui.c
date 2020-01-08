@@ -684,10 +684,10 @@ GW_HAND *CreateWindow(	CONST CHAR8 *Title,
 	GwHand->Buffer	= (VOID*) G->BankBuffer; // 
 
 	// area
-	GwHand->Area.X 		= X; // area coordenada X
+	GwHand->Area.X 		= X + W_BORDER_SIZE; // area coordenada X
 	GwHand->Area.Y 		= Y + W_BARRA_TITUL_SIZE; // area Coordenada Y
-	GwHand->Area.Width	= Width; // area largura
-	GwHand->Area.Height	= Height - W_BARRA_TITUL_SIZE; // area altura
+	GwHand->Area.Width	= Width - (W_BORDER_SIZE*2); // area largura
+	GwHand->Area.Height	= Height - W_BARRA_TITUL_SIZE - W_BORDER_SIZE; // area altura
 
 
 
@@ -703,17 +703,33 @@ GW_HAND *CreateWindow(	CONST CHAR8 *Title,
 	
 
 	// Area de janela
-	DrawRect (GwHand->X,GwHand->Y,GwHand->Width,GwHand->Height,ColorTable[GW_WHITE],GwHand->Buffer);
+	//DrawRect (GwHand->X,GwHand->Y,GwHand->Width,GwHand->Height,ColorTable[GW_WHITE],GwHand->Buffer);
+
+
+	// border
 	// barra de title
-	DrawArea (GwHand->X + 1,GwHand->Y + 1,GwHand->Area.Width -1,W_BARRA_TITUL_SIZE -1, \
+	DrawArea (GwHand->X,GwHand->Y,GwHand->Width,W_BARRA_TITUL_SIZE, \
 				ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
-	// area
-	DrawArea (GwHand->Area.X + 1,GwHand->Area.Y + 1,GwHand->Area.Width -1,GwHand->Area.Height -1, \
+
+
+	// Roda-pe
+	DrawArea (GwHand->X,GwHand->Y + GwHand->Height - W_BORDER_SIZE,GwHand->Width,W_BORDER_SIZE, \
+				ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
+
+	// esquerda
+	DrawArea (GwHand->X,GwHand->Y + W_BARRA_TITUL_SIZE,W_BORDER_SIZE,GwHand->Height - W_BARRA_TITUL_SIZE, \
+				ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
+
+
+	// direita
+	DrawArea (GwHand->X + GwHand->Width - W_BORDER_SIZE ,\
+	GwHand->Y + W_BARRA_TITUL_SIZE,W_BORDER_SIZE,GwHand->Height - W_BARRA_TITUL_SIZE,\
+	ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
+
+
+	// area do cliente
+	DrawArea (GwHand->Area.X,GwHand->Area.Y,GwHand->Area.Width,GwHand->Area.Height, \
 				ColorTable[GwHand->Style >> 8 &0xff],GwHand->Buffer);
-
-
-	// Barra de titule
-	LineDrawHorizontal (GwHand->X,GwHand->Width,GwHand->Y + W_BARRA_TITUL_SIZE,ColorTable[GW_WHITE],GwHand->Buffer);
 
 	
 	// Title
@@ -728,13 +744,11 @@ GW_HAND *CreateWindow(	CONST CHAR8 *Title,
 	
 	// Status
 
-	BoxDrawSectCursor(GwHand->box,GwHand->box->Font.SizeX - 2,0);
+	BoxDrawSectCursor(GwHand->box,GwHand->box->Font.SizeX - 3,0);
 	UpdateBoxDraw(GwHand->box);
 	BoxDraw(GwHand->box,'x',ColorTable[GwHand->Style &0xff],ColorTable[GwHand->Style >> 8 &0xff],GwHand->box->Buffer);
 	
-	
-	// border
-	//wBorder(1,1,1,1,0x09f911,(gHAND)wH);
+
 
 
 
@@ -765,25 +779,43 @@ UINTN UpdateWindow(GW_HAND *_GwHand)
 {
 	GW_HAND *GwHand = _GwHand;
 
-	GwHand->Area.X 		= GwHand->X; // area coordenada X
+	GwHand->Area.X 		= GwHand->X + W_BORDER_SIZE; // area coordenada X
 	GwHand->Area.Y 		= GwHand->Y + W_BARRA_TITUL_SIZE; // area Coordenada Y
-	GwHand->Area.Width	= GwHand->Width; // area largura
-	GwHand->Area.Height	= GwHand->Height - W_BARRA_TITUL_SIZE; // area altura
+	GwHand->Area.Width	= GwHand->Width - (W_BORDER_SIZE*2); // area largura
+	GwHand->Area.Height	= GwHand->Height - W_BARRA_TITUL_SIZE - W_BORDER_SIZE; // area altura
 	
 
 	if(!(GwHand->Flag &GW_FLAG_VISIBLE)) return 1;
 	// Area de janela
-	DrawRect (GwHand->X,GwHand->Y,GwHand->Width,GwHand->Height,ColorTable[GW_WHITE],GwHand->Buffer);
+	//DrawRect (GwHand->X,GwHand->Y,GwHand->Width,GwHand->Height,ColorTable[GW_WHITE],GwHand->Buffer);
+
+
+	// border
 	// barra de title
-	DrawArea (GwHand->X + 1,GwHand->Y + 1,GwHand->Area.Width -1,W_BARRA_TITUL_SIZE -1, \
+	DrawArea (GwHand->X,GwHand->Y,GwHand->Width,W_BARRA_TITUL_SIZE, \
 				ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
-	// area
-	DrawArea (GwHand->Area.X + 1,GwHand->Area.Y + 1,GwHand->Area.Width -1,GwHand->Area.Height -1, \
+
+
+	// Roda-pe
+	DrawArea (GwHand->X,GwHand->Y + GwHand->Height - W_BORDER_SIZE,GwHand->Width,W_BORDER_SIZE, \
+				ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
+
+	// esquerda
+	DrawArea (GwHand->X,GwHand->Y + W_BARRA_TITUL_SIZE,W_BORDER_SIZE,GwHand->Height - W_BARRA_TITUL_SIZE, \
+				ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
+
+
+	// direita
+	DrawArea (GwHand->X + GwHand->Width - W_BORDER_SIZE ,\
+	GwHand->Y + W_BARRA_TITUL_SIZE,W_BORDER_SIZE,GwHand->Height - W_BARRA_TITUL_SIZE,\
+	ColorTable[GwHand->Style >> 16 &0xff],GwHand->Buffer);
+
+
+	// area do cliente
+	DrawArea (GwHand->Area.X,GwHand->Area.Y,GwHand->Area.Width,GwHand->Area.Height, \
 				ColorTable[GwHand->Style >> 8 &0xff],GwHand->Buffer);
 
 
-	// Barra de titule
-	LineDrawHorizontal (GwHand->X,GwHand->Width,GwHand->Y + W_BARRA_TITUL_SIZE,ColorTable[GW_WHITE],GwHand->Buffer);
 
 	
 	// Title
@@ -796,8 +828,7 @@ UINTN UpdateWindow(GW_HAND *_GwHand)
 	
 	
 	// Status
-
-	BoxDrawSectCursor(GwHand->box,GwHand->box->Font.SizeX - 2,0);
+	BoxDrawSectCursor(GwHand->box,GwHand->box->Font.SizeX - 3,0);
 	UpdateBoxDraw(GwHand->box);
 	BoxDraw(GwHand->box,'x',ColorTable[GwHand->Style &0xff],\
 	ColorTable[GwHand->Style >> 8 &0xff],GwHand->box->Buffer);

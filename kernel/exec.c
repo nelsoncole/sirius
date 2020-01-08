@@ -103,7 +103,9 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 	__asm__ __volatile__("movl %%cr3,%%eax":"=a"(oldpd));
 
 	load_page_diretory(pd);
-	flush_tlb();
+	//flush_tlb();
+	// Espera o MMU, completar a primeira traducao 
+	wait_ns(1000);
 
 		//FIXME
 

@@ -41,7 +41,8 @@
 #define W_TASK_BARRA_SIZE 32
 
 // Type
-#define W_BARRA_TITUL_SIZE 24
+#define W_BARRA_TITUL_SIZE 	24
+#define W_BORDER_SIZE 		8
 #define GW_HANDLE_EDIT 		1
 #define GW_HANDLE_BUTTON	2
 #define GW_HANDLE_LABEL 	3
@@ -69,7 +70,7 @@
 #define GW_STYLE(x) x
 #define FORE_GROUND(x)(x &0xff)
 #define BACK_GROUND(x)( x << 8 &0xff00)
-#define BACK_GROUND_TITLE(x)( x << 16 &0xff0000)
+#define BACK_GROUND_STYLE(x)( x << 16 &0xff0000)
 
 #define FONT_SIZE_X 8
 #define FONT_SIZE_Y 16

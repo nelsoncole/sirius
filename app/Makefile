@@ -10,9 +10,10 @@ CONSOLE= setup.o __main.o console.o shell.o string.o gui.o font8x16.o bmp.o
 MSGBOX= setup.o __main.o msgbox.o string.o gui.o font8x16.o bmp.o
 TASK= setup.o __main.o task.o string.o gui.o font8x16.o bmp.o
 GSERVER= setup.o __main.o gserver.o string.o gui.o font8x16.o bmp.o
+FILES= setup.o __main.o files.o string.o gui.o font8x16.o bmp.o
 
 
-.PHONY: console.sys task.sys msgbox.sys gserver.sys clean move
+.PHONY: console.sys task.sys msgbox.sys gserver.sys files.sys clean move
 
 console.sys: $(CONSOLE)
 	$(LD) $(LDFLAGS) -o $@ $^
@@ -24,6 +25,9 @@ msgbox.sys: $(MSGBOX)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 gserver.sys: $(GSERVER)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+files.sys: $(FILES)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 #LIB/SYS
@@ -54,6 +58,9 @@ gserver.sys: $(GSERVER)
 
 #SERVER
 %.o:server/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
+#FILES
+%.o:files/%.c
 	$(CC) $(CFLAGS32) -c -o $@ $<
 
 move:

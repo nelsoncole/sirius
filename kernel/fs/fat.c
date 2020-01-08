@@ -82,7 +82,7 @@ FAT_BPB *FatReadBPB(VOLUME *volume)
 
 FAT_DIRECTORY *FatOpenRoot(FAT_BPB *_bpb,FAT_DATA *data)
 {
-	FAT_DIRECTORY *root = (FAT_DIRECTORY *)malloc(0x8000); //32 KiB = 1024 entradas
+	FAT_DIRECTORY *root = (FAT_DIRECTORY *)malloc(0xF000); //64 KiB = 2048 entradas
 	FAT_BPB *bpb = _bpb;
 
 	// calcular o total numero de sectores Root Directory, RootDirSectors FAT12/16
@@ -136,7 +136,7 @@ UINTN FatOpenFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,CONST CHAR8 *
 	// Comparar ate achar o SHORT NAME
 	FileShortName(shortname,(CHAR8*)filename);
 
-	for(i = 0;i < 128/*FIXME*/; i++) {
+	for(i = 0;i < 256/*FIXME*/; i++) {
 
 		if((dir->DIR_Attr == FAT_ATTR_LONG_NAME)) { dir++; continue; }
 
