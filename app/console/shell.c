@@ -231,7 +231,8 @@ UINTN cmd_info(INTN argc,CHAR8 *argv[])
 	\n0x10001110 - 0x10001113  *RCT             // size 4 bytes\
 	\n0x10001114 - 0x10001117   PID             // size 4 bytes\
 	\n0x10001118 - 0x1000111B  *FOCUS           // size 4 bytes\
-	\n0x1000111C - 0x100011FF   Reserved        // size 228 bytes\
+	\n0x1000111C - 0x1000111F  *MOUSE           // size 4 bytes\
+	\n0x10001120 - 0x100011FF   Reserved        // size 224 bytes\
 	\n0x10001200 - 0x100012FF   Channel         // size 256 bytes\n");
 
         return 0;

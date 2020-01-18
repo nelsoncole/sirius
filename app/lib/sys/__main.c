@@ -41,6 +41,9 @@ extern INTN main();
 FOCUS 	*__focus	= NULL;
 UINT32	__pid = -1;
 
+CHAT *ready_queue_host_chat;
+CHAT *host_chat;
+
 typedef struct _BOOT_INFO{
 	GUI Graphic;
 	
@@ -57,12 +60,100 @@ UINTN __main(BOOT_INFO *boot_info)
 
 	p = (UINT32*)0x10001114;
 	__pid = *p;
-	__focus = (FOCUS*)(*++p); 
+	__focus = (FOCUS*)(*++p);
+
+
+	// inicializa chat
+
+	ready_queue_host_chat = host_chat = (CHAT*) MSG_VIRTUAL_ADDR;
+
+	host_chat->next = NULL;
+	host_chat->type = 0;
+ 
 
 	exit(main());
 
 	for(;;);
 }
+
+VOID send_msg(UINT32 type,UINT32 p1,UINT32 p2)
+{
+	__asm__ __volatile__("int $0x72"::"a"(6),"d"(type),"c"(p1),"b"(p2));
+
+}
+UINTN read_msg(UINT32 *p1,UINT32 *p2) 
+{
+	UINT16 *input 	= (UINT16*) 0x10001100; // extended key
+
+	CHAT *chat;
+	UINT32 type = 0;
+
+
+	// Teclado
+
+	if(input[1]) {
+		*p1 = input[1] &0xffff;
+		*p2 = 0;
+		type = MSG_READ_KEY;
+
+
+		input[0] = 0;
+		input[1] = 0;
+
+		goto done;
+
+	}
+
+
+
+
+
+	host_chat = host_chat->next;
+
+
+	if(!(host_chat)) { // final da lista
+
+		host_chat = ready_queue_host_chat;
+
+		goto done;
+		
+	}
+
+	if(host_chat/*verifica se ha msg na fila*/) {
+
+		if(!host_chat->type)return type;
+
+		*p1 = host_chat->p1;
+		*p2 = host_chat->p2;
+		type = host_chat->type;
+
+
+
+		//remover da lista de mensagens
+		// Percorre a lista ate achar o p->next igual ao current
+		chat = ready_queue_host_chat;
+		do{
+
+			if(chat->next == host_chat)break;
+
+			chat = chat->next;
+
+		}while(TRUE);
+
+		// aponta o chat->next para o current->next
+		chat->next = host_chat->next;
+
+
+		__free(host_chat);
+
+
+	}
+
+done:
+
+	return type;
+}
+
 
 VOID exit(INTN rc)
 {

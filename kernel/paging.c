@@ -44,7 +44,7 @@ VOID load_page_diretory(PAGE_DIRECTORY  *phy_addr)
 {
 
 	__asm__ __volatile__("movl %k0,%%cr3"::"r"(phy_addr));
-	//wait_ns(120); // Wait Translation Lookaside Buffer (TLB)
+	wait_ns(120); // Wait Translation Lookaside Buffer (TLB)
 }
 
 VOID page_enable()

@@ -95,5 +95,15 @@ typedef struct {
 }REG;
 
 
+typedef struct _MOUSE {
+
+	UINT32	x;
+	UINT32	y;
+	UINT32	z;
+	UINT32	b;
+
+}__attribute__((packed)) MOUSE;
+
+
 
 #endif

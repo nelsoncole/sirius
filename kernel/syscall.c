@@ -35,7 +35,7 @@
  */
 #include <os.h>
 
-#define SYSCALL_NUM 6
+#define SYSCALL_NUM 7
 
 extern VOID interrupter(INTN n,UINT32 offset,UINT16 sel,UINT8 dpl );
 extern void int114(); // system call
@@ -67,7 +67,29 @@ static VOID sys_pci(UINTN max_bus) {
 	pci_get_info(0,max_bus);
 
 }
+static VOID sys_chat(UINT32 type,UINT32 p1, UINT32 p2)
+{
+	CHAT *new_msg = (CHAT*)malloc(sizeof(CHAT));
 
+
+	new_msg->type	= type;
+	new_msg->p1	= p1;
+	new_msg->p2	= p2;
+	new_msg->process = (UINT32) current_thread;
+	new_msg->next	= NULL;
+
+
+	// enfilar mensagem
+	// add no final da lista
+	CHAT	*p = ready_queue_host_chat;
+	while(p->next)
+	p = p->next;
+
+	p->next = new_msg;
+
+	
+
+}
 
 VOID *syscall_table[SYSCALL_NUM]={
     	0,			// eax, 0	null
@@ -75,7 +97,8 @@ VOID *syscall_table[SYSCALL_NUM]={
 	&sys_malloc,       	// eax, 2    	sys_malloc
 	&sys_free,       	// eax, 3    	sys_free
 	&sys_reboot,       	// eax, 4    	sys_reboot
-	&sys_pci		// eax, 5	sys_pci, edx = max_bus
+	&sys_pci,		// eax, 5	sys_pci, edx = max_bus
+	&sys_chat		// eax, 6	sys_chat, edx = type, ecx = p1, cbx = p2
 };
 
 static VOID invalidsyscall(UINT32 num)

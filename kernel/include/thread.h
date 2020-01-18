@@ -36,6 +36,14 @@
 #ifndef __THREAD_H__
 #define __THREAD_H__
 
+#define MSG_READ_KEY	1
+#define MSG_READ_FILE	2
+#define MSG_READ_DIR	3
+#define MSG_WRITE_FILE	4
+#define MSG_WRITE_DIR	5
+#define MSG_VIRTUAL_ADDR	0x10001200;
+
+
 typedef struct _THREAD {
 	// Registradores geral
 	UINT32 	eax;
@@ -73,12 +81,24 @@ typedef struct _THREAD {
 	FRAME *frame;
 
 	UINT32 _static;
+	UINT32 flag;
 
 	// linker do próximo     
     	struct _THREAD *next;
 
 
 }__attribute__((packed)) THREAD;
+
+typedef struct _CHAT {
+	UINT32	id;
+	UINT32	p1;
+	UINT32	p2;
+	UINT32	type;
+	UINT32 	process;
+	
+	struct _CHAT *next;
+
+}__attribute__((packed)) CHAT;
 
 
 UINTN initialize_thread();

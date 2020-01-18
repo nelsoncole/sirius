@@ -71,6 +71,7 @@ UINTN exit()
 	
 
 	if(!current->_static) {
+		current->flag = -1;
 		free_pages(current->pd);
 		free_pages(current->pt);
 		free_frame(current->frame);

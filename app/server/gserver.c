@@ -39,6 +39,7 @@
 INTN main(INTN argc,CHAR8 *argv[])
 {
 
+	
 
 	GW_HAND *window = (GW_HAND *)(*(UINT32*)(G->List));
 
@@ -50,6 +51,8 @@ INTN main(INTN argc,CHAR8 *argv[])
 	while(TRUE){
 
 		gui_server();
+		
+
 	}
 
 	return 0;

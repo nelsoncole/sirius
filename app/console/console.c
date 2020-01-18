@@ -364,7 +364,7 @@ UINTN getchar()
 {
 	UINTN rc;
 
-	while(!*input) WindowFocus(whd); //FIXME
+	while(!(*input&0xffff)) WindowFocus(whd); //FIXME
 
 	rc = *input;
 	*input = 0;

@@ -57,7 +57,7 @@ UINT8     buttons;
 signed int  mouse_x;
 signed int  mouse_y;
 
-GW_HAND *MouseHand;
+
 
 // Algumas variáveis de controle
 
@@ -157,6 +157,9 @@ UINTN mouse_install(){
 	largura_da_tela = G->HorizontalResolution;
 	altura_da_tela	= G->VerticalResolution;
 
+
+	//mouse = (MOUSE *) malloc(sizeof(MOUSE));
+
 	return 0;
 
 }
@@ -216,12 +219,14 @@ static VOID mouse_refresh(){
      	if(mouse_y < 0) mouse_y =0;
      	else if(mouse_y >altura_da_tela ) mouse_y = altura_da_tela;
 
-     	mouse_position = mouse_x + (largura_da_tela  * mouse_y);
+     	//mouse_position = mouse_x + (largura_da_tela  * mouse_y);
 
 
 
-	MouseHand->X 		= mouse_x;// coordenada X
-	MouseHand->Y 		= mouse_y; // Coordenada Y
+	mouse->x 		= mouse_x;// coordenada X
+	mouse->y 		= mouse_y; // Coordenada Y
+	mouse->z		= 0;
+	mouse->b		= buttons;
 
     	/*ClearScreen();	
      	print("((%d)   (%d,%d,%d)) ",mouse_position, mouse_x, buttons ,mouse_y );*/

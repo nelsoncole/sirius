@@ -8,7 +8,7 @@ LD=ld
 
 OBJS= setup.o vector.o main.o os.o data.o dscptor.o exceptions.o string.o gui.o font8x16.o bmp.o console.o cpuid.o apic.o lvt.o irq.o paging.o memory.o thread.o exec.o exit.o syscall.o pci.o ata.o disk.o fat.o media.o ps2.o mouse.o keyboard.o rtc.o i82540.o process.o
 
-.PHONY: kernel.bin clean move test clearscreen
+.PHONY: kernel.bin clean move clearscreen
 
 kernel.bin: $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
@@ -51,9 +51,6 @@ move:
 
 clean: move
 	rm *.o
-
-test:
-	sudo qemu-system-i386 -m 64 -vga vmware -drive file=/dev/sdb,format=raw
 
 clearscreen:
 	clear

@@ -114,6 +114,10 @@ UINTN initialize_thread()
    
     	current_thread->next 	= NULL;
 
+	current_thread->flag	= 0;
+
+
+
 
 	return 0;
 
@@ -184,7 +188,9 @@ UINTN create_thread(	VOID (*main)(),
 	UINTN d = (UINTN) (APP_VIRTUAL_ADDRESS >> 22 &0x3FF);
 	new_thread->pt   	= (PAGE_TABLE*)((UINTN)(page_directory[d].addrpt << 12));
 
-    	new_thread->next = NULL;
+    	new_thread->next 	= NULL;
+
+	new_thread->flag	= 0;
 
     
      
@@ -283,6 +289,10 @@ VOID task_switch(VOID){
 
 
 	// Aqui enviamos a mensagem para a thread
+
+	
+
+
 
 end:
 	return;

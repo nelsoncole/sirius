@@ -126,12 +126,16 @@ extern 	THREAD		*thread_focus;
 extern 	UINTN		key_msg_focos;
 extern 	UINTN		key_msg_exec_console;
 
+// CHAT
+extern CHAT *ready_queue_host_chat, *host_chat;
+
 //Boot Info
 extern 	UINT32 		UID;
 extern 	UINT32 		DEV;
 
 //APP USE
-extern UINT32 		*key;
+extern UINT16 		*key;
+extern MOUSE 		*mouse;
 
 // console
 extern CHAR8 *__buffer__;

@@ -85,6 +85,8 @@ UINT8 keyboard_charset = 0;
 static UINTN shift = 0;
 static UINTN caps_lock = 0;
 
+UINT8 key_buffer[2];
+UINTN count = 0;
 
 
 
@@ -196,13 +198,16 @@ UINTN keyboard_install(){
 // TODO: 
 // O Bit 7 (0x80) na scancode lido, nos informa se a tecla foi precionada ou solta  		
 // Exemplo: O shift left quando precionado gera o scancode 0x2A quando solto 0xAA (0x2A + 0x80 = 0xAA)
-
-
 VOID keyboard_handler(VOID){
 
 	static UINT32 oldcr3 = 0;
+	
+	if(count >= 2)count = 0;
 
     	UINT8 scancode = inportb(0x60);
+
+	key_buffer[count++] = scancode;
+	
 
 	// Control kernel
 	if(scancode == KEY_F1) {
@@ -266,6 +271,9 @@ VOID keyboard_handler(VOID){
 			oldcr3 = switch_cr3(focus->pd);
 
 			key[0] = keyboard_charset &0xff;
+
+			key[1] = key_buffer[0] &0xff;
+			key[1] |= (key_buffer[1] << 8) &0xff00;
 
 			switch_cr3(oldcr3);
 

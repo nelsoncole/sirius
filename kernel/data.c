@@ -47,12 +47,17 @@ UINT32 global_controll_task_switch = 1;
 
 //APP USE
 
-UINT32 *key = (UINT32*)0x10001100;
+UINT16 *key = (UINT16*)0x10001100;
+MOUSE *mouse = (MOUSE*)0x800000;
 
 FAT_BPB *bpb = NULL;
 FAT_DIRECTORY *root = NULL;
 FAT_DATA *data = NULL;
 VFS *vfs = NULL;
+
+
+//CHAT
+CHAT *ready_queue_host_chat, *host_chat;
 
 
 

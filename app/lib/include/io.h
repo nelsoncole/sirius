@@ -122,6 +122,69 @@
 #endif
 
 
+// CHAT
+#define MSG_READ_KEY	1
+#define MSG_READ_FILE	2
+#define MSG_READ_DIR	3
+#define MSG_WRITE_FILE	4
+#define MSG_WRITE_DIR	5
+#define MSG_VIRTUAL_ADDR	0x10001200;
+
+#define	KEY_UP 		(0x48E0)
+#define	KEY_LEFT 	(0x4BE0)
+#define	KEY_RIGHT 	(0x4DE0)
+#define	KEY_DOWN 	(0x50E0)
+
+#define	KEY_ENTER 	(0x1C1C)
+
+typedef struct _CHAT {
+	UINT32	id;
+	UINT32	p1;
+	UINT32	p2;
+	UINT32	type;
+	UINT32 	process;
+	
+	struct _CHAT *next;
+
+}__attribute__((packed)) CHAT;
+
+
+typedef struct _VFS_FILE_HEADER 
+{
+	// File Header 4 KiB
+	CHAR8	filename[256];
+	UINT8 	attr;
+	UINT32	size;
+	UINT8	dev;
+	UINT8	p_entry;
+	UINT16	bps;
+	UINT8	count;	// numeros de sector por bloco
+	UINT32	blocks;
+	UINT8	rsv[256 - 14];
+
+}__attribute__ ((packed)) VFS_FILE_HEADER;
+
+typedef struct _VFS 
+{
+	// File Header 4 KiB
+	VFS_FILE_HEADER header;
+
+	// LBA block start
+	UINT32	block[1];
+
+}__attribute__ ((packed)) VFS;
+
+
+typedef struct _MOUSE {
+
+	UINT32	x;
+	UINT32	y;
+	UINT32	z;
+	UINT32	b;
+
+}__attribute__((packed)) MOUSE;
+
+
 // header
 extern FOCUS	       	*__focus;
 extern UINT32		__pid;
@@ -130,6 +193,11 @@ extern GUI *G;
 extern UINT32 ColorTable[16];
 extern UINT16 font8x16[256*16];
 //extern UINT16 cursor18x18[18];
+
+
+// CHAT
+VOID send_msg(UINT32 type,UINT32 p1,UINT32 p2);
+UINTN read_msg(UINT32 *p1,UINT32 *p2);
 
 
 // String

@@ -48,6 +48,7 @@
 #define GW_HANDLE_LABEL 	3
 #define GW_HANDLE_LIST 		4
 #define GW_HANDLE_BOX 		5
+#define GW_HANDLE_FILE 		6
 
 // Flags
 #define GW_FLAG_INVISIBLE 	0

@@ -85,6 +85,8 @@ FAT_DIRECTORY *FatOpenRoot(FAT_BPB *_bpb,FAT_DATA *data)
 	FAT_DIRECTORY *root = (FAT_DIRECTORY *)malloc(0xF000); //64 KiB = 2048 entradas
 	FAT_BPB *bpb = _bpb;
 
+	setmem(root,0xF000,0);
+
 	// calcular o total numero de sectores Root Directory, RootDirSectors FAT12/16
 	data->root_sectors = ((bpb->BPB_RootEntCnt * 32) + (bpb->BPB_BytsPerSec - 1)) / bpb->BPB_BytsPerSec;
 
@@ -133,12 +135,25 @@ UINTN FatOpenFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,CONST CHAR8 *
 	UINT16 *fat_table =(UINT16*) (FAT);
 
 	UINTN i;
+	
+
+	if(*filename == '.')goto successfull;
+
+
 	// Comparar ate achar o SHORT NAME
 	FileShortName(shortname,(CHAR8*)filename);
 
-	for(i = 0;i < 256/*FIXME*/; i++) {
+	for(i = 0;i < 2048/*FIXME*/; i++) {
 
+		if((dir->DIR_Name[0] ==0)){return -1;} // FIXME Errro
+		if((dir->DIR_Name[0] == 0xE5)) { dir++; continue; } // Avaliable
+		if((dir->DIR_Name[0] == 0x20)) { dir++; continue; } // space
 		if((dir->DIR_Attr == FAT_ATTR_LONG_NAME)) { dir++; continue; }
+		if((dir->DIR_Attr == FAT_ATTR_HIDDEN)) { dir++; continue; }
+		if((dir->DIR_Attr == FAT_ATTR_SYSTEM)) { dir++; continue; }
+		if((dir->DIR_Attr == FAT_ATTR_VOLUME_ID)) { dir++; continue; }
+		if((dir->DIR_Attr != FAT_ATTR_DIRECTORY) &&\
+	 	(dir->DIR_Attr != FAT_ATTR_ARCHIVE)) { dir++; continue; }
 
 		if( !(strncmp (dir->DIR_Name,shortname,11)) )
 			goto successfull;
@@ -149,6 +164,10 @@ UINTN FatOpenFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,CONST CHAR8 *
 
 successfull:
 
+
+	switch(attr) {
+
+	case 0: // Arquivo
 	// Aqui podemos carregar o VFS
 	strncpy(vfs->header.filename,dir->DIR_Name,11);
 	vfs->header.attr 	= dir->DIR_Attr;
@@ -194,6 +213,44 @@ successfull:
 
 
 	vfs->header.blocks += i;
+		break;
+	case 1: //Directory
+	strncpy(vfs->header.filename,dir->DIR_Name,11);
+	vfs->header.attr 	= dir->DIR_Attr;
+	vfs->header.size 	= dir->DIR_FileSize;
+	vfs->header.dev		= bpb->specific.fat.BS_DrvNum;
+	vfs->header.bps 	= bpb->BPB_BytsPerSec;
+	vfs->header.count	= 0;
+	vfs->header.blocks	= 0;
+
+
+	for(i = 0;i < 2048/*FIXME*/; i++) {
+
+		if((dir->DIR_Name[0] == 0)){break;}
+		if((dir->DIR_Name[0] == 0xE5)) { dir++; continue; } // Avaliable
+		if((dir->DIR_Name[0] == 0x20)) { dir++; continue; } // space
+		if((dir->DIR_Attr == FAT_ATTR_LONG_NAME)) { dir++; continue; }
+		if((dir->DIR_Attr == FAT_ATTR_HIDDEN)) { dir++; continue; }
+		if((dir->DIR_Attr == FAT_ATTR_SYSTEM)) { dir++; continue; }
+		if((dir->DIR_Attr == FAT_ATTR_VOLUME_ID)) { dir++; continue; }
+		if((dir->DIR_Attr != FAT_ATTR_DIRECTORY) &&\
+	 	(dir->DIR_Attr != FAT_ATTR_ARCHIVE)) { dir++; continue; }
+		
+
+		strncpy((CHAR8*)(vfs->block + (vfs->header.count*64)),dir->DIR_Name,11);
+
+		*(UINT16*)(vfs->block + (vfs->header.count*60)) = 0;
+		*(UINT16*)(vfs->block + (vfs->header.count*62)) = 0;
+
+		vfs->header.count++;
+		dir++;
+	}
+
+		break;
+
+	default:
+		return -1;
+	}
 
 	return 0;
 }

@@ -60,8 +60,25 @@ GraphicInitialize(GUI *Graphic)
 VOID thread_main()
 {
 	UINTN pid;
+	static UINT32 oldcr3 = 0;
+
+	// initialize CHAT
+	cli();
+	ready_queue_host_chat = host_chat = (CHAT*)malloc(sizeof(CHAT));
+	host_chat->next = NULL;
+	host_chat->type = 0;
+
+	sti();
+
 
 	debug("Initialize thread main\n");
+	
+
+	CHAT *chat;
+	CHAT *current_chat;
+
+	CHAT *device_chat = (CHAT*) MSG_VIRTUAL_ADDR;
+
 
 	while(TRUE) {
 
@@ -69,32 +86,123 @@ VOID thread_main()
 		if(key_msg_focos) {
 		 	cli();
 		 	msg_set_focus();
-
 			sti();	
-
 		}
 
 		// execute console
 		if(key_msg_exec_console) {
-
-			
-
 			cli();
-
 			pid = do_exec("CONSOLE.SYS",1);
-
-
 			set_focus(pid);
-
 			key_msg_exec_console = 0;
-
 			sti();	
-
-
-
 		}
 
 
+		// CHAT
+		host_chat = host_chat->next;
+		if(!(host_chat)) { // final da lista
+
+				host_chat = ready_queue_host_chat;
+		
+		}
+
+		if(host_chat/*verifica se ha msg na fila*/) {
+
+			chat = host_chat;			
+
+			switch(chat->type) {
+			case MSG_READ_DIR:
+			
+			cli();
+			// actualizar
+			FAT_DIRECTORY *_root =FatOpenRoot(bpb,data);
+
+			VFS *_vfs = (VFS*) chat->p1;
+			if(FatOpenFile(bpb,data,root,".",1,_vfs)) {
+				//debug("OpenFile Dir Error\n");
+				chat->p1 = 0; //Error
+				
+			}else { free(_root);}
+
+			sti();
+			// enviar a mensagem
+
+			THREAD *current = (THREAD*) chat->process;
+
+			// salve
+			current_chat = chat;
+			
+			if(current->flag != -1) { // enviar
+	
+				cli();
+				__asm__ __volatile__("movl %%cr3,%k0;":"=a"(oldcr3):);
+				load_page_diretory(current->pd);
+
+				
+				
+				// add no final da lista
+
+				chat = device_chat;
+				while(chat->next)
+				chat = chat->next;
+
+				chat->next = current_chat;
+
+
+				
+				load_page_diretory((PAGE_DIRECTORY *)oldcr3);
+
+				sti();
+
+
+	
+				//remover da lista de mensagens
+				// Percorre a lista ate achar o p->next igual ao current
+				chat = ready_queue_host_chat;
+				do{
+
+					if(chat->next == current_chat)break;
+						chat = chat->next;
+
+				}while(TRUE);
+
+				// aponta o chat->next para o current->next
+				chat->next = current_chat->next;
+
+
+				
+
+
+			}else { // nao enviar
+
+	
+				//remover da lista de mensagens
+				// Percorre a lista ate achar o p->next igual ao current
+				chat = ready_queue_host_chat;
+				do{
+
+					if(chat->next == current_chat)break;
+						chat = chat->next;
+
+				}while(TRUE);
+
+				// aponta o chat->next para o current->next
+				chat->next = current_chat->next;
+
+				
+
+
+			}
+
+				break;
+			default:
+
+				break;
+			
+
+			}
+		}
 
 	}
 
@@ -271,13 +379,14 @@ UINTN main(BOOT_INFO *boot_info)
 	//do_exec("MSGBOX.SYS",1);
 	do_exec("TASK.SYS",1);
 	do_exec("FILES.SYS",1);
+	
 
 
 
 	apic_timer_umasked();
 
 
-	//clearscreen();
+	clearscreen();
 	BitMAP(	(UINTN*)0xA00000,260,50,G->BankBuffer);
 	refreshrate();
 

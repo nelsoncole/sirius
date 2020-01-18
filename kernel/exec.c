@@ -105,7 +105,7 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 	load_page_diretory(pd);
 	//flush_tlb();
 	// Espera o MMU, completar a primeira traducao 
-	wait_ns(1000);
+	wait_ns(1000000);
 
 		//FIXME
 

@@ -853,6 +853,7 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 	GW_HAND *Hand = (GW_HAND*) __malloc(sizeof(GW_HAND));
 
 
+
 	CHAR8 *_title = (CHAR8*) __malloc(256);
 	setmem(_title,256,0);
 	strcpy(_title,Title);
@@ -876,13 +877,13 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 	Hand->Msg1		= 0;
 	Hand->Msg2		= 0;
 	
-	Hand->box = CreateBox(Hand,4,4,Hand->Width - 2,Hand->Height -2, 
-	GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
-	
 	
 	switch(Hand->Type){
 
 		case GW_HANDLE_BUTTON:
+		Hand->box = CreateBox(Hand,4,4,Hand->Width - 2,Hand->Height -2, 
+		GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
+
 		// Area
 		DrawRectC (Hand->X,Hand->Y,Hand->Width,Hand->Height,ColorTable[Hand->Style &0xff],Hand->Buffer);
 		DrawArea (Hand->X + 1,Hand->Y + 1,Hand->Width -1,Hand->Height -1, \
@@ -894,7 +895,10 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 
 			break;
 		
-		case GW_HANDLE_LABEL:			
+		case GW_HANDLE_LABEL:
+		Hand->box = CreateBox(Hand,4,4,Hand->Width - 2,Hand->Height -2, 
+		GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
+			
 		// Area
 		DrawRect (Hand->X,Hand->Y,Hand->Width,Hand->Height,ColorTable[Hand->Style >> 8 &0xff],Hand->Buffer);
 		DrawArea (Hand->X + 1,Hand->Y + 1,Hand->Width -1,Hand->Height -1,\
@@ -904,6 +908,9 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 			break;
 		
 		case GW_HANDLE_LIST:
+		Hand->box = CreateBox(Hand,4,4,Hand->Width - 2,Hand->Height -2, 
+		GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
+	
 		// Area
 		DrawRect (Hand->X,Hand->Y,Hand->Width,Hand->Height,ColorTable[Hand->Style >> 8 &0xff],Hand->Buffer);
 		DrawArea (Hand->X + 1,Hand->Y + 1,Hand->Width -1,Hand->Height -1, \
@@ -916,12 +923,23 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 			break;
 
 		case GW_HANDLE_BOX:
+		Hand->box = CreateBox(Hand,4,4,Hand->Width - 4,Hand->Height - 4, 
+		GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
+
 
 		__CreateBox(GwHand,Hand,X,Y,Width,Height,
 		GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
 		
 
 			break;
+
+		case GW_HANDLE_FILE:
+
+		Hand->box = CreateBox(Hand,4 + 8,4 + 8,Hand->Width - (4 + 8),Hand->Height - (4 + 8), 
+		GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
+
+
+				break;
 			
 		default:
 			
@@ -955,12 +973,15 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 UINTN UpdateObject(	GW_HAND *GwHand,GW_HAND *_Hand)
 {
 	
+
+	UINTN i,y,x;
 	
 	GW_HAND *Hand = _Hand;
 	CHAR8 *text;
 
 	Hand->X 		= GwHand->Area.X + Hand->Area.X; // coordenada X
 	Hand->Y 		= GwHand->Area.Y + Hand->Area.Y; // Coordenada Y
+
 	
 	if(!(Hand->Flag&GW_FLAG_VISIBLE)) return 1;
 	
@@ -1045,6 +1066,42 @@ UINTN UpdateObject(	GW_HAND *GwHand,GW_HAND *_Hand)
 		}
 
 			break;
+
+		case GW_HANDLE_FILE:
+
+		LineDrawVertical (Hand->Y,Hand->Height,Hand->X,ColorTable[Hand->Style >> 8 &0xff],Hand->Buffer);
+
+		LineDrawHorizontal (Hand->X,Hand->Width,Hand->Y + 18,ColorTable[Hand->Style >> 8 &0xff],Hand->Buffer);
+		
+		VFS *vfs = (VFS*) Hand->Msg1;
+
+		y = 0;
+		x = 0;
+		for(i=0;i < vfs->header.count;i++) {
+
+			//if((Hand->X + (x*120) + 120) > Hand->Width) { x = 0; y++;}
+	
+			text = (CHAR8*) (vfs->block + (i*64));
+			BoxDrawSectCursor(Hand->box,x,y);
+			__UpdateBoxDraw(Hand,Hand->box);
+	
+			while(*text) {
+				BoxDraw(Hand->box,*text++,ColorTable[Hand->Style &0xff],\
+				ColorTable[Hand->Style >> 8 &0xff],Hand->box->Buffer);
+			}
+
+
+			//x++;
+			y++;
+
+
+		}
+
+
+		DrawRectC (Hand->X + 8,Hand->Y + (18 + 8) + (Hand->Msg2*16),
+		Hand->Width - (16 + 8),16,ColorTable[1],Hand->Buffer);
+
+				break;
 			
 		default:
 			
@@ -1131,6 +1188,22 @@ UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 				Hand->Flag |= GW_FLAG_READY;
 			
 			break;
+
+		case GW_HANDLE_FILE:
+
+		if(!Msg1) {
+			Hand->Msg2 = Msg2 &GW_SMG_NORMAL_BIT;
+			return 0;
+		}
+
+		
+		Hand->Msg1 = Msg1;
+		Hand->Msg2 = Msg2 &GW_SMG_NORMAL_BIT;
+
+		Hand->Flag |= GW_FLAG_READY;
+			
+			break;
+
 		default:
 		
 			break;
