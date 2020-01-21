@@ -101,6 +101,53 @@ typedef struct _FOCUS
 
 	}__attribute__((packed)) FOCUS;
 
+typedef struct _CHAT {
+	UINT32	id;
+	UINT32	p1;
+	UINT32	p2;
+	UINT32	type;
+	UINT32 	process;
+	
+	struct _CHAT *next;
+
+}__attribute__((packed)) CHAT;
+
+
+typedef struct _VFS_FILE_HEADER 
+{
+	// File Header 4 KiB
+	CHAR8	filename[256];
+	UINT8 	attr;
+	UINT32	size;
+	UINT8	dev;
+	UINT8	p_entry;
+	UINT16	bps;
+	UINT8	count;	// numeros de sector por bloco
+	UINT32	blocks;
+	UINT8	rsv[256 - 14];
+
+}__attribute__ ((packed)) VFS_FILE_HEADER;
+
+typedef struct _VFS 
+{
+	// File Header 4 KiB
+	VFS_FILE_HEADER header;
+
+	// LBA block start
+	UINT32	block[1];
+
+}__attribute__ ((packed)) VFS;
+
+
+typedef struct _MOUSE {
+
+	UINT32	x;
+	UINT32	y;
+	UINT32	z;
+	UINT32	b;
+
+}__attribute__((packed)) MOUSE;
+
 
 
 #endif

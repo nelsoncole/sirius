@@ -38,34 +38,22 @@
 UINTN strlen(CONST CHAR8 *s)
 {
 	CHAR8 *tmp = (CHAR8*)s;
-	while(*tmp != '\0')
-	tmp++;
+	while(*tmp++ != '\0');
 	return (UINTN)(tmp - s);
 }
 
 VOID  *copymem(IN VOID *Destination,IN VOID *Source,IN UINTN Length)
 {	
 
-	UINTN p    = Length;
-	UINTN *p_dest = (UINTN*)Destination;
-	UINTN *p_src  = (UINTN*)Source;
+	UINTN i;
+	UINT8 *p_dest = (UINT8*)Destination;
+	UINT8 *p_src  = (UINT8*)Source;
 	
-	p = p/4;
-	
-	if(Length %4) p++;
 
-	if(Length < 4) {
-       		__asm__ __volatile__("cld; rep; movsb;"::"D"(p_dest),\
-        	"S"(p_src),"c"(p):"memory");
-		return p_dest;
-
-	}
-
-       	__asm__ __volatile__("cld; rep; movsd;"::"D"(p_dest),\
-        "S"(p_src),"c"(p):"memory");
+	for(i =0; i<Length;i++)*p_dest++ = *p_src++;
 		
 
-	return p_dest;
+	return Destination;
 }
 
 

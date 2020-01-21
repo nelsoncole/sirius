@@ -94,6 +94,9 @@ typedef struct _FRAME
 #include "fs/vfs.h"
 #include "fs/fat.h"
 
+// LIB
+#include "lib/lib.h"
+
 
 
 
@@ -144,10 +147,10 @@ extern CHAR8 *__string__;
 
 // FAT
 extern VOID 		*FAT;
-extern FAT_BPB 		*bpb;
-extern FAT_DIRECTORY 	*root;
-extern FAT_DATA 	*data;
-extern VFS 		*vfs;
+extern FAT_BPB 		*__bpb__;
+extern FAT_DIRECTORY 	*__root__;
+extern FAT_DATA 	*__data__;
+extern VFS 		*__vfs__;
 
 
 // OS
@@ -225,6 +228,7 @@ print(CONST CHAR8 *format,...);
 //disk
 VOID initialize_gui();
 UINTN read_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer);
+UINTN write_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer);
 
 //Media
 UINTN Read(IN VFS *vfs,OUT VOID *buffer);

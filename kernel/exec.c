@@ -109,7 +109,7 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 
 		//FIXME
 
-	if(FatOpenFile(bpb,data,root,name,0,vfs)) {
+	if(FatOpenFile(__bpb__,__data__,__root__,name,0,__vfs__)) {
 		print("OpenFile %s Error\n",name);
 
 		free_pages(pt);
@@ -118,7 +118,7 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 
 	}else {
 
-		if(Read(vfs,(VOID*)addr) ) {
+		if(Read(__vfs__,(VOID*)addr) ) {
 		print("FileRead Error %s\n",name);
 		free_pages(pt);
 		free_pages(pd);

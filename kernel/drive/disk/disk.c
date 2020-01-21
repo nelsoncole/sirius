@@ -50,3 +50,21 @@ UINTN read_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer)
 
 	return 0;
 }
+
+UINTN write_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer)
+{
+	UINTN i;
+	UINT8 *buf = buffer;
+
+	for(i = 0; i <count;i++) {
+		if(ata_write_sector(p,1,addr + i,buf + (ata[p].bps * i)) )
+			return -1;
+	}
+
+
+	return 0;
+}
+
+
+
+

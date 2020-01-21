@@ -209,6 +209,10 @@ UINTN ata_read_sector(	IN UINTN p,
 			IN UINTN count,
 			IN UINT64 addr,
 			OUT VOID *buffer);
+UINTN ata_write_sector(	IN UINTN p,
+			IN UINTN count,
+			IN UINT64 addr,
+			OUT VOID *buffer);
 
 
 #endif

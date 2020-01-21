@@ -485,6 +485,79 @@ UINTN ata_read_sector(	IN UINTN p,
 
 }
 
+UINTN ata_write_sector(	IN UINTN p,
+			IN UINTN count,
+			IN UINT64 addr,
+			OUT VOID *buffer)
+{   
+   
+
+	switch(ata[p].dev_type) {
+
+		case ATADEV_UNKNOWN:
+		return -1;
+			break;
+
+		case ATADEV_PATA:
+
+		//select device, lba, count
+        	set_ata_device_and_sector(p,count,addr);
+		
+     		switch(ata[p].mode) 
+		{
+
+			case ATA_PIO_MODO:
+			switch(ata[p].lba_type) 
+			{
+				case ATA_LBA28:
+				ata_cmd_write(p,ATA_CMD_WRITE_SECTORS);
+					break;
+				case ATA_LBA48:
+				ata_cmd_write(p,ATA_CMD_WRITE_SECTORS_EXT);
+					break;
+
+			}
+
+			//ata_wait_irq(ata[p].irq); //FIXME IRQs
+            		ata_wait_not_busy(p);
+            		if(ata_wait_drq(p) != 0)return -1;
+            		ata_pio_write(p,buffer,ata[p].bps);
+
+            		//Flush Cache
+			switch(ata[p].lba_type) 
+			{
+				case ATA_LBA28:
+				ata_cmd_write(p,ATA_CMD_FLUSH_CACHE);
+					break;
+				case ATA_LBA48:
+				ata_cmd_write(p,ATA_CMD_FLUSH_CACHE_EXT);
+					break;
+
+			}
+
+            		ata_wait_not_busy(p);
+            		if(ata_wait_no_drq(p) != 0)return -1;
+
+				break;
+
+			case ATA_DMA_MODO:
+			return -1;
+				break;
+
+		}
+			break;
+
+		case ATADEV_PATAPI:
+		return -1;
+			break;
+
+	}
+        	
+        return 0;
+
+
+}
+
 UINTN ata_initialize()
 {
 	UINTN p;

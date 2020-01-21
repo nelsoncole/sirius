@@ -43,11 +43,13 @@ UINTN Read(IN VFS *vfs,OUT VOID *buffer)
 	UINTN p = vfs->header.dev;
 	UINTN count = vfs->header.count;
 
+	UINT32 *block	= (UINT32*)(vfs->block);
+
 	UINTN i;
 	for(i = 0; i < vfs->header.blocks;i++) {
 
 		__buffer__ = buffer + (i* (count*vfs->header.bps) );
-		if(read_sector(p,count,vfs->block[i],__buffer__)) return 1;
+		if(read_sector(p,count,block[i],__buffer__)) return 1;
 
 		
 	}

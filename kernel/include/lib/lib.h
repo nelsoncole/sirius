@@ -1,5 +1,5 @@
 /*
- * File Name: files.c
+ * File Name: lib.h
  *
  *
  * BSD 3-Clause License
@@ -33,95 +33,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
 
-#include <io.h>
-
-
-INTN main() {
-
-	UINT32 p1,p2;
-	UINTN i;
-	UINTN spin = 0;
-
-	GW_HAND *gw = CreateWindow(TEXT(" Files "),NULL,50,50,900,600, 
-	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_WHITE/*GW_DARKGRAY*/) | BACK_GROUND_STYLE(GW_BLUE)),GW_FLAG_VISIBLE);
+#ifndef __LIB_H__
+#define __LIB_H__
 
 
-	GW_HAND *file = CreateObject(gw,TEXT("FILE NAME"),GW_HANDLE_FILE,200,20,gw->Area.Width -200,gw->Area.Height - 20, 
-	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_GRAY)),GW_FLAG_INVISIBLE);
+#define EOF		0xFFFFFFFF
+#define FOPEN_MAX	0
+#define SEEK_SET	0
+#define SEEK_CUR	1
+#define SEEK_END	2
 
-	VFS *vfs = (VFS*)__malloc(0x10000);
+typedef struct _VFS FILE;
 
-	
-	
-
-
-
-	send_msg(MSG_READ_DIR,(UINT32)vfs,0);
-	
-
-	i = 0;
-	while(TRUE) {
-
-		switch(read_msg(&p1,&p2)) {
+FILE *open(const char *filename,const char *mode);
+int close (FILE *stream);
+int putc (int ch, FILE *stream);
+int getc (FILE *stream);
+int flush(FILE *stream);
 
 
-		case MSG_READ_KEY:
-
-		switch(p1) {
-		case KEY_UP:
-
-			Send(file,0,--i &GW_SMG_NORMAL_BIT);
-
-			break;
-		case KEY_LEFT:
-
-			break;
-		case KEY_RIGHT:
-
-			break;
-		case KEY_DOWN:
-
-			Send(file,0,++i &GW_SMG_NORMAL_BIT);
-
-			break;
-		case KEY_ENTER:
-
-			break;
-
-		default:
-			break;
-
-		}
-
-			break;
-
-		case MSG_READ_DIR:
-
-		Send(file,(UINT32)vfs,0 &GW_SMG_NORMAL_BIT);
-
-		Send(file,GW_FLAG_VISIBLE,0 |GW_SMG_FLAG_BIT);
-
-		if(!spin) { send_msg(MSG_READ_DIR,(UINT32)vfs,0); spin = 100000000;}
-
-			break;
-
-
-		default:
-
-			spin--;		
-
-			break;
-
-
-
-		}
-
-		WindowFocus(gw);
-
-	}
-
-	return 0;
-
-}
+#endif

@@ -62,14 +62,6 @@ VOID thread_main()
 	UINTN pid;
 	static UINT32 oldcr3 = 0;
 
-	// initialize CHAT
-	cli();
-	ready_queue_host_chat = host_chat = (CHAT*)malloc(sizeof(CHAT));
-	host_chat->next = NULL;
-	host_chat->type = 0;
-
-	sti();
-
 
 	debug("Initialize thread main\n");
 	
@@ -92,7 +84,7 @@ VOID thread_main()
 		// execute console
 		if(key_msg_exec_console) {
 			cli();
-			pid = do_exec("CONSOLE.SYS",1);
+			pid = do_exec("console.sys",1);
 			set_focus(pid);
 			key_msg_exec_console = 0;
 			sti();	
@@ -100,12 +92,15 @@ VOID thread_main()
 
 
 		// CHAT
+		cli();
 		host_chat = host_chat->next;
 		if(!(host_chat)) { // final da lista
 
-				host_chat = ready_queue_host_chat;
+			host_chat = ready_queue_host_chat;
 		
 		}
+
+		sti();
 
 		if(host_chat/*verifica se ha msg na fila*/) {
 
@@ -116,18 +111,18 @@ VOID thread_main()
 			
 			cli();
 			// actualizar
-			FAT_DIRECTORY *_root =FatOpenRoot(bpb,data);
+			FAT_DIRECTORY *_root =FatOpenRoot(__bpb__,__data__);
 
 			VFS *_vfs = (VFS*) chat->p1;
-			if(FatOpenFile(bpb,data,root,".",1,_vfs)) {
+			if(FatOpenFile(__bpb__,__data__,_root,".",1,_vfs)) {
 				//debug("OpenFile Dir Error\n");
 				chat->p1 = 0; //Error
 				
 			}else { free(_root);}
 
-			sti();
+			
 			// enviar a mensagem
-
+			
 			THREAD *current = (THREAD*) chat->process;
 
 			// salve
@@ -135,8 +130,7 @@ VOID thread_main()
 			
 			if(current->flag != -1) { // enviar
 	
-				cli();
-				__asm__ __volatile__("movl %%cr3,%k0;":"=a"(oldcr3):);
+				__asm__ __volatile__("movl %%cr3,%%eax;":"=a"(oldcr3):);
 				load_page_diretory(current->pd);
 
 				
@@ -144,8 +138,7 @@ VOID thread_main()
 				// add no final da lista
 
 				chat = device_chat;
-				while(chat->next)
-				chat = chat->next;
+				while(chat->next) chat = chat->next;
 
 				chat->next = current_chat;
 
@@ -153,20 +146,14 @@ VOID thread_main()
 				
 				load_page_diretory((PAGE_DIRECTORY *)oldcr3);
 
-				sti();
-
-
-	
+				
+			
 				//remover da lista de mensagens
 				// Percorre a lista ate achar o p->next igual ao current
 				chat = ready_queue_host_chat;
-				do{
 
-					if(chat->next == current_chat)break;
-						chat = chat->next;
-
-				}while(TRUE);
-
+				while(chat->next != current_chat) chat = chat->next;
+				
 				// aponta o chat->next para o current->next
 				chat->next = current_chat->next;
 
@@ -176,24 +163,19 @@ VOID thread_main()
 
 			}else { // nao enviar
 
-	
 				//remover da lista de mensagens
 				// Percorre a lista ate achar o p->next igual ao current
 				chat = ready_queue_host_chat;
-				do{
 
-					if(chat->next == current_chat)break;
-						chat = chat->next;
-
-				}while(TRUE);
+				while(chat->next != current_chat) chat = chat->next;
 
 				// aponta o chat->next para o current->next
 				chat->next = current_chat->next;
 
 				
+				
 
-
-			}
+			}  sti();
 
 				break;
 			default:
@@ -358,27 +340,33 @@ UINTN main(BOOT_INFO *boot_info)
 
 	// OPEN ROOT
 	FAT = (VOID*)malloc(0x1000);
-	vfs = (VFS*)malloc(0x1000);
-	data = (FAT_DATA*)malloc(0x1000);
+	__vfs__ = (VFS*)malloc(0x1000);
+	__data__ = (FAT_DATA*)malloc(0x1000);
 
 	
 	VOLUME v;
 	v.lba_start = mbr->part[0].lba_start;
 	v.dev_num = DEV;
 
-	bpb = FatReadBPB(&v);
-	if(!bpb) print("BPB Error");
-	else root =FatOpenRoot(bpb,data);
+	__bpb__ = FatReadBPB(&v);
+	if(!__bpb__) print("BPB Error");
+	else __root__ =FatOpenRoot(__bpb__,__data__);
 
 
 	}
 
+	// initialize CHAT
+	ready_queue_host_chat = host_chat = (CHAT*)malloc(sizeof(CHAT));
+	host_chat->next = NULL;
+	host_chat->type = 0;
+
+
 
 	// USER
-	do_exec("GSERVER.SYS",1);
-	//do_exec("MSGBOX.SYS",1);
-	do_exec("TASK.SYS",1);
-	do_exec("FILES.SYS",1);
+	do_exec("gserver.sys",1);
+	//do_exec("msgbox.sys",1);
+	do_exec("task.sys",1);
+	do_exec("files.sys",1);
 	
 
 
@@ -390,12 +378,49 @@ UINTN main(BOOT_INFO *boot_info)
 	BitMAP(	(UINTN*)0xA00000,260,50,G->BankBuffer);
 	refreshrate();
 
+
 	
+
+
+	/*FAT_DIRECTORY *dir =FatOpenRoot(bpb,data);
+
+	FatCreateFile(bpb,data,dir,"text.txt",0);
+
+	free(dir);
+	dir =FatOpenRoot(bpb,data); //UPDATE
+	FatCreateFile(bpb,data,dir,"sirius",1);*/
+
+	FILE *fp = open("Nelson Sapalo Da Silva Cole.txt","w+b");
+	if(fp != NULL) {
+
+		if(putc ('S', fp) == EOF){ print("putc Error S\n"); for(;;);}
+		if(putc ('i', fp) == EOF){ print("putc Error i\n"); for(;;);}
+		if(putc ('r', fp) == EOF){ print("putc Error r\n"); for(;;);}
+		if(putc ('i', fp) == EOF){ print("putc Error i\n"); for(;;);}
+		if(putc ('u', fp) == EOF){ print("putc Error u\n"); for(;;);}
+		if(putc ('s', fp) == EOF){ print("putc Error s\n"); for(;;);}
+
+		if(flush(fp)){ print("flush Error\n"); for(;;);}
+
+		close (fp);
+	}else { print("open Error\n"); for(;;);}
+
+	/*if(fp)
+	print("FileName: %s\nFileSize: %d KiB\n",fp->header.filename,fp->header.size/1024);
+
+	fp = open("FILES.SYS","rb");
+	if(fp)
+	print("FileName: %s\nFileSize: %d KiB\n",fp->header.filename,fp->header.size/1024);
+
+	fp = open("KERNEL.BIN","rb");
+	if(fp)
+	print("FileName: %s\nFileSize: %d KiB\n",fp->header.filename,fp->header.size/1024);*/
+
 
 	sti(); //Enable eflag interrupt
 
 	// wait
-	/*UINTN i = 900000000;
+	/*UINTN i = 700000000;
 	while(i--);*/
 
 	

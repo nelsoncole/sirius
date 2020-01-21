@@ -935,7 +935,7 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 
 		case GW_HANDLE_FILE:
 
-		Hand->box = CreateBox(Hand,4 + 8,4 + 8,Hand->Width - (4 + 8),Hand->Height - (4 + 8), 
+		Hand->box = CreateBox(Hand,4 + 8,8 + 18,Hand->Width - (4 + 8),Hand->Height - (8 + 18), 
 		GW_STYLE(FORE_GROUND(Hand->Style &0xff) | BACK_GROUND(Hand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
 
 
@@ -1077,9 +1077,7 @@ UINTN UpdateObject(	GW_HAND *GwHand,GW_HAND *_Hand)
 
 		y = 0;
 		x = 0;
-		for(i=0;i < vfs->header.count;i++) {
-
-			//if((Hand->X + (x*120) + 120) > Hand->Width) { x = 0; y++;}
+		for(i=0;i < vfs->header.blocks;i++) {
 	
 			text = (CHAR8*) (vfs->block + (i*64));
 			BoxDrawSectCursor(Hand->box,x,y);
@@ -1090,8 +1088,6 @@ UINTN UpdateObject(	GW_HAND *GwHand,GW_HAND *_Hand)
 				ColorTable[Hand->Style >> 8 &0xff],Hand->box->Buffer);
 			}
 
-
-			//x++;
 			y++;
 
 
@@ -1126,6 +1122,8 @@ UINTN GwStrLength(CHAR8 *Source)
 UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 {
 	
+	while(spin_lock);
+	spin_lock++;
 	
 	/*CHAR8 *src;
 	UINTN data1;
@@ -1143,7 +1141,7 @@ UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 				Hand->Flag |= GW_FLAG_VISIBLE;
 				break;
 		}
-		return 0;
+		goto done;
 	}
 	
 	switch(Hand->Type){
@@ -1160,7 +1158,7 @@ UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 		
 			if(!Msg1) {
 				Hand->Msg2 = Msg2 &GW_SMG_NORMAL_BIT;
-				return 0;
+				goto done;
 			}
 			
 			/*Hand->Msg1 = Msg1;
@@ -1193,7 +1191,7 @@ UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 
 		if(!Msg1) {
 			Hand->Msg2 = Msg2 &GW_SMG_NORMAL_BIT;
-			return 0;
+			goto done;
 		}
 
 		
@@ -1208,6 +1206,8 @@ UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 		
 			break;
 	}
+done:
+	spin_lock--;
 	
 	return 0;
 }
