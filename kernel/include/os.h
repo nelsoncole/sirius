@@ -64,20 +64,6 @@
 
 
 #include "typ.h"
-typedef struct _FOCUS 
-	{
-	UINTN 			pid;
-	PHYSICAL_ADDRESS 	pd;
-	
-
-	}__attribute__((packed)) FOCUS;
-
-typedef struct _FRAME 
-	{
-	UINT16	offset; //block
-	struct _FRAME *next;
-
-	}__attribute__((packed)) FRAME;
 #include "io.h"
 #include "cpuid.h"
 #include "paging.h"
@@ -93,7 +79,6 @@ typedef struct _FRAME
 #include "mbr.h"
 #include "fs/vfs.h"
 #include "fs/fat.h"
-
 // LIB
 #include "lib/lib.h"
 
@@ -104,6 +89,8 @@ typedef struct _FRAME
 	cli();\
 	print(format, ##__VA_ARGS__);\
 	sti();} 
+
+#define HEADER_MAGIC 0x454C4F43
 
 
 
@@ -128,6 +115,10 @@ extern 	FOCUS	       	*focus;
 extern 	THREAD		*thread_focus;
 extern 	UINTN		key_msg_focos;
 extern 	UINTN		key_msg_exec_console;
+
+extern UINTN	_end();
+extern unsigned char *ZERO;
+extern unsigned char *__vfsbuf__;
 
 // CHAT
 extern CHAT *ready_queue_host_chat, *host_chat;
@@ -179,6 +170,9 @@ VOID free(VOID *buffer);
 // System
 UINTN gdt_install(VOID);
 UINTN idt_install(VOID);
+
+UINTN do_exec(CONST CHAR8 *name,UINT8 prv);
+UINTN exit();
 
 
 //  MSR
@@ -246,6 +240,8 @@ UINTN media_initialize();
 // 
 UINTN file_read(OUT VOID *buf,IN CHAR8 *name);
 UINTN file_write(IN VOID *buf,CHAR8 *name);
+
+
 
 
 

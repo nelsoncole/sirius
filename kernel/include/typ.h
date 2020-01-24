@@ -105,5 +105,34 @@ typedef struct _MOUSE {
 }__attribute__((packed)) MOUSE;
 
 
+typedef struct _HEADER {
+
+	UINT32	magic;
+	UINT32	eflag;
+	UINT32  header;
+	UINT32	start;
+	UINT32	stack;
+	UINT32	end;
+
+}__attribute__((packed)) HEADER;
+
+typedef struct _VFS FILE;
+
+typedef struct _FOCUS 
+	{
+	UINTN 			pid;
+	PHYSICAL_ADDRESS 	pd;
+	
+
+	}__attribute__((packed)) FOCUS;
+
+typedef struct _FRAME 
+	{
+	UINT16	offset; //block
+	struct _FRAME *next;
+
+	}__attribute__((packed)) FRAME;
+
+
 
 #endif

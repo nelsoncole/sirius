@@ -41,6 +41,7 @@
 #define ATTR_ARCHIVE 	0
 #define ATTR_DIRECTORY 	1
 
+struct _FAT_BPB;
 
 typedef struct _VFS_FILE_HEADER 
 {
@@ -55,25 +56,28 @@ typedef struct _VFS_FILE_HEADER
 	UINT8	count;
 	// número total de blocos
 	UINT32	blocks;	
-	UINT32	offset_lo;
+	UINT32	offset;
+	UINT32	offset2;
 	UINT32	buffer;
+	UINT32	cache;
+	UINT32	ccache;
 	// definido em libc padrão
-	UINT8	mode[4]; 
-	UINT32	size_hi;
-	UINT32	offset_hi;
+	UINT8	mode[4];
+	UINT8	flag;
+	struct _FAT_BPB  *bpb; 
 	struct _VFS_FILE_HEADER *current;
 	struct _VFS_FILE_HEADER *next;
-	UINT8	rsv[256 - 42];
+	UINT8	rsvx[256 - 51];
 
 }__attribute__ ((packed)) VFS_FILE_HEADER;
 
 typedef struct _VFS 
 {
-	// File Header 4 KiB
+	// File Header 512 Bytes
 	VFS_FILE_HEADER header;
 
 	// LBA block start
-	UINT32	block[1];
+	UINT32	block[1024-128];
 
 }__attribute__ ((packed)) VFS;
 

@@ -366,7 +366,7 @@ static UINTN ata_identify_device(UINTN p,UINT16 *buffer)
 			break;
 		case ATADEV_UNKNOWN:
 		ata[p].dev_type	= ATADEV_UNKNOWN;
-		print("Uinidade%d Not fount\n",p);
+		print("Uinidade%d Not found\n",p);
 
 			break;
 

@@ -159,6 +159,7 @@ UINT32 ReadFat(FAT_BPB *_bpb,OUT VOID *fat_table,UINTN FATOffset);
 UINTN FatOpenFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,CONST CHAR8 *filename,UINT8 attr,VFS *_vfs);
 UINTN FatCreateFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,CONST CHAR8 *filename,UINT8 attr);
 UINTN FatUpdateFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,VFS *_vfs);
+int AddFAT(VFS *vfs, FAT_BPB *bpb, unsigned int first_sector_of_cluster);
 
 
 

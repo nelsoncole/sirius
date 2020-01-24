@@ -1,6 +1,6 @@
 ASFLAGS  :=-f elf32 -O0
-CFLAGS32 :=-Wall -O0 -m32 -ffreestanding -fno-stack-protector -nostdlib -nostdinc -fno-align-functions -I ./lib/include
-LDFLAGS  := -m elf_i386 -T lib/sys/link.ld
+CFLAGS32 :=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./lib/include
+LDFLAGS  :=-m elf_i386 -T lib/sys/link.ld
 AS=nasm
 CC=gcc
 LD=ld

@@ -83,8 +83,14 @@ typedef struct _THREAD {
 	UINT32 _static;
 	UINT32 flag;
 
+	// Stream default
+	FILE 	*stdin;
+	FILE 	*stdout;
+	FILE	*stderr;
+
 	// linker do próximo     
     	struct _THREAD *next;
+	struct _THREAD *tail;
 
 
 }__attribute__((packed)) THREAD;
@@ -113,10 +119,6 @@ UINTN create_thread(	VOID (*main)(),
 			UINT8 privileg);
 UINTN getpid();
 UINTN getcr3();
-
-
-UINTN do_exec(CONST CHAR8 *name,UINT8 prv);
-UINTN exit();
 
 
 

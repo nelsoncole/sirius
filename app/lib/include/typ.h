@@ -122,9 +122,22 @@ typedef struct _VFS_FILE_HEADER
 	UINT8	dev;
 	UINT8	p_entry;
 	UINT16	bps;
-	UINT8	count;	// numeros de sector por bloco
-	UINT32	blocks;
-	UINT8	rsv[256 - 14];
+	// números de sector por bloco
+	UINT8	count;
+	// número total de blocos
+	UINT32	blocks;	
+	UINT32	offset;
+	UINT32	offset2;
+	UINT32	buffer;
+	UINT32	cache;
+	UINT32	ccache;
+	// definido em libc padrão
+	UINT8	mode[4];
+	UINT8	flag;
+	UINT32  bpb; 
+	struct _VFS_FILE_HEADER *current;
+	struct _VFS_FILE_HEADER *next;
+	UINT8	rsvx[256 - 51];
 
 }__attribute__ ((packed)) VFS_FILE_HEADER;
 

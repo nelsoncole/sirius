@@ -36,9 +36,6 @@
  
 #include <os.h>
 
-
-extern UINTN _end();
-
 UINTN index_mem_map_pt = 0;
 UINT8 *RamBMP = NULL;
 UINT8 *AllocTablePages = NULL;
@@ -74,7 +71,7 @@ UINTN RamBitValue[8]={1,2,4,8,16,32,64,128};
 UINTN ram_initialize() 
 {
 
-	RamBMP = (UINT8*) _end;
+	RamBMP = (UINT8*) (_end);
 
 
 	// For 4 GiB
@@ -246,77 +243,78 @@ UINTN alloc_pages_initialize()
  *
  **/
 UINTN alloc_pages(	IN UINTN type,
-			IN UINTN size,
+			IN UINTN _size,
 			OUT VIRTUAL_ADDRESS *addr)
 {
 
+	int i,e;
+	unsigned char *tmp = (unsigned char*)AllocTablePages;
+	size_t count;
+	unsigned char flag;
+	unsigned char *start_buf = NULL;
+	int start = 0;
 
-	UINTN _i=0,i=0,_ok = 0;
-	UINT8 *p = (UINT8*) AllocTablePages;
-	UINT8 *_p;
+	//chek space
+	count = 0;
+	flag = 1;
+	e = 0;
+	for(i=0;i<8192;i++) {
 
+		if(!*tmp) {
+			if(!count) { start_buf = tmp; start = i; }
+ 
+			count += 1; e = 1; 
 
-	// check free pool and define index
-	while(TRUE){
-	
-		if(*p == 0) _ok++;
-		else if(_ok)_ok = 0; //reiniciar
+		}
+		if(count == _size) {flag = 0; break;}
+		if(e == _size){ count = 0; e = 0;}
 
-		_i++;
-		p++;
-	
-		if(_ok == size)break;
-	
-
-	}
-	
-
-	// check space
-	if(_i > ((END_ALLOC_PAGES_VIRTUAL_ADDRESS - START_ALLOC_PAGES_VIRTUAL_ADDRESS)/0x1000) ){
-		cli();
-		print("Kernel panic: alloc pages error\n");
-		for(;;);
+		tmp++;
+		e++;
 	}
 
-	// assert _p
-	for(i=0;i < _ok ; i++){
-		p--;
-		_i--;
+
+	if(flag) {
+
+		print("KERNEL PANIC: AllocTablePages()\n"); for(;;);
 	}
 
-	
-	_p = p;
 
-	// Mask
-	for(i =0;i < size;i++){
-		*_p++ = 1;
-	}
+	// Marcar ocupado
+	for(i=0;i<count;i++) *start_buf++ = 0x11;
 
-	// eof
-	*--_p = 0xff;
 
-	*(VIRTUAL_ADDRESS*)(addr) = (START_ALLOC_PAGES_VIRTUAL_ADDRESS + (0x1000*_i));
-	
+	start_buf--;
+	*start_buf = 0xFF;
+
+
+	*(VIRTUAL_ADDRESS*)(addr) = (START_ALLOC_PAGES_VIRTUAL_ADDRESS + (0x1000*start));
 
 	return (0);
+
 }
 
 VOID free_pages(IN VOID *addr)
 {
-	UINTN _i,i = (((UINTN)addr) - START_ALLOC_PAGES_VIRTUAL_ADDRESS)/0x1000;
+	unsigned int start =( (END_ALLOC_PAGES_VIRTUAL_ADDRESS - START_ALLOC_PAGES_VIRTUAL_ADDRESS)/0x1000 ) -\
+	( (END_ALLOC_PAGES_VIRTUAL_ADDRESS - ((unsigned)addr)) /0x1000);
 
+
+	unsigned char *tmp1 = (unsigned char*) AllocTablePages;
+	unsigned char *tmp  = (unsigned char*) (tmp1 + start);
+
+	int i;
+
+	for(i=0;i<8192;i++) {
 	
+		if(*tmp == 0xff) {
+			*tmp = 0;
+			return;
 
-	UINT8 *p = (UINT8*) AllocTablePages;
-	UINT8 eof = 0;
+		}else *tmp++ = 0;
 
-	for(_i = 0;eof != 0xff;_i++){
 
-		eof = *(UINT8*)(p + i + _i);
-
-		*(UINT8*)(p + i + _i) = 0 &0xff;
 	}
-
 
 
 }

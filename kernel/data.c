@@ -50,10 +50,13 @@ UINT32 global_controll_task_switch = 1;
 UINT16 *key = (UINT16*)0x10001100;
 MOUSE *mouse = (MOUSE*)0x800000;
 
+unsigned char *ZERO = NULL;
+
 FAT_BPB *__bpb__ = NULL;
 FAT_DIRECTORY *__root__ = NULL;
 FAT_DATA *__data__ = NULL;
 VFS *__vfs__ = NULL;
+unsigned char *__vfsbuf__ = NULL;
 
 
 //CHAT

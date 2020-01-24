@@ -159,6 +159,8 @@ UINTN create_thread(	VOID (*main)(),
 
 	new_thread->prv = 1;
 
+	new_thread->esp0   	= esp0;
+
     	}
 
 	if(!(privileg&1)){ // processo do kernelspace
@@ -171,6 +173,8 @@ UINTN create_thread(	VOID (*main)(),
 	
 	new_thread->prv = 0;
 
+	new_thread->esp0   	= 0;
+
     	}
 
 	if(privileg&2) new_thread->_static = 1;
@@ -179,8 +183,6 @@ UINTN create_thread(	VOID (*main)(),
    
 	new_thread->eflag 	= 0x3202;
     	new_thread->cr3 	= (UINT32)page_directory;
-
-	new_thread->esp0   	= esp0;
 
 
 	new_thread->pd   	= (PAGE_DIRECTORY*)page_directory;
@@ -191,6 +193,11 @@ UINTN create_thread(	VOID (*main)(),
     	new_thread->next 	= NULL;
 
 	new_thread->flag	= 0;
+
+
+	new_thread->stdin	= open(0,"std");
+	new_thread->stdout	= open(0,"std");
+	new_thread->stderr	= open(0,"std");
 
     
      
@@ -281,7 +288,7 @@ VOID task_switch(VOID){
 
 
     	// stack esp0
-	tss_esp0(context_esp0);
+	if(context_esp0)tss_esp0(context_esp0);
 
 	load_page_diretory((PAGE_DIRECTORY *)(context_cr3));
 	flush_tlb();

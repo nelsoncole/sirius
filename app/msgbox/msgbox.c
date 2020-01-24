@@ -40,13 +40,13 @@
 INTN main(INTN argc,CHAR8 *argv[])
 {
 
-	GW_HAND *gw = CreateWindow(TEXT(" MsgBox "),NULL,50,200,220,120, 
+	GW_HAND *gw = CreateWindow(TEXT(" MsgBox "),NULL,400,300,260,120, 
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_GRAY) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *glabel1 = CreateObject(gw,TEXT("This is a mensagem box!"),GW_HANDLE_LABEL,8,16,200,50, 
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_GRAY)),GW_FLAG_INVISIBLE);
 
-	GW_HAND *gbutton1 = CreateObject(gw,TEXT("OK"),GW_HANDLE_BUTTON,70,40,60,28, 
+	GW_HAND *gbutton1 = CreateObject(gw,TEXT("OK"),GW_HANDLE_BUTTON,100,40,60,28, 
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_INVISIBLE);
 
 
@@ -56,9 +56,10 @@ INTN main(INTN argc,CHAR8 *argv[])
 	Send(gbutton1,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT);
 	
 
-	//for(;;);
+	for(;;)WindowFocus(gw);
 
 	gui_exit(gw);
+
 
 	return 0;
 }

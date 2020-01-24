@@ -135,7 +135,7 @@ UINTN FatOpenFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,CONST CHAR8 *
 	// Comparar ate achar o SHORT NAME
 	FileShortName(shortname,(CHAR8*)filename);
 
-	for(i = 0;i < 128/*FIXME*/; i++) {
+	for(i = 0;i < 512; i++) {
 
 		if((dir->DIR_Attr == FAT_ATTR_LONG_NAME)) { dir++; continue; }
 
@@ -185,7 +185,7 @@ successfull:
 
 		if( (N == 0xFFFF) || (N == 0xFFF8) ) break;
 
-		if(!(TableEntry)) flag = 0;
+		if(TableEntry >= ((bpb->BPB_BytsPerSec/2)-1)) flag = 0;
 
 		i++;
 	

@@ -226,12 +226,16 @@ UINTN main(BOOT_INFO *boot_info)
 
 	alloc_pages(0,64/*256 KiB*/,(VIRTUAL_ADDRESS *)&G->TaskBuffer);
 
-	alloc_pages(0,1/*4 KiB*/,(VIRTUAL_ADDRESS *)&G->List);
-
-	*(VIRTUAL_ADDRESS*)(G->List) = 0;
-
+	unsigned int phys = 0;
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	G->List = phys;
+	setmem((void*)G->List,0x1000,0);
 
 	font = (CHAR8 *)(font8x16);
+
+	ZERO = (unsigned char *)malloc(0x10000); // 64 KiB
+	__vfs__ = (VFS*)malloc(0x8000); // 32 KiB
+	__vfsbuf__ = (unsigned char *)malloc(0x8000); // 32 KiB
 
 	
 
@@ -340,7 +344,6 @@ UINTN main(BOOT_INFO *boot_info)
 
 	// OPEN ROOT
 	FAT = (VOID*)malloc(0x1000);
-	__vfs__ = (VFS*)malloc(0x1000);
 	__data__ = (FAT_DATA*)malloc(0x1000);
 
 	
@@ -367,6 +370,9 @@ UINTN main(BOOT_INFO *boot_info)
 	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
 	do_exec("files.sys",1);
+
+	/*FILE *fp = open ("msgbox.sys","rb");
+	close(fp);*/
 	
 
 
@@ -374,49 +380,15 @@ UINTN main(BOOT_INFO *boot_info)
 	apic_timer_umasked();
 
 
-	clearscreen();
+	/*clearscreen();
 	BitMAP(	(UINTN*)0xA00000,260,50,G->BankBuffer);
-	refreshrate();
+	refreshrate();*/
 
 
 	
 
 
-	/*FAT_DIRECTORY *dir =FatOpenRoot(bpb,data);
-
-	FatCreateFile(bpb,data,dir,"text.txt",0);
-
-	free(dir);
-	dir =FatOpenRoot(bpb,data); //UPDATE
-	FatCreateFile(bpb,data,dir,"sirius",1);*/
-
-	FILE *fp = open("Nelson Sapalo Da Silva Cole.txt","w+b");
-	if(fp != NULL) {
-
-		if(putc ('S', fp) == EOF){ print("putc Error S\n"); for(;;);}
-		if(putc ('i', fp) == EOF){ print("putc Error i\n"); for(;;);}
-		if(putc ('r', fp) == EOF){ print("putc Error r\n"); for(;;);}
-		if(putc ('i', fp) == EOF){ print("putc Error i\n"); for(;;);}
-		if(putc ('u', fp) == EOF){ print("putc Error u\n"); for(;;);}
-		if(putc ('s', fp) == EOF){ print("putc Error s\n"); for(;;);}
-
-		if(flush(fp)){ print("flush Error\n"); for(;;);}
-
-		close (fp);
-	}else { print("open Error\n"); for(;;);}
-
-	/*if(fp)
-	print("FileName: %s\nFileSize: %d KiB\n",fp->header.filename,fp->header.size/1024);
-
-	fp = open("FILES.SYS","rb");
-	if(fp)
-	print("FileName: %s\nFileSize: %d KiB\n",fp->header.filename,fp->header.size/1024);
-
-	fp = open("KERNEL.BIN","rb");
-	if(fp)
-	print("FileName: %s\nFileSize: %d KiB\n",fp->header.filename,fp->header.size/1024);*/
-
-
+	
 	sti(); //Enable eflag interrupt
 
 	// wait

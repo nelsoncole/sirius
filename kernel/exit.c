@@ -85,6 +85,12 @@ UINTN exit()
 		focus->pid = thread_ready_queue->pid;
 	}
 
+
+	
+
+	close(current->stdin);
+	close(current->stdout);
+	close(current->stderr);
 	free(current);
 
 	exit_thread = 1;

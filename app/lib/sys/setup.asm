@@ -51,8 +51,8 @@ header:
     	dd HEADER_FLAGS    
     	dd header
 	dd _start
-    	dd _end
 	dd stack
+    	dd _end
 	times 0x1000 -($-$$)   	db 0
 start:
 
@@ -124,7 +124,7 @@ __setmem:
 	
 global stack
 section .bss
-	resq 1024*16 ;128 KB
+	resb 1024*32 ;64 KiB
 stack:
 
 

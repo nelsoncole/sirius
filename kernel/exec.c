@@ -51,6 +51,50 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 	PAGE_DIRECTORY *pd,*oldpd;
 	PAGE_TABLE *pt, *_pt;
 
+
+	UINTN d = (UINTN) (addr >> 22 &0x3FF);
+    	//UINTN t = (UINTN) (addr >> 12 &0x3FF);
+    	//UINTN o = (UINTN) (addr  &0xFFF); // unused
+
+
+	HEADER *header = (HEADER*)(ZERO);
+
+	FILE *fpx = open (name,"rx");
+
+	if(fpx == NULL) { 
+		print("open \"%s\" error\n",name);
+		return 0;
+	}
+
+	
+	rewind(fpx);
+	if(read(header,1,0x2000,fpx) != 0x2000) { 
+		print("read header \"%s\"error\n",name);
+		close(fpx);
+		return 0;
+	} else{
+		for(int i = 0;i < (2048 - (sizeof(HEADER)));i++) {
+			header = (HEADER*) ( (unsigned int) header + 4);
+			if(header->magic == HEADER_MAGIC)break;				
+				
+		}
+
+		// cheksum
+		if(header->magic != HEADER_MAGIC) {
+			return 0;
+		}else {
+
+			rewind(fpx);
+		}
+			
+	}
+
+
+	int filesize = fpx->header.size;
+	int physize = (header->end -  (header->start - 0x1000));	
+
+
+
 	// allocar memoria
 	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&pd);
 	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&pt);
@@ -63,18 +107,15 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 
 
 
-	UINTN d = (UINTN) (addr >> 22 &0x3FF);
-    	//UINTN t = (UINTN) (addr >> 12 &0x3FF);
-    	//UINTN o = (UINTN) (addr  &0xFFF); // unused
-
 
 	// Page Table
 
 	_pt = pt;
 
-	
+	int pagesize = (physize/4096);
+	if((physize%4096)) pagesize++;
 
-	for(i = 0; i < 1024;i++){
+	for(i = 0; i < pagesize +1;i++){
 
 		_pt->p = 1;
 		_pt->rw= 1;
@@ -87,7 +128,12 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 
 	FRAME *frame = NULL;
 
-	alloc_frame(pt,4096/64/*4 MiB*/,(VIRTUAL_ADDRESS *)&frame);
+
+	// Um bloco e de 64 KiB
+	int physblocks = ((pagesize*4)/64);
+	if(((pagesize*4)%64)) physblocks++;
+
+	alloc_frame(pt,physblocks +1,(VIRTUAL_ADDRESS *)&frame);
 
 	
 
@@ -107,38 +153,31 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 	// Espera o MMU, completar a primeira traducao 
 	wait_ns(1000000);
 
-		//FIXME
 
-	if(FatOpenFile(__bpb__,__data__,__root__,name,0,__vfs__)) {
-		print("OpenFile %s Error\n",name);
-
+	if(/*Read(fpx,(void*)addr)*/read((void*)addr,1,filesize,fpx) != filesize) {
+		print("read \"%s\"error\n",name);
 		free_pages(pt);
 		free_pages(pd);
 		free_frame(frame);
+		close(fpx);
+		return 0;
 
-	}else {
-
-		if(Read(__vfs__,(VOID*)addr) ) {
-		print("FileRead Error %s\n",name);
-		free_pages(pt);
-		free_pages(pd);
-		free_frame(frame);
 	} else {
 
  
 
 		// Copy struct GUI
-		copymem((UINT8*)addr + 0x1020,(UINT8*)0x101038,sizeof(GUI));
+		copymem((UINT8*)header->start + 0x20,(UINT8*)0x101038,sizeof(GUI));
 
 		// envia o PID
-		p  	= (UINT32*)(addr + 0x1114);
+		p  	= (UINT32*)(header->start + 0x114);
 		*p++ 	= next_pid;
 		*p	= (UINT32)focus;
 
 
 		if((prv&1) == 1)esp0 =(UINT32)(&stack_esp_0);/*(UINTN)malloc(0x2000);*/
 
-		pid = create_thread((VOID*)(addr + 0x1000),pd,0,(addr + 0x1020)/*Boot info*/,0,0,0x101FFFF0/*ESP*/,\
+		pid = create_thread((void*)(header->start),pd,0,(header->start + 0x20)/*Boot info*/,0,0,header->stack,\
 			esp0/*ESP0*/,prv);
 
 
@@ -149,18 +188,18 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 
 		thread->frame = frame;
 
-		}
 				
 	}
 
-
-	
+	close(fpx);
 
 	load_page_diretory(oldpd);
 	flush_tlb();
 
 
     	return (pid);
+
+
 
 }
 

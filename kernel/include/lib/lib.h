@@ -44,13 +44,16 @@
 #define SEEK_CUR	1
 #define SEEK_END	2
 
-typedef struct _VFS FILE;
-
 FILE *open(const char *filename,const char *mode);
 int close (FILE *stream);
+int flush(FILE *stream);
 int putc (int ch, FILE *stream);
 int getc (FILE *stream);
-int flush(FILE *stream);
+
+void rewind(FILE *stream);
+
+size_t write (const void *buffer,size_t num_bytes, size_t count, FILE *stream);
+size_t read (void *buffer,size_t num_bytes, size_t count, FILE *stream);
 
 
 #endif

@@ -49,7 +49,9 @@ static VOID sys_exit()
 
 static VOID *sys_malloc(UINTN size)
 {
-    	return malloc(size);
+	void *addr = malloc(size);
+
+    	return addr;
 }
 
 static VOID sys_free(VOID *buf)
@@ -94,8 +96,8 @@ static VOID sys_chat(UINT32 type,UINT32 p1, UINT32 p2)
 VOID *syscall_table[SYSCALL_NUM]={
     	0,			// eax, 0	null
     	&sys_exit,       	// eax, 1    	sys_exit
-	&sys_malloc,       	// eax, 2    	sys_malloc
-	&sys_free,       	// eax, 3    	sys_free
+	&sys_malloc,       	// eax, 2    	sys_malloc, edx = size
+	&sys_free,       	// eax, 3    	sys_free, edx = buf
 	&sys_reboot,       	// eax, 4    	sys_reboot
 	&sys_pci,		// eax, 5	sys_pci, edx = max_bus
 	&sys_chat		// eax, 6	sys_chat, edx = type, ecx = p1, cbx = p2
@@ -103,7 +105,7 @@ VOID *syscall_table[SYSCALL_NUM]={
 
 static VOID invalidsyscall(UINT32 num)
 {
-	print("Invalid syscall: EAX,%d INT 0x72\n",num);
+	print("Invalid syscall: EAX,0x%x INT 0x72\n",num);
 
 }
 

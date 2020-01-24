@@ -12,25 +12,27 @@ SECTIONS
 	
 	_start = .;
 	
-	.text ALIGN(0x1000) : AT(ADDR(.text) - 0x100000)
+	.text : AT(ADDR(.text) - 0x100000)
 	{
-		*(.text .text.*)
+		 code = .;
+    		*(.text)
+    		*(.rodata)
+    		. = ALIGN(4096);
 	}
 	
-	.rodata ALIGN(0x1000) : AT(ADDR(.rodata) - 0x100000)
+	.data : AT(ADDR(.data) - 0x100000)
 	{
-		*(.rodata .rodata.*)
+		data = .;
+    		*(.data)
+    		. = ALIGN(4096);
 	}
 	
-	.data ALIGN(0x1000) : AT(ADDR(.data) - 0x100000)
+	.bss : AT(ADDR(.bss) - 0x100000)
 	{
-		*(.data .data.*)
-	}
-	
-	.bss ALIGN(0x1000) : AT(ADDR(.bss) - 0x100000)
-	{
-		*(.bss .bss.*)
+		bss = .;
+    		*(.bss)
 		*(COMMON)
+		. = ALIGN(4096);
 	}
 	
 	_end = .;

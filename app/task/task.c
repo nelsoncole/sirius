@@ -37,10 +37,10 @@
 #include <io.h>
 
 
-UINT8 *clock = (UINT8*) 0x101104;
+volatile unsigned char *clock = (UINT8*) 0x101104;
 
 
-CHAR8 *clock_table[60] = {
+const char *clock_table[60] = {
 "00","01","02","03","04","05","06","07","08","09",
 "10","11","12","13","14","15","16","17","18","19",
 "20","21","22","23","24","25","26","27","28","29",
@@ -50,11 +50,11 @@ CHAR8 *clock_table[60] = {
 };
 
 
-UINTN _cpy(CHAR8 *Destination,CHAR8 *Source,UINTN count)
+UINTN _cpy(CHAR8 *Destination,const char *Source,UINTN count)
 {
     	UINTN i;
 	CHAR8 *des = Destination;
-	CHAR8 *src = Source;
+	CHAR8 *src =(char*) Source;
 
 	for(i =0;i <count;i++)
 	*des++ = *src++;
@@ -82,7 +82,7 @@ INTN main() {
 
 
 
-		_cpy(_st,clock_table[clock[2] &0x3f],2);
+		_cpy(_st,clock_table[clock[2] &0x1f],2);
 		_st++; _st++; _st++;
 		
 		_cpy(_st,clock_table[clock[1] &0x3f],2);

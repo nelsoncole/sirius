@@ -41,7 +41,7 @@ INTN main(INTN argc,CHAR8 *argv[])
 
 	
 
-	GW_HAND *window = (GW_HAND *)(*(UINT32*)(G->List));
+	GW_HAND *window = (GW_HAND *)(G->List);
 
 
 	window->next = NULL;

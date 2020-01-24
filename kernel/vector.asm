@@ -619,9 +619,11 @@ int114:
 	mov gs,ax
 	pop eax
 
-	push eax
+
+	mov ebx, eax
+	push ebx
 	call syscall_handler
-   	add esp,4
+   	pop ebx
 
     	pop esp
     	pop ebp

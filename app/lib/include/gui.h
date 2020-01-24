@@ -127,7 +127,7 @@ typedef struct _GUI
 	// Extra
 	GUI_AREA Area;
 
-	VOID	*List;
+	UINT32	List;
 	
 	
 	

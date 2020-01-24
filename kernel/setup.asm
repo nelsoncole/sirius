@@ -46,6 +46,7 @@ start:
 	; Nelson, este é um bom momento 
 	; para alterar a pilha do kernel.
 	mov esp, stack
+	mov ebp, 0;
 
 	; i386
 	push ebx

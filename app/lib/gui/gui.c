@@ -756,7 +756,7 @@ GW_HAND *CreateWindow(	CONST CHAR8 *Title,
 
 	GwHand->next	= NULL;
 	GwHand->tail	= NULL;
-	GW_HAND *p 	= (GW_HAND *)(*(UINT32*)(G->List));
+	GW_HAND *p 	= (GW_HAND *)(G->List);
 
 	
 
@@ -1311,7 +1311,7 @@ UINTN gui_server()
 	UINT32 *GwFocus = (UINT32 *)0x7C00;
 	UINTN __flag__ = 0;
 
-	GW_HAND *window = (GW_HAND *)(*(UINT32*)(G->List));
+	GW_HAND *window = (GW_HAND*)(G->List);
 
 	window		= window->next;
 	GW_HAND *obj 	= window->tail;
@@ -1377,7 +1377,7 @@ UINTN gui_exit(GW_HAND *Hand)
 
 	GW_HAND *next 		= Hand->next;
 	GW_HAND *obj 		= Hand->tail;
-	GW_HAND *p 		= (GW_HAND *)(*(UINT32*)(G->List));
+	GW_HAND *p 		= (GW_HAND *)(G->List);
 	GW_HAND *current 	= Hand;
 
 	while(obj) {
