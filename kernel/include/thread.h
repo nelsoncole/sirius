@@ -117,6 +117,17 @@ UINTN create_thread(	VOID (*main)(),
 			UINT32 esp,
 			UINT32 esp0,
 			UINT8 privileg);
+
+UINTN create_thread_child(THREAD	*thread,	
+			VOID (*main)(),
+			PAGE_DIRECTORY *page_directory,
+			UINT32 eax,
+			UINT32 ebx,
+			UINT32 ecx,
+			UINT32 edx,
+			UINT32 esp,
+			UINT32 esp0,
+			UINT8 privileg);
 UINTN getpid();
 UINTN getcr3();
 

@@ -73,7 +73,9 @@ FILE *open (const char *filename,const char *mode)
 		stream->header.mode[1] = 't';
 		stream->header.mode[2] = 'd';
 		// 64 KiB
-		alloc_pages(0,8,(VIRTUAL_ADDRESS *)&stream->header.buffer);
+		alloc_pages(0,16,(VIRTUAL_ADDRESS *)&stream->header.buffer);
+
+		setmem((void*)(stream->header.buffer),0x10000,' ');
 
 
 		return (FILE*) stream;
@@ -192,7 +194,7 @@ int close (FILE *stream)
 
 
 
-	/*FAT_DATA *data 	= (FAT_DATA*)malloc(sizeof(FAT_DATA));
+	FAT_DATA *data 	= (FAT_DATA*)malloc(sizeof(FAT_DATA));
 
 
 	if(stream->header.bpb == NULL) goto error;
@@ -209,7 +211,7 @@ int close (FILE *stream)
 
 	free(root);
 error:
-	free(data);*/
+	free(data);
 
 
 	stream->header.flag = 0;
@@ -221,6 +223,31 @@ error:
 }
 
 int flush(FILE *stream) {
+
+	// error
+	if(stream->header.mode[0] == '\0') return EOF;
+
+
+	// rx
+	if((stream->header.mode[0] == 'r') && (stream->header.mode[1] == 'x')) {
+
+		return 0;
+
+
+	}
+
+	// std
+	if ((stream->header.mode[0] == 's') \
+	&& (stream->header.mode[1] == 't') && (stream->header.mode[2] == 'd')) {
+
+
+		return 0;
+	}
+
+
+
+
+	// default
 
 	FAT_DATA *data 	= (FAT_DATA*)malloc(sizeof(FAT_DATA));
 
@@ -247,7 +274,7 @@ error:
 	free(data);
 
 	
-	return -1;
+	return EOF;
 
 }
 
@@ -263,7 +290,45 @@ int putc (int ch, FILE *stream)
 	unsigned int lba_start;
 	unsigned int local_offset;
 	
+	
+
+	// error
+	if(stream->header.mode[0] == '\0') return EOF;
+
+	
+
+	// std
+	if ((stream->header.mode[0] == 's') \
+	&& (stream->header.mode[1] == 't') && (stream->header.mode[2] == 'd')) {
+
+
+		if(offset >= 65536) {
+
+			setmem((unsigned char*)(buffer),65536,0);
+			stream->header.offset = 0;
+			stream->header.offset2 = 0;
+			return EOF;
+
+		}
+
+		// write character
+		*(unsigned char*)(buffer + offset) = ch;
+
+		// Update offset
+		offset = stream->header.offset +=1;
+
+		return  (ch&0xff); // successfull
+	}
+
+
+
 	if(!total_blocks) return EOF;
+
+
+	// Outros modos default lib C
+
+
+	// FAT
 
 	if(offset >= (total_blocks*bps*count)) {
 		// new block 
@@ -305,13 +370,49 @@ int getc (FILE *stream)
 	unsigned dev_n = stream->header.dev;
 	unsigned count = stream->header.count;
 	unsigned int offset = stream->header.offset;
+	unsigned int offset2 = stream->header.offset2;
 	unsigned int total_blocks = stream->header.blocks;
 	unsigned int *block	= (unsigned int*)(stream->block);
 	unsigned int bps = stream->header.bps;
 	unsigned int lba_start;
 	unsigned int local_offset;
+	int ch;
 	
+	
+	// error
+	if(stream->header.mode[0] == '\0') return EOF;
+
+	
+
+	// std
+	if ((stream->header.mode[0] == 's') \
+	&& (stream->header.mode[1] == 't') && (stream->header.mode[2] == 'd')) {
+
+
+		if(offset2 >= 65536) {
+
+			stream->header.offset2 = 0;
+			return EOF;
+
+		}
+
+		ch = *(unsigned char*)(buffer + offset2);
+
+		// Update offset
+		if(ch) offset2 = stream->header.offset2 +=1;
+
+		return ch; // successfull
+	}
+
+
+
+
 	if(!total_blocks) return EOF;
+
+	// Outros modos default lib C
+
+
+	// FAT
 
 	if(offset >= (total_blocks*bps*count)) {
 		// FINAL DO ARQUIVO, leu todos os blocos

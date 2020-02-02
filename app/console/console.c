@@ -35,6 +35,8 @@
  */
  
 #include <io.h>
+#include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 
 
@@ -76,8 +78,6 @@ UINTN getchar();
 VOID gets(CHAR8 *string);
 
 extern UINTN shell();
-
-
 
 
 INTN main()
@@ -124,6 +124,8 @@ INTN main()
 		Send(boxhd,(UINTN)(vram + scroll*cursor_x_size),GW_SMG_NORMAL_BIT);
 
 		shell();
+
+		
 	}
 
 
@@ -362,12 +364,14 @@ UINTN __putchar(UINTN ch) {
 // input
 UINTN getchar()
 {
-	UINTN rc;
+	UINTN rc  = 0;
 
-	while(!(*input&0xffff)) WindowFocus(whd); //FIXME
+	//while(!(*input&0xffff)) WindowFocus(whd); //FIXME
 
-	rc = *input;
-	*input = 0;
+	//rc = *input;
+	//*input = 0;
+	
+	while(!rc) { rc = getc(stdin); WindowFocus(whd);}
 
 	if(rc == '\n')return rc;
 

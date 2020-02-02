@@ -1,5 +1,5 @@
 /*
- * File Name: __main.c
+ * File Name: __main2.c
  *
  *
  * BSD 3-Clause License
@@ -33,152 +33,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
-#include <io.h>
 
-UINTN spin_lock = 0;
-
-extern INTN main();
-
-FOCUS 	*__focus	= NULL;
-UINT32	__pid = -1;
-
-CHAT *ready_queue_host_chat;
-CHAT *host_chat;
+extern int main();
+void exit(int rc);
 
 typedef struct _BOOT_INFO{
-	GUI Graphic;
+	void *Graphic;
 	
 }__attribute__((packed)) BOOT_INFO;
 
-UINTN __main(BOOT_INFO *boot_info)
-{	
-	UINT32 *p = NULL;
-
-	// GUI	
-	G = (GUI *)&boot_info->Graphic;
-
-	// pid e focus
-
-	p = (UINT32*)0x10001114;
-	__pid = *p;
-	__focus = (FOCUS*)(*++p);
-
-
-	// inicializa chat
-
-	ready_queue_host_chat = host_chat = (CHAT*) MSG_VIRTUAL_ADDR;
-	host_chat->type = 0;
-	host_chat->next = NULL;
- 
-	spin_lock = 0;
+int __main(BOOT_INFO *boot_info)
+{
 
 	exit(main());
 
 	for(;;);
 }
 
-VOID send_msg(UINT32 type,UINT32 p1,UINT32 p2)
-{
 
-	while(spin_lock);
-	spin_lock++;
-	__asm__ __volatile__("int $0x72"::"a"(6),"d"(type),"c"(p1),"b"(p2));
-
-	spin_lock--;
-
-}
-UINTN read_msg(UINT32 *p1,UINT32 *p2) 
-{
-	UINT16 *input 	= (UINT16*) 0x10001100; // extended key
-
-	while(spin_lock);
-	spin_lock++;
-
-
-	CHAT *chat;
-	UINT32 type = 0;
-
-
-	// Teclado
-
-	if(input[1]) {
-		*p1 = input[1] &0xffff;
-		*p2 = 0;
-		type = MSG_READ_KEY;
-
-
-		input[0] = 0;
-		input[1] = 0;
-
-		goto done;
-
-	}
-
-
-	host_chat = host_chat->next;
-
-
-	if(!(host_chat)) { // final da lista
-
-		host_chat = ready_queue_host_chat;
-
-		goto done;
-		
-	}
-
-	if(host_chat/*verifica se ha msg na fila*/) {
-
-		if(!host_chat->type)goto done;
-
-		*p1 = host_chat->p1;
-		*p2 = host_chat->p2;
-		type = host_chat->type;
-
-
-
-		//remover da lista de mensagens
-		// Percorre a lista ate achar o p->next igual ao current
-		chat = ready_queue_host_chat;
-
-		while(chat->next != host_chat) chat = chat->next;
-
-		// aponta o chat->next para o current->next
-		chat->next = host_chat->next;
-
-
-		__free(host_chat);
-
-
-	}
-
-done:
-
-	spin_lock--;
-
-	return type;
-}
-
-
-VOID exit(INTN rc)
+void exit(int rc)
 {
 	__asm__ __volatile__("int $0x72"::"a"(1));
 
 }
 
 
-VOID *__malloc(UINTN size){
+void *__malloc(unsigned size){
 
-	UINTN rc;
+	unsigned int rc;
 
 	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(2),"d"(size));
 
-	return (VOID*)(rc);
+	return (void*)(rc);
 
 };
 
 
-VOID __free(VOID *buffer){
+void __free(void *buffer){
 
 	__asm__ __volatile__("int $0x72"::"a"(3),"d"(buffer));
 }

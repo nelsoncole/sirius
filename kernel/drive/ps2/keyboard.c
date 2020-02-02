@@ -193,7 +193,7 @@ UINTN keyboard_install(){
 
 }
 
-
+extern THREAD	*zzzz_;
 // Este é o nosso manipulador do mouse no vetor IDT
 // TODO: 
 // O Bit 7 (0x80) na scancode lido, nos informa se a tecla foi precionada ou solta  		
@@ -263,12 +263,16 @@ VOID keyboard_handler(VOID){
 			
             	}
 
-			
+			//if(!(focus->pid))return;
 
-			if(!(focus->pid))return;
-			if(focus->pid != current_thread->pid) {
+			if(zzzz_ && (keyboard_charset &0xff) != 0) putc(keyboard_charset &0xff,zzzz_->stdin);
+
+			/*if(focus->pid != current_thread->pid) {
+
 		
 			oldcr3 = switch_cr3(focus->pd);
+
+			
 
 			key[0] = keyboard_charset &0xff;
 
@@ -277,7 +281,7 @@ VOID keyboard_handler(VOID){
 
 			switch_cr3(oldcr3);
 
-			} else { key[0] = keyboard_charset &0xff; }
+			} else { key[0] = keyboard_charset &0xff;  }*/
 			
 
 

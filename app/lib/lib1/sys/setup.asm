@@ -39,6 +39,9 @@
 bits 32
 section .text
 extern __main
+global stdin
+global stdout
+global stderr
 global _start
 _start:
 	jmp start
@@ -53,10 +56,21 @@ header:
 	dd _start
 	dd stack
     	dd _end
+
 	times 0x1000 -($-$$)   	db 0
+
+stdin 	dd 0
+stdout 	dd 0
+stderr 	dd 0
 start:
 
 	; i386
+
+	mov dword[stdin],  edx
+	mov dword[stdout], eax
+	mov dword[stderr], esi
+
+	
 	push ebx
 	call __main
 	add esp,4
@@ -124,7 +138,7 @@ __setmem:
 	
 global stack
 section .bss
-	resb 1024*32 ;64 KiB
+	resb 1024*32 ;32 KiB
 stack:
 
 

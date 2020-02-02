@@ -118,6 +118,12 @@ UINTN initialize_thread()
 
 
 
+	current_thread->stdin	= open(0,"std");
+	current_thread->stdout	= open(0,"std");
+	current_thread->stderr	= open(0,"std");
+
+
+
 
 	return 0;
 
@@ -194,10 +200,13 @@ UINTN create_thread(	VOID (*main)(),
 
 	new_thread->flag	= 0;
 
-
 	new_thread->stdin	= open(0,"std");
 	new_thread->stdout	= open(0,"std");
 	new_thread->stderr	= open(0,"std");
+
+	new_thread->edx 	= (unsigned int) new_thread->stdin;
+	new_thread->eax 	= (unsigned int) new_thread->stdout;
+	new_thread->esi 	= (unsigned int) new_thread->stderr;
 
     
      
@@ -212,6 +221,103 @@ UINTN create_thread(	VOID (*main)(),
 
    	return (new_thread->pid);
 }
+
+// processo filho
+UINTN create_thread_child(THREAD	*thread,	
+			VOID (*main)(),
+			PAGE_DIRECTORY *page_directory,
+			UINT32 eax,
+			UINT32 ebx,
+			UINT32 ecx,
+			UINT32 edx,
+			UINT32 esp,
+			UINT32 esp0,
+			UINT8 privileg)
+{
+
+	if(!thread)return 0;
+
+    	THREAD	*new_thread	=(THREAD*)malloc(sizeof(THREAD)); 
+    	new_thread->pid 	= next_pid++;
+
+    	new_thread->eax 	= eax;
+    	new_thread->ebx 	= ebx;
+    	new_thread->ecx 	= ecx;
+    	new_thread->edx 	= edx;
+    	new_thread->edi 	= 0;
+    	new_thread->esi 	= new_thread->pid;
+    	new_thread->ebp 	= 0;
+    	new_thread->esp 	= esp;
+	new_thread->eip  	= (UINT32)main;
+
+    	if((privileg&1) == 1) { // processo do userspace
+    	new_thread->cs	= 0x1B;
+    	new_thread->ds 	= 0x23;
+    	new_thread->es 	= 0x23;
+    	new_thread->fs 	= 0x23;
+    	new_thread->gs 	= 0x23;
+    	new_thread->ss 	= 0x23;
+
+
+	new_thread->prv = 1;
+
+	new_thread->esp0   	= esp0;
+
+    	}
+
+	if(!(privileg&1)){ // processo do kernelspace
+    	new_thread->cs 	= 0x8;
+    	new_thread->ds 	= 0x10;
+    	new_thread->es 	= 0x10;
+    	new_thread->fs 	= 0x10;
+    	new_thread->gs 	= 0x10;
+    	new_thread->ss 	= 0x10;
+	
+	new_thread->prv = 0;
+
+	new_thread->esp0   	= 0;
+
+    	}
+
+	if(privileg&2) new_thread->_static = 1;
+	else new_thread->_static = 0;
+	
+   
+	new_thread->eflag 	= 0x3202;
+    	new_thread->cr3 	= (UINT32)page_directory;
+
+
+	new_thread->pd   	= (PAGE_DIRECTORY*)page_directory;
+
+	UINTN d = (UINTN) (APP_VIRTUAL_ADDRESS >> 22 &0x3FF);
+	new_thread->pt   	= (PAGE_TABLE*)((UINTN)(page_directory[d].addrpt << 12));
+
+    	new_thread->next 	= NULL;
+
+	new_thread->flag	= 0;
+
+	new_thread->stdin	= thread->stdin;
+	new_thread->stdout	= thread->stdout;
+	new_thread->stderr	= thread->stderr;
+
+	new_thread->edx 	= (unsigned int) new_thread->stdin;
+	new_thread->eax 	= (unsigned int) new_thread->stdout;
+	new_thread->esi 	= (unsigned int) new_thread->stderr;
+
+    
+     
+    	// Adicionar novo elemento, no final da lista
+    	// tmp aponta para inicio da lista
+    	THREAD *tmp = thread_ready_queue;
+    	while (tmp->next)
+    	tmp = tmp->next;
+    
+    	tmp->next = new_thread;
+
+
+   	return (new_thread->pid);
+}
+
 
 
 VOID task_switch(VOID){

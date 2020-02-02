@@ -143,11 +143,11 @@ typedef struct _VFS_FILE_HEADER
 
 typedef struct _VFS 
 {
-	// File Header 4 KiB
+	// File Header 512 Bytes
 	VFS_FILE_HEADER header;
 
 	// LBA block start
-	UINT32	block[1];
+	UINT32	block[1024-128];
 
 }__attribute__ ((packed)) VFS;
 

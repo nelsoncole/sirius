@@ -1,5 +1,5 @@
 /*
- * File Name: process.c
+ * File Name: shell.c
  *
  *
  * BSD 3-Clause License
@@ -33,89 +33,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#include <os.h> 
+ 
+#include <stdio.h>
 
+int main()
+{	
 
-FOCUS 	*focus		= NULL;
-THREAD	*thread_focus 	= NULL;
-THREAD	*zzzz_		= NULL;
-UINTN	key_msg_focos   = 0; 
-UINTN	key_msg_exec_console   = 0; 
+	//puts("Terminal virtual, implementando o putc() e o getc()"); 
 
-UINTN initialize_focus()
-{
-
-	thread_focus = thread_ready_queue;
-
-	focus = (FOCUS*)malloc(sizeof(FOCUS));
-
-	focus->pid = 0;
-	focus->pd = (UINT32)kernel_page_directory;
-
-	return 0;
-
-}
-
-
-UINT32 switch_cr3(UINT32 pdbase)
-{
-	UINT32 old = 0;
-
-	__asm__ __volatile__("\
-	movl %%cr3,%%edx;\
-	movl %%eax,%%cr3;":"=d"(old):"a"(pdbase));
-
-	// deixa a MMU terminar
-	wait_ns(120);
-
-	return old;
-
-}
-
-UINTN set_focus(UINTN pid)
-{
-
-	THREAD	*p = thread_ready_queue;
-
-	while(p->pid != pid)p = p->next;
-
-	focus->pd = p->cr3;
-	focus->pid = p->pid;
-
-	zzzz_ = p;
-
-
-	return 0;
-}
-
-UINTN msg_set_focus()
-{
-
-	UINTN x = 0;
-
-	do {
-		if((thread_focus->prv == 1) && (thread_focus->pid != focus->pid )) 
-		{
-
-			zzzz_ = thread_focus;
-			break;
-
-		}
-
-		thread_focus = thread_focus->next;
-
-		if(!(thread_focus) && (!(x))) {
-			thread_focus = thread_ready_queue;
-			x++;
-		} else { zzzz_ = NULL; return -1;}
-		
-	}while(TRUE);
-
-	focus->pd = thread_focus->cr3;
-	focus->pid = thread_focus->pid;
-
-	key_msg_focos  = 0;
-
+	
+	for(;;) getc(stdin);
 
 	return 0;
 }

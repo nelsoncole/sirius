@@ -84,7 +84,7 @@ VOID thread_main()
 		// execute console
 		if(key_msg_exec_console) {
 			cli();
-			pid = do_exec("console.sys",1);
+			pid = do_exec("terminal.sys",1);
 			set_focus(pid);
 			key_msg_exec_console = 0;
 			sti();	
@@ -369,10 +369,9 @@ UINTN main(BOOT_INFO *boot_info)
 	do_exec("gserver.sys",1);
 	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
-	do_exec("files.sys",1);
+	//do_exec("files.sys",1);
+	
 
-	/*FILE *fp = open ("msgbox.sys","rb");
-	close(fp);*/
 	
 
 
@@ -382,12 +381,17 @@ UINTN main(BOOT_INFO *boot_info)
 
 	/*clearscreen();
 	BitMAP(	(UINTN*)0xA00000,260,50,G->BankBuffer);
-	refreshrate();*/
+	refreshrate(); */ //refresh_screen();
 
 
+	/*
+	FILE *fp = open (0,"std");
+
+	if(fp == NULL) print("open error\n");
+	else print("%c %c\n",getc(fp),putc('a',fp));
 	
 
-
+	for(;;);*/
 	
 	sti(); //Enable eflag interrupt
 

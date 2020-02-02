@@ -36,9 +36,6 @@
 
 #include <io.h>
 
-
-
-
 GUI *G = NULL;
 
 GW_HAND	*GlobalGwFocus = NULL;
@@ -671,7 +668,10 @@ GW_HAND *CreateWindow(	CONST CHAR8 *Title,
 	// title
 	CHAR8 *_title = (CHAR8*) __malloc(256);
 	setmem(_title,256,0);
-	strcpy(_title,Title);
+	//strcpy(_title,Title);
+	char *p_dest = (char*)_title;
+	char *p_src  = (char*)Title;
+    	while (*p_src != '\0') *p_dest++ = *p_src++;
 	
 	GwHand->Title 	= (CHAR8*) _title;		
 	GwHand->Menu 	= (VOID*) Menu;
@@ -856,7 +856,10 @@ GW_HAND *CreateObject(	GW_HAND *GwHand, CONST CHAR8 *Title,
 
 	CHAR8 *_title = (CHAR8*) __malloc(256);
 	setmem(_title,256,0);
-	strcpy(_title,Title);
+	//strcpy(_title,Title);
+	char *p_dest = (char*)_title;
+	char *p_src  = (char*)Title;
+    	while (*p_src != '\0') *p_dest++ = *p_src++;
 
 	Hand->Title 		= (CHAR8*) _title;
 	Hand->Area.X 		= X;
@@ -1121,10 +1124,6 @@ UINTN GwStrLength(CHAR8 *Source)
 
 UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 {
-	
-	while(spin_lock);
-	spin_lock++;
-	
 	/*CHAR8 *src;
 	UINTN data1;
 	UINTN data2;*/
@@ -1207,7 +1206,6 @@ UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2)
 			break;
 	}
 done:
-	spin_lock--;
 	
 	return 0;
 }

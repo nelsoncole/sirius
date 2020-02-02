@@ -1,52 +1,44 @@
 ASFLAGS  :=-f elf32 -O0
-CFLAGS32 :=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./lib/include
-LDFLAGS  :=-m elf_i386 -T lib/sys/link.ld
+CFLAGS32 :=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./lib/lib1/include -I ./lib/libc/include
+LDFLAGS  :=-m elf_i386 -T lib/lib1/sys/link.ld
 AS=nasm
 CC=gcc
 LD=ld
 
 
-CONSOLE= setup.o __main.o console.o shell.o string.o gui.o font8x16.o bmp.o
-MSGBOX= setup.o __main.o msgbox.o string.o gui.o font8x16.o bmp.o
-TASK= setup.o __main.o task.o string.o gui.o font8x16.o bmp.o
-GSERVER= setup.o __main.o gserver.o string.o gui.o font8x16.o bmp.o
-FILES= setup.o __main.o files.o string.o gui.o font8x16.o bmp.o
+LIBC	:=lib/libc/obj/stdio.o lib/libc/obj/string.o #libc.a
+LIB1	:=lib/lib1/lib1.a
+HEAD	:=lib/lib1/obj/setup.o
+HEAD2	:=lib/lib1/obj/__main2.o
 
 
-.PHONY: console.sys task.sys msgbox.sys gserver.sys files.sys clean move
+CONSOLE= console.o shell.o
+MSGBOX= msgbox.o
+TASK= task.o
+GSERVER= gserver.o
+FILES= files.o
 
-console.sys: $(CONSOLE)
+
+.PHONY: task.sys msgbox.sys gserver.sys files.sys terminal.sys shell.sys clean move
+
+task.sys: $(HEAD) $(LIB1) $(LIBC) $(TASK)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-task.sys: $(TASK)
+msgbox.sys: $(HEAD) $(LIB1) $(LIBC) $(MSGBOX)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-msgbox.sys: $(MSGBOX)
+gserver.sys: $(HEAD) $(LIB1) $(LIBC) $(GSERVER)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-gserver.sys: $(GSERVER)
+files.sys: $(HEAD) $(LIB1) $(LIBC) $(FILES)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-files.sys: $(FILES)
+terminal.sys: $(HEAD) $(LIB1) $(LIBC) terminal.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
-#LIB/SYS
-%.o:lib/sys/%.asm
-	$(AS) $(ASFLAGS) $< -o $@
+shell.sys: $(HEAD) $(HEAD2) $(LIBC) shell.o
+	$(LD) $(LDFLAGS) -o $@ $^
 
-%.o:lib/sys/%.c
-	$(CC) $(CFLAGS32) -c -o $@ $<
-#GUI
-%.o:lib/gui/%.c
-	$(CC) $(CFLAGS32) -c -o $@ $<
-
-#LIB
-%.o:lib/%.c
-	$(CC) $(CFLAGS32) -c -o $@ $<
-
-#CONSOLE
-%.o:console/%.c
-	$(CC) $(CFLAGS32) -c -o $@ $<
 
 #TASK
 %.o:task/%.c
@@ -61,6 +53,14 @@ files.sys: $(FILES)
 	$(CC) $(CFLAGS32) -c -o $@ $<
 #FILES
 %.o:files/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
+
+#TERMINAL
+%.o:terminal/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
+
+#SHELL
+%.o:shell/%.c
 	$(CC) $(CFLAGS32) -c -o $@ $<
 
 move:

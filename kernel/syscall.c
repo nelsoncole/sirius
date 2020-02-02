@@ -35,7 +35,7 @@
  */
 #include <os.h>
 
-#define SYSCALL_NUM 7
+#define SYSCALL_NUM 8
 
 extern VOID interrupter(INTN n,UINT32 offset,UINT16 sel,UINT8 dpl );
 extern void int114(); // system call
@@ -93,6 +93,12 @@ static VOID sys_chat(UINT32 type,UINT32 p1, UINT32 p2)
 
 }
 
+UINTN sys_do_exec_child(CONST CHAR8 *name,UINT8 prv) {
+
+	return do_exec_child(current_thread,name,prv);
+
+}
+
 VOID *syscall_table[SYSCALL_NUM]={
     	0,			// eax, 0	null
     	&sys_exit,       	// eax, 1    	sys_exit
@@ -100,7 +106,8 @@ VOID *syscall_table[SYSCALL_NUM]={
 	&sys_free,       	// eax, 3    	sys_free, edx = buf
 	&sys_reboot,       	// eax, 4    	sys_reboot
 	&sys_pci,		// eax, 5	sys_pci, edx = max_bus
-	&sys_chat		// eax, 6	sys_chat, edx = type, ecx = p1, cbx = p2
+	&sys_chat,		// eax, 6	sys_chat, edx = type, ecx = p1, cbx = p2
+	&sys_do_exec_child	// eax, 7	sys_do_exec_child, edx = filename, ecx = prv
 };
 
 static VOID invalidsyscall(UINT32 num)

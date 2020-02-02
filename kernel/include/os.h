@@ -172,6 +172,7 @@ UINTN gdt_install(VOID);
 UINTN idt_install(VOID);
 
 UINTN do_exec(CONST CHAR8 *name,UINT8 prv);
+UINTN do_exec_child(THREAD *father_thread,CONST CHAR8 *name,UINT8 prv);
 UINTN exit();
 
 

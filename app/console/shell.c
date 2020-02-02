@@ -35,6 +35,7 @@
  */
  
 #include <io.h>
+#include <string.h>
 
 #define SHELL_CMD_NUM 17 + 2
 
@@ -115,10 +116,10 @@ UINTN shell()
 {
 	UINTN i;
 	CHAR8 cmd_buffer[256];
-	CHAR8 cmd_name[256];
+	CHAR8 *cmd_name = (char*) __malloc(0x1000);
 
 	setmem(cmd_buffer,256,0);
-	setmem(cmd_name,256,0);
+	setmem(cmd_name,0x1000,0);
 
 	gets(cmd_name);
 

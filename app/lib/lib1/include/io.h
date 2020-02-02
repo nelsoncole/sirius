@@ -159,13 +159,8 @@ UINTN read_msg(UINT32 *p1,UINT32 *p2);
 extern VOID __copymem(VOID *dest, VOID *src, UINTN size);
 extern VOID __setmem(VOID *dest, UINT32 val, UINTN size);
 
-UINTN strlen(CONST CHAR8 *s);
 VOID *copymem(IN VOID *Destination,IN VOID *Source,IN UINTN Length);
 VOID *setmem(IN VOID *Buffer,IN UINTN Size,IN UINT8 Value);
-CHAR8 *strcpy(CHAR8 *Destination, CONST CHAR8 *Source);
-UINTN strncpy(CHAR8 *Destination,CONST CHAR8 *Source,UINTN count);
-UINTN strcmp (CHAR8* Destination, CONST CHAR8* Source);
-UINTN strncmp (CHAR8* Destination,CONST CHAR8* Source,UINTN count);
 
 
 // 

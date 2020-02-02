@@ -1,5 +1,5 @@
 /*
- * File Name: process.c
+ * File Name: terminal.c
  *
  *
  * BSD 3-Clause License
@@ -33,89 +33,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#include <os.h> 
+ 
+#include <io.h>
+#include <stdio.h>
 
 
-FOCUS 	*focus		= NULL;
-THREAD	*thread_focus 	= NULL;
-THREAD	*zzzz_		= NULL;
-UINTN	key_msg_focos   = 0; 
-UINTN	key_msg_exec_console   = 0; 
-
-UINTN initialize_focus()
+INTN main()
 {
 
-	thread_focus = thread_ready_queue;
 
-	focus = (FOCUS*)malloc(sizeof(FOCUS));
-
-	focus->pid = 0;
-	focus->pd = (UINT32)kernel_page_directory;
-
-	return 0;
-
-}
+	int offset = 0;
+	int sizeout = 0;
 
 
-UINT32 switch_cr3(UINT32 pdbase)
-{
-	UINT32 old = 0;
+	GW_HAND *window = CreateWindow("# Terminal",0,100,100,700,500,
+	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_GRAY)),GW_FLAG_VISIBLE);
 
-	__asm__ __volatile__("\
-	movl %%cr3,%%edx;\
-	movl %%eax,%%cr3;":"=d"(old):"a"(pdbase));
-
-	// deixa a MMU terminar
-	wait_ns(120);
-
-	return old;
-
-}
-
-UINTN set_focus(UINTN pid)
-{
-
-	THREAD	*p = thread_ready_queue;
-
-	while(p->pid != pid)p = p->next;
-
-	focus->pd = p->cr3;
-	focus->pid = p->pid;
-
-	zzzz_ = p;
+	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,2,2,window->Area.Width -2,
+	window->Area.Height - 2,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK)),GW_FLAG_INVISIBLE);
 
 
-	return 0;
-}
+	// execute shell, criando um processo filho
 
-UINTN msg_set_focus()
-{
+	int rc = 0;
+	char filename[] = "shell.sys";
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(7),"d"(filename),"c"(0x1));
 
-	UINTN x = 0;
+	if(!rc) {
 
-	do {
-		if((thread_focus->prv == 1) && (thread_focus->pid != focus->pid )) 
-		{
+		//exit();
 
-			zzzz_ = thread_focus;
-			break;
+		for(;;);
+	}
+	
 
-		}
+	// enviar sms para box
+	Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT); 
 
-		thread_focus = thread_focus->next;
+	// loop
+	while(TRUE) {
 
-		if(!(thread_focus) && (!(x))) {
-			thread_focus = thread_ready_queue;
-			x++;
-		} else { zzzz_ = NULL; return -1;}
+
+		// calculando o tamanho da tela em caracteres
+		sizeout = (box->Font.SizeX * box->Font.SizeY);
+
+		offset = ( (stdout->header.offset/sizeout) * sizeout );	
+
+		Send(box,(unsigned int)(stdout->header.buffer + offset),GW_SMG_NORMAL_BIT);
+
+		WindowFocus(window);
+
 		
-	}while(TRUE);
+	}
 
-	focus->pd = thread_focus->cr3;
-	focus->pid = thread_focus->pid;
-
-	key_msg_focos  = 0;
-
-
+	//exit();
 	return 0;
 }
