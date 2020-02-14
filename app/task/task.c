@@ -35,6 +35,8 @@
  */
  
 #include <io.h>
+#include <ctype.h>
+
 
 
 volatile unsigned char *clock = (UINT8*) 0x101104;

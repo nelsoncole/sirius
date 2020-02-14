@@ -59,15 +59,13 @@ typedef struct _VFS_FILE_HEADER
 	UINT32	offset;
 	UINT32	offset2;
 	UINT32	buffer;
-	UINT32	cache;
-	UINT32	ccache;
 	// definido em libc padrão
 	UINT8	mode[4];
 	UINT8	flag;
 	struct _FAT_BPB  *bpb; 
 	struct _VFS_FILE_HEADER *current;
 	struct _VFS_FILE_HEADER *next;
-	UINT8	rsvx[256 - 51];
+	UINT8	rsvx[256 - 43];
 
 }__attribute__ ((packed)) VFS_FILE_HEADER;
 

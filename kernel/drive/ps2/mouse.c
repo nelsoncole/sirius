@@ -76,7 +76,7 @@ VOID mouse_write(UINT8 write){
 	outportb(0x64,0xD4);
 	kbdc_wait(1);
 	outportb(0x60,write);
-    	wait_ns(200);
+    	kbdc_wait(0);
 
 }
 
@@ -85,10 +85,10 @@ VOID mouse_write(UINT8 write){
 UINT8 mouse_read(){
 
     
+	kbdc_wait(1);
+	outportb(0x64,0xD3);
 	kbdc_wait(0);
-	UINT8 val = inportb(0x60);
-    	wait_ns(200);
-    	return val;
+	return inportb(0x60);
 
 }
 
@@ -121,33 +121,45 @@ static UINTN MOUSE_BAT_TEST(){
 // Instalação do mouse
 UINTN mouse_install(){
 
-    	// reseta o mouse
+
+	int i = 1000000000;
+
+    	print("// reseta o mouse\n");
 	mouse_write(KBDC_RESET);
-    	//Espera o dados descer (ACK)
-    	while( mouse_read() != KBDC_ACK);
 
 
-    	// Basic Assurance Test (BAT)
+    	print("// Espera o dados descer (ACK)\n");
+    	while( mouse_read() != KBDC_ACK) { i--; if(!i)return 1;}
+
+
+    	print("// Basic Assurance Test (BAT)\n");
     	if(MOUSE_BAT_TEST() != 0) {
 
     		// Aqui! Precisaremos de fazer alguma coisa, em casos de erro
-    		print("\n Mouse error!");
+    		print("\n Mouse error!\n");
 
     	}
 
-    	// Use mouse default
+    	print("// Use mouse default\n");
 	mouse_write(MOUSE_DEFAULT);
-   	//Espera o dados descer (ACK)
-    	while( mouse_read() != KBDC_ACK);
+
+   	print("//Espera o dados descer (ACK)\n");
+	i = 1000000000;
+    	while( mouse_read() != KBDC_ACK){ i--; if(!i)return 1;}
+
+	
 
 
-    	// habilita o mouse.
+    	print("// habilita o mouse\n");
 	mouse_write(ENABLE_MOUSE);
-    	//Espera o dados descer (ACK)
-	while( mouse_read() != KBDC_ACK);
+
+	
+    	print("//Espera o dados descer (ACK)\n");
+	i = 1000000000;
+	while( mouse_read() != KBDC_ACK){ i--; if(!i)return 1;}
 
 
-    	// espera nossa controladora terminar
+    	print("// espera nossa controladora terminar\n");
     	kbdc_wait(1);
 
     	// habilita o IRQ12

@@ -36,6 +36,7 @@
  
 #include <io.h>
 #include <stdio.h>
+#include <ctype.h>
 
 
 INTN main()
@@ -43,14 +44,24 @@ INTN main()
 
 
 	int offset = 0;
+	int div = 0;
 	int sizeout = 0;
 
 
-	GW_HAND *window = CreateWindow("# Terminal",0,100,100,700,500,
-	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_GRAY)),GW_FLAG_VISIBLE);
+	GW_HAND *window = CreateWindow("# Terminal",0,100,20,800,650,
+	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,2,2,window->Area.Width -2,
 	window->Area.Height - 2,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK)),GW_FLAG_INVISIBLE);
+
+
+	// salve tamanho do cusor
+	/*cursor_x_size = boxhd->Font.SizeX;
+	cursor_y_size = boxhd->Font.SizeY;
+
+	cursor_x 	= 0;
+	cursor_y 	= 0;
+	scroll		= 0;*/
 
 
 	// execute shell, criando um processo filho
@@ -77,7 +88,14 @@ INTN main()
 		// calculando o tamanho da tela em caracteres
 		sizeout = (box->Font.SizeX * box->Font.SizeY);
 
-		offset = ( (stdout->header.offset/sizeout) * sizeout );	
+		div = stdout->header.offset;
+
+		offset = ( (div/sizeout) * sizeout );
+	
+		//offset += ( div%sizeout);
+
+
+		//Send(boxhd,(UINTN)(vram + scroll*cursor_x_size),GW_SMG_NORMAL_BIT);	
 
 		Send(box,(unsigned int)(stdout->header.buffer + offset),GW_SMG_NORMAL_BIT);
 

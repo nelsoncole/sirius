@@ -40,7 +40,7 @@
 INTN main(INTN argc,CHAR8 *argv[])
 {
 
-	GW_HAND *gw = CreateWindow(TEXT(" MsgBox "),NULL,400,300,260,120, 
+	GW_HAND *gw = CreateWindow(TEXT(" MsgBox "),0,400,300,260,120, 
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_GRAY) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *glabel1 = CreateObject(gw,TEXT("This is a mensagem box!"),GW_HANDLE_LABEL,8,16,200,50, 

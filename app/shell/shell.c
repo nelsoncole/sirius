@@ -35,14 +35,366 @@
  */
  
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <diskblock.h>
+
+#define SHELL_CMD_NUM 17 + 1
+
+void (*call_loader)  (int argc,char **argv) = 0;// NULL;
+
+typedef struct _COMMAND {
+  char *name;
+  void *fun;
+  char *help;
+}__attribute__((packed)) COMMAND;
+
+int cmd_version(int argc,char **argv);
+int cmd_time(int argc,char **argv);
+int cmd_shutdown(int argc,char **argv);
+int cmd_rename(int argc,char **argv);
+int cmd_reboot(int argc,char **argv);
+int cmd_new(int argc,char **argv);
+int cmd_mov(int argc,char **argv);
+int cmd_info(int argc,char **argv);
+int cmd_help(int argc,char **argv);
+int cmd_exit(int argc,char **argv);
+int cmd_echo(int argc,char **argv);
+int cmd_dir(int argc,char **argv);
+int cmd_del(int argc,char **argv);
+int cmd_date(int argc,char **argv);
+int cmd_copy(int argc,char **argv);
+int cmd_cls(int argc,char **argv);
+int cmd_cd(int argc,char **argv);
+
+
+
+COMMAND cmd_table[] = {
+    	{"?",           cmd_help,           "This help"                                     	},
+    	{"cd",          cmd_cd,             "Change current directory"                      	},
+    	{"cls",         cmd_cls,            "Clear screen"                                  	},
+    	{"copy",        cmd_copy,           "Copy file or directory"                        	},
+    	{"date",        cmd_date,           "Date"                                          	},
+    	{"del",         cmd_del,            "Delete file or directory"                      	},
+    	{"dir",         cmd_dir,            "List directory"                                	},
+    	{"echo",        cmd_echo,           "This ---"                                      	},
+    	{"exit",        cmd_exit,           "Exit shell"                                    	},
+    	{"help",        cmd_help,           "This help"                             		},
+	{"info",        cmd_info,           "This System information"   		   	},
+    	{"mov",         cmd_mov,            "Move file or directory"                        	},
+    	{"new",         cmd_new,            "New file or directory"                         	},
+    	{"reboot",      cmd_reboot,         "Reboot system"                                 	},
+    	{"rename",      cmd_rename,         "Rename file or directory"                      	},
+    	{"shutdown",    cmd_shutdown,       "Shutdown your computer locally or remotely"    	},
+   	{"time",        cmd_time,           "Time"                                          	},
+    	{"version",     cmd_version,        "Shell version"                                 	},
+};
+
+
+char **argv_malloc(size_t size) {
+
+	char **argv = (char**) malloc(0x2000);
+
+	int i;
+	for(i= 0 ;i < 32;i++) argv[i] =(char*) (((size_t)argv) + (128* i) + 128 );
+	
+	return (char**) argv;
+
+}
+
+int argc_num(char **argv,const char *src) {
+
+	int i, c = 0;
+	const char *p_src = src;
+	char *p_dest = (char *) argv[0];
+	
+	do{
+
+		char *p_dest = (char *) argv[c];
+
+		while(*p_src) { 
+			if(*p_src == ' ')p_src++;
+			else break;
+		}
+
+		if(*p_src) {
+		
+			for(i=0;i < 128;i++) { 
+				*p_dest++ = *p_src++;
+
+				if(*p_src == ' '){ 
+					*p_dest = '\0';
+					break;
+				}
+
+			} 
+			c++;
+		}
+
+	}while(*p_src);
+
+	p_dest = p_dest;
+
+	return c;
+}
 
 int main()
-{	
+{
 
-	//puts("Terminal virtual, implementando o putc() e o getc()"); 
+	fopen(0,0);
+
+	int i;
+	char *cmd_name = (char*) malloc(0x10000);
+
+	char **argv = argv_malloc(32);
+	int argc;
+	
+
+
+	for(;;) {
+		memset(cmd_name,0,0x1000);
+
+		printf("[ sirius@nelson ]# ");
+
+		for(i=0;i<32;i++)memset(argv[i],0,128);
+
+		fgets (cmd_name,stdin);
+
+		argc = argc_num(argv,cmd_name);
 
 	
-	for(;;) getc(stdin);
+		for(i=0;i < SHELL_CMD_NUM;i++) {
 
+            		if((strcmp(argv[0]/*cmd_name*/,cmd_table[i].name)) == 0) {
+
+				call_loader = (void(*)(int,char **))(cmd_table[i].fun);
+
+				call_loader(argc,argv);
+                		break;
+            		}
+            		else if(i == (SHELL_CMD_NUM - 1)) {
+            			printf("%s: command not found\n",cmd_name);
+
+			}
+			
+        	}
+
+	}
+
+
+	free(cmd_name);
+	//exit();
 	return 0;
+}
+
+
+int cmd_cd(int argc,char **argv)
+{
+
+    	return 0;
+}
+
+int cmd_cls(int argc,char **argv)
+{
+	//cls();
+    	return 0;
+}
+
+int cmd_copy(int argc,char **argv)
+{
+
+    	return 0;
+}
+
+int cmd_date(int argc,char **argv)
+{
+    	return 0;
+
+}
+
+
+int cmd_del(int argc,char **argv)
+{
+	if(argc != 2){ printf("delete file: error\n"); return 1;}
+
+	remove (argv[1]);
+
+    	return 0;
+}
+
+
+int cmd_dir(int argc,char **argv)
+{
+	// FIXME test open directory
+
+	FILE *fd = (FILE*)malloc(0x80000);
+
+	MBR *mbr	= (MBR*)malloc(0x200);
+	VOLUME *volume	= (VOLUME*)malloc(sizeof(VOLUME));
+	
+
+	if(!block_read(0,1,0,mbr) ){
+
+		volume->lba_start = mbr->part[0].lba_start;
+		volume->dev_num = 0;
+
+		//FAT TYPE
+		FAT_BPB  *bpb  	= FatReadBPB(volume);
+
+		if(bpb != 0){
+
+			// salve bpb
+			fd->header.bpb = (unsigned int)bpb;
+
+			FAT_DIRECTORY *root =FatOpenRoot(bpb);
+			if(root) {
+				if(!FatOpenFile(bpb,root,".",1,fd)) {
+
+					putchar('\n');
+					for(int i=0;i< fd->header.blocks;i++) printf("%d - %s\n",i,(char*)(fd->block + (64*i)));
+					putchar('\n');
+				
+				} else puts("Open DIR error\n");
+
+
+				free(root);
+
+
+			} else puts("Open Root error\n");
+
+		} else puts("read FAT BPB error\n");
+
+	}else puts("read mbr error\n");
+
+
+	
+	free(volume);
+	free(mbr);
+	free(fd);
+
+
+    	return  0;
+}
+
+int cmd_echo(int argc,char **argv)
+{
+
+    	return 0;
+}	
+
+int cmd_exit(int argc,char **argv)
+{
+    	return 0;
+}
+int cmd_help(int argc,char **argv)
+{
+        int i;
+       	puts("Commands:\n");
+        for(i=0;i< SHELL_CMD_NUM;i++){
+        	puts(cmd_table[i].name);
+        	//set_cursor_x(15);
+		puts("     ");
+        	puts(cmd_table[i].help);
+		putchar('\n');
+
+        }
+
+        return 0;
+
+}
+int cmd_info(int argc,char **argv)
+{
+	puts("System information:\
+	\nKERNEL_OF_NUM_PAGE_TABLE          12          // size 48 MiB\
+	\nSTART_ALLOC_PAGES_VIRTUAL_ADDRESS 0x01000000  // mark 16 MiB\
+	\nEND_ALLOC_PAGES_VIRTUAL_ADDRESS   0x03000000  // mark 48 MiB\
+	\nAPP_VIRTUAL_ADDRESS               0x10000000  // mark 256 MiB\
+	\nAPP HEADER:\
+	\nHEADER_MAGIC      0x00  // size 4 Bytes\
+    	\nHEADER_FLAGS      0x04  // size 4 Bytes\
+	\nheader            0x08  // size 4 Bytes\
+	\n_start            0x0C  // size 4 Bytes\
+    	\n_end              0x10  // size 4 Bytes\
+	\nstack             0x14  // size 4 Bytes\
+	\nAPP INFO:\
+	\n0x10000000 - 0x1000EFFF   ELF Header      // size 4 KiB\
+	\n0x10001020 - 0x100010FF   Struct GUI      // size 224 Bytes\
+	\n0x10001100 - 0x10001103   Key             // size 4 bytes\
+	\n0x10001104 - 0x10001107   X               // size 4 bytes\
+	\n0x10001108 - 0x1000110B   Y               // size 4 bytes\
+	\n0x1000110C - 0x1000110F  *Detail Hardware // size 4 bytesn\
+	\n0x10001110 - 0x10001113  *RCT             // size 4 bytes\
+	\n0x10001114 - 0x10001117   PID             // size 4 bytes\
+	\n0x10001118 - 0x1000111B  *FOCUS           // size 4 bytes\
+	\n0x1000111C - 0x1000111F  *MOUSE           // size 4 bytes\
+	\n0x10001120 - 0x100011FF   Reserved        // size 224 bytes\
+	\n0x10001200 - 0x100012FF   Channel         // size 256 bytes\n");
+
+        return 0;
+
+}
+
+int cmd_mov(int argc,char **argv)
+{
+
+    	return 0;
+}
+
+int cmd_new(int argc,char **argv)
+{
+
+	if(argc != 3){ printf("new file: error\n"); return 1;}
+
+	char *str = (char *) argv[1];
+
+	if((str[0]== '-') && (str[1] == 'a')) {
+	
+		FILE *fd = fopen(argv[2],"w+");
+		fclose(fd);
+	} else {
+
+		printf("new file: error\n");
+
+
+	}
+    	return 0;
+}
+
+
+int cmd_reboot(int argc,char **argv)
+{
+    	// This syscall reboot system.
+    	puts("System rebooting ...\n");
+
+	int i = 100000;
+	while(i--);
+
+	__asm__ __volatile__("int $0x72"::"a"(4));
+    	return 0;
+}
+
+int cmd_rename(int argc,char **argv)
+{
+    	puts("Function not implemented\n");
+    	return 0;
+}
+
+
+
+int cmd_shutdown(int argc,char **argv)
+{
+    	puts("Too much claw, the road is long.\n");
+    	return 0;
+
+}
+int cmd_time(int argc,char **argv)
+{
+    	return 0;
+
+}
+
+int cmd_version(int argc,char **argv)
+{
+    	puts("Sirius Operating System v2.00\n");
+    	return 0;
 }

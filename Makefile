@@ -23,7 +23,6 @@ mount:
 	sudo cp bin/kernel.bin /mnt/
 	sudo cp bin/task.sys /mnt/
 	sudo cp bin/gserver.sys /mnt/
-	sudo cp bin/console.sys /mnt/
 	sudo cp bin/files.sys /mnt/
 	sudo cp bin/msgbox.sys /mnt/
 	sudo cp bin/terminal.sys /mnt/

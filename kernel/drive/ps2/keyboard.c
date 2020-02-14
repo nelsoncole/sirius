@@ -88,6 +88,8 @@ static UINTN caps_lock = 0;
 UINT8 key_buffer[2];
 UINTN count = 0;
 
+extern THREAD	*zzzz_;
+
 
 
 // Este é o nosso mapa de caracters minúsculas
@@ -193,14 +195,12 @@ UINTN keyboard_install(){
 
 }
 
-extern THREAD	*zzzz_;
+
 // Este é o nosso manipulador do mouse no vetor IDT
 // TODO: 
 // O Bit 7 (0x80) na scancode lido, nos informa se a tecla foi precionada ou solta  		
 // Exemplo: O shift left quando precionado gera o scancode 0x2A quando solto 0xAA (0x2A + 0x80 = 0xAA)
 VOID keyboard_handler(VOID){
-
-	static UINT32 oldcr3 = 0;
 	
 	if(count >= 2)count = 0;
 
@@ -263,26 +263,9 @@ VOID keyboard_handler(VOID){
 			
             	}
 
-			//if(!(focus->pid))return;
 
-			if(zzzz_ && (keyboard_charset &0xff) != 0) putc(keyboard_charset &0xff,zzzz_->stdin);
+		if(zzzz_ && (keyboard_charset &0xff) != 0) putc(keyboard_charset &0xff,zzzz_->stdin);
 
-			/*if(focus->pid != current_thread->pid) {
-
-		
-			oldcr3 = switch_cr3(focus->pd);
-
-			
-
-			key[0] = keyboard_charset &0xff;
-
-			key[1] = key_buffer[0] &0xff;
-			key[1] |= (key_buffer[1] << 8) &0xff00;
-
-			switch_cr3(oldcr3);
-
-			} else { key[0] = keyboard_charset &0xff;  }*/
-			
 
 
 

@@ -42,17 +42,17 @@
 // Se a entra é 0 = IBF, se entrada é 1 = OBF
 VOID kbdc_wait(UINT8 type)
 {
-	INTN spin = 5000000; 
+	INTN spin = 10000000; 
 
 	if(type == 0) {
-		while(!(inportb(0x64)&1)) { wait_ns(100); if(!(spin--))break; }
+		while(!(inportb(0x64)&1)) { if(!spin)break; spin--; }
        	}
 
 	else if(type == 1) {
 
-                 while((inportb(0x64)&2)) { wait_ns(100); if(!(spin--))break; }
+                 while((inportb(0x64)&2)) { if(!spin)break; spin--; }
 
-      	}else wait_ns(200);
+      	}else wait_ns(400);
 
 }
 
@@ -81,11 +81,18 @@ UINTN ps2_install()
 	kbdc_wait(1);    
 	outportb(0x64,0x20);
 
-
-    	//Activar o segundo despositivo PS/2, modificando o status de configuração do controlador PS/2.
-    	//Lembrando que o bit 1 é o responsável por habilitar, desabilitar o segundo despositivo PS/2  (o mouse).
+	/*
+    	* 0 	First PS/2 port interrupt (1 = enabled, 0 = disabled)
+	* 1 	Second PS/2 port interrupt (1 = enabled, 0 = disabled, only if 2 PS/2 ports supported)
+	* 2 	System Flag (1 = system passed POST, 0 = your OS shouldn't be running)
+	* 3 	Should be zero
+	* 4 	First PS/2 port clock (1 = disabled, 0 = enabled)
+	* 5 	Second PS/2 port clock (1 = disabled, 0 = enabled, only if 2 PS/2 ports supported)
+	* 6 	First PS/2 port translation (1 = enabled, 0 = disabled)
+	* 7 	Must be zero 
+	*/
 	kbdc_wait(0);
-	tmp=inportb(0x60)|2; 
+	tmp=inportb(0x60)|0x3; 
 
 	// defina, a escrita  de byte de configuração do controlador PS/2
 	kbdc_wait(1);

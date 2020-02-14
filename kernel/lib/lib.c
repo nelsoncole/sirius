@@ -46,8 +46,8 @@
  * wb		Cria um arquivo binário para escrita
  * ab		Anexa a um arquivo binário
  * r+		Abre um arquivo-texto para leitura/escrita
- * w+		Cria um arquivo-texto para escrita/escrita
- * a+		Anexa ou cria um arquivo-texto para escrita/escrita
+ * w+		Cria um arquivo-texto para leitura/escrita
+ * a+		Anexa ou cria um arquivo-texto para leitura/escrita
  * r+b		Abre um arquivo binário para leitura/escrita
  * w+b		Cria um arquivo binário para escrita/escrita
  * a+b		Anexa ou cria um arquivo binário para escrita/escrita

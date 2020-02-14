@@ -168,6 +168,8 @@ VOID *malloc(UINTN size);
 VOID free(VOID *buffer);
 
 // System
+VOID initialize_gui();
+
 UINTN gdt_install(VOID);
 UINTN idt_install(VOID);
 
@@ -221,7 +223,6 @@ print(CONST CHAR8 *format,...);
 
 
 //disk
-VOID initialize_gui();
 UINTN read_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer);
 UINTN write_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer);
 

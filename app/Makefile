@@ -1,42 +1,40 @@
-ASFLAGS  :=-f elf32 -O0
-CFLAGS32 :=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./lib/lib1/include -I ./lib/libc/include
-LDFLAGS  :=-m elf_i386 -T lib/lib1/sys/link.ld
+ASFLAGS  :=-f elf32
+CFLAGS32 :=-Wall -m32 -ffreestanding -nostdlib -nostdinc -I ./xlib/include
+LDFLAGS  :=-m elf_i386 -T xlib/sys/link.ld
 AS=nasm
 CC=gcc
 LD=ld
 
 
-LIBC	:=lib/libc/obj/stdio.o lib/libc/obj/string.o #libc.a
-LIB1	:=lib/lib1/lib1.a
-HEAD	:=lib/lib1/obj/setup.o
-HEAD2	:=lib/lib1/obj/__main2.o
+HEAD	:=xlib/obj/setup.o xlib/obj/crt0.o
+XLIB	:=xlib/xlib.a
+LIB	:=xlib/xlib.so
 
-
-CONSOLE= console.o shell.o
-MSGBOX= msgbox.o
-TASK= task.o
-GSERVER= gserver.o
-FILES= files.o
-
+MSGBOX	:=msgbox.o
+TASK	:=task.o
+GSERVER	:=gserver.o
+FILES	:=files.o
+TERMINAL:=terminal.o
+_SHELL	:=shell.o
 
 .PHONY: task.sys msgbox.sys gserver.sys files.sys terminal.sys shell.sys clean move
 
-task.sys: $(HEAD) $(LIB1) $(LIBC) $(TASK)
+task.sys: $(HEAD) $(TASK) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-msgbox.sys: $(HEAD) $(LIB1) $(LIBC) $(MSGBOX)
+msgbox.sys: $(HEAD) $(MSGBOX) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-gserver.sys: $(HEAD) $(LIB1) $(LIBC) $(GSERVER)
+gserver.sys: $(HEAD) $(GSERVER) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-files.sys: $(HEAD) $(LIB1) $(LIBC) $(FILES)
+files.sys: $(HEAD) $(FILES) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-terminal.sys: $(HEAD) $(LIB1) $(LIBC) terminal.o
+terminal.sys: $(HEAD) $(TERMINAL) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-shell.sys: $(HEAD) $(HEAD2) $(LIBC) shell.o
+shell.sys: $(HEAD) $(_SHELL) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 

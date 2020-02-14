@@ -34,6 +34,8 @@
  *
  */
 #include <io.h>
+#include <ctype.h>
+
 
 
 INTN main(INTN argc,CHAR8 *argv[])
@@ -44,8 +46,8 @@ INTN main(INTN argc,CHAR8 *argv[])
 	GW_HAND *window = (GW_HAND *)(G->List);
 
 
-	window->next = NULL;
-	window->tail = NULL;
+	window->next = 0;
+	window->tail = 0;
 
 
 	while(TRUE){

@@ -60,16 +60,10 @@ GraphicInitialize(GUI *Graphic)
 VOID thread_main()
 {
 	UINTN pid;
-	static UINT32 oldcr3 = 0;
 
 
 	debug("Initialize thread main\n");
 	
-
-	CHAT *chat;
-	CHAT *current_chat;
-
-	CHAT *device_chat = (CHAT*) MSG_VIRTUAL_ADDR;
 
 
 	while(TRUE) {
@@ -88,102 +82,6 @@ VOID thread_main()
 			set_focus(pid);
 			key_msg_exec_console = 0;
 			sti();	
-		}
-
-
-		// CHAT
-		cli();
-		host_chat = host_chat->next;
-		if(!(host_chat)) { // final da lista
-
-			host_chat = ready_queue_host_chat;
-		
-		}
-
-		sti();
-
-		if(host_chat/*verifica se ha msg na fila*/) {
-
-			chat = host_chat;			
-
-			switch(chat->type) {
-			case MSG_READ_DIR:
-			
-			cli();
-			// actualizar
-			FAT_DIRECTORY *_root =FatOpenRoot(__bpb__,__data__);
-
-			VFS *_vfs = (VFS*) chat->p1;
-			if(FatOpenFile(__bpb__,__data__,_root,".",1,_vfs)) {
-				//debug("OpenFile Dir Error\n");
-				chat->p1 = 0; //Error
-				
-			}else { free(_root);}
-
-			
-			// enviar a mensagem
-			
-			THREAD *current = (THREAD*) chat->process;
-
-			// salve
-			current_chat = chat;
-			
-			if(current->flag != -1) { // enviar
-	
-				__asm__ __volatile__("movl %%cr3,%%eax;":"=a"(oldcr3):);
-				load_page_diretory(current->pd);
-
-				
-				
-				// add no final da lista
-
-				chat = device_chat;
-				while(chat->next) chat = chat->next;
-
-				chat->next = current_chat;
-
-
-				
-				load_page_diretory((PAGE_DIRECTORY *)oldcr3);
-
-				
-			
-				//remover da lista de mensagens
-				// Percorre a lista ate achar o p->next igual ao current
-				chat = ready_queue_host_chat;
-
-				while(chat->next != current_chat) chat = chat->next;
-				
-				// aponta o chat->next para o current->next
-				chat->next = current_chat->next;
-
-
-				
-
-
-			}else { // nao enviar
-
-				//remover da lista de mensagens
-				// Percorre a lista ate achar o p->next igual ao current
-				chat = ready_queue_host_chat;
-
-				while(chat->next != current_chat) chat = chat->next;
-
-				// aponta o chat->next para o current->next
-				chat->next = current_chat->next;
-
-				
-				
-
-			}  sti();
-
-				break;
-			default:
-
-				break;
-			
-
-			}
 		}
 
 	}
@@ -274,9 +172,9 @@ UINTN main(BOOT_INFO *boot_info)
 
 		
 
-	print("Install GDTR\n",gdt_install());
-	print("Install TSS\n",tss_install());
-	print("Install IDTR\n",idt_install());
+	print("Install GDTR\n");	gdt_install();
+	print("Install TSS\n");		tss_install();
+	print("Install IDTR\n");	idt_install();
 
 
 
@@ -285,31 +183,29 @@ UINTN main(BOOT_INFO *boot_info)
 	(VIRTUAL_ADDRESS *)&local_apic_virtual_addr,1024/*4MiB*/,0x13);
 	
 	apic_initialize(IA32_LOCAL_APIC_BASE_ADDR/*local_apic_virtual_addr*/);
-	print("Install APIC Timer\n",apic_timer());
+	print("Install APIC Timer\n");	apic_timer();
 
 	print("I/O APIC initialize ");
 	ioapic_initialize();
 
+		
 
 	// Keyboard
 	ioapic_umasked(1);
 	// Mouse
-	//ioapic_umasked(12);
+	ioapic_umasked(12);
 
 	// RTC 
 	ioapic_umasked(8);
 
 
-	
-
-	/*print("Install PS/2\n",ps2_install());
-	print("Install Mouse\n",mouse_install());
-	print("Instal Keyboard\n",keyboard_install());*/
-	print("Install RTC\n",rtc_install());
-	
 
 
-	
+	print("Install PS/2\n"); 	ps2_install();
+	print("Instal Keyboard\n");	keyboard_install();
+	print("Install Mouse\n");	mouse_install();
+
+	print("Install RTC\n");		rtc_install();
 
 
 	print("Initialize IDE Controller:\n");
@@ -366,7 +262,7 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 	// USER
-	do_exec("gserver.sys",1);
+	do_exec("gserver.sys",0x81);
 	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
 	//do_exec("files.sys",1);

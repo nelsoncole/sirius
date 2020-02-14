@@ -35,7 +35,7 @@
  */
 #include <os.h>
 
-#define SYSCALL_NUM 8
+#define SYSCALL_NUM 18
 
 extern VOID interrupter(INTN n,UINT32 offset,UINT16 sel,UINT8 dpl );
 extern void int114(); // system call
@@ -61,37 +61,13 @@ static VOID sys_free(VOID *buf)
 
 static VOID sys_reboot()
 {
-    	kbdc_wait(1);
+
+	cli();
+    	kbdc_wait(0);
 	outportb(0x64,0xFE);
+	kbdc_wait(0);
 }
 
-static VOID sys_pci(UINTN max_bus) {
-	pci_get_info(0,max_bus);
-
-}
-static VOID sys_chat(UINT32 type,UINT32 p1, UINT32 p2)
-{
-	CHAT *new_msg = (CHAT*)malloc(sizeof(CHAT));
-
-
-	new_msg->type	= type;
-	new_msg->p1	= p1;
-	new_msg->p2	= p2;
-	new_msg->process = (UINT32) current_thread;
-	new_msg->next	= NULL;
-
-
-	// enfilar mensagem
-	// add no final da lista
-	CHAT	*p = ready_queue_host_chat;
-	while(p->next)
-	p = p->next;
-
-	p->next = new_msg;
-
-	
-
-}
 
 UINTN sys_do_exec_child(CONST CHAR8 *name,UINT8 prv) {
 
@@ -99,15 +75,46 @@ UINTN sys_do_exec_child(CONST CHAR8 *name,UINT8 prv) {
 
 }
 
+
+int syscall_read_sector(int p,int count,unsigned int lba32_47 ,void *buffer,unsigned int lba0_31) {
+
+	UINT64 addr = ( (lba0_31 &0xFFFFFFFF) /*| (lba32_47 << 32) */);
+
+	return read_sector(p,count,addr,buffer);
+
+}
+
+int syscall_write_sector(int p,int count,unsigned int lba32_47 ,void *buffer,unsigned int lba0_31) {
+
+	UINT64 addr = ( (lba0_31 &0xFFFFFFFF) /*| (lba32_47 << 32) */);
+
+	return write_sector(p,count,addr,buffer);
+
+}
+
+void syscall_unknown(void){
+
+}
+
 VOID *syscall_table[SYSCALL_NUM]={
-    	0,			// eax, 0	null
+    	syscall_unknown,	// eax, 0	null
     	&sys_exit,       	// eax, 1    	sys_exit
 	&sys_malloc,       	// eax, 2    	sys_malloc, edx = size
 	&sys_free,       	// eax, 3    	sys_free, edx = buf
 	&sys_reboot,       	// eax, 4    	sys_reboot
-	&sys_pci,		// eax, 5	sys_pci, edx = max_bus
-	&sys_chat,		// eax, 6	sys_chat, edx = type, ecx = p1, cbx = p2
-	&sys_do_exec_child	// eax, 7	sys_do_exec_child, edx = filename, ecx = prv
+	&syscall_unknown,	// eax, 5	reserved
+	&syscall_unknown,	// eax, 9	reserved
+	&sys_do_exec_child,	// eax, 7	sys_do_exec_child, edx = filename, ecx = prv
+	&syscall_unknown,	// eax, 8	reserved
+	&syscall_unknown,	// eax, 9	reserved
+	&syscall_unknown,	// eax, 10	reserved
+	&syscall_unknown,	// eax, 11	reserved
+	&syscall_unknown,	// eax, 12	reserved
+	&syscall_unknown,	// eax, 13	reserved
+	&syscall_unknown,	// eax, 14	reserved
+	&syscall_unknown,	// eax, 15	reserved
+	&syscall_read_sector,	// eax, 0x10	read_sector, edx = MediaID, ecx = count, cbx = LBA32-47, edi = buffer, esi = LBA0-31
+	&syscall_write_sector,	// eax, 0x11	write_sector, edx = MediaID, ecx = count, cbx = LBA32-47, edi = buffer, esi = LBA0-31
 };
 
 static VOID invalidsyscall(UINT32 num)
@@ -125,21 +132,19 @@ UINTN syscall_handler(UINTN num){
 		VOID *addr =syscall_table[num];
 
 		__asm__ __volatile__ ("\
+		pushl %%esi;\
+		pushl %%edi;\
 		pushl %%ebx;\
 		pushl %%ecx;\
 		pushl %%edx;\
 		call *%k1;\
-    		addl $12,%%esp;\
+    		addl $20,%%esp;\
 		":"=a"(eax):"r"(addr));
 
 	}else {
 
     		__asm__ __volatile__ ("\
-		pushl %%ebx;\
-		pushl %%ecx;\
-		pushl %%edx;\
 		call *%k1;\
-    		addl $12,%%esp;\
 		":"=a"(eax):"r"(invalidsyscall),"d"(num));
     	}
 

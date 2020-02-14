@@ -36,7 +36,8 @@
  
 
 #include <io.h>
-
+#include <ctype.h>
+#include <stdlib.h>
 
 INTN main() {
 
@@ -52,20 +53,20 @@ INTN main() {
 	GW_HAND *file = CreateObject(gw,TEXT("FILE NAME"),GW_HANDLE_FILE,200,20,gw->Area.Width -200,gw->Area.Height - 20, 
 	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_GRAY)),GW_FLAG_INVISIBLE);
 
-	VFS *vfs = (VFS*)__malloc(0x10000);
+	VFS *vfs = (VFS*)malloc(0x10000);
 
 	
 	
 
 
 
-	send_msg(MSG_READ_DIR,(UINT32)vfs,0);
+	//send_msg(MSG_READ_DIR,(UINT32)vfs,0);
 	
 
 	i = 0;
 	while(TRUE) {
 
-		switch(read_msg(&p1,&p2)) {
+		switch(0/*read_msg(&p1,&p2)*/) {
 
 
 		case MSG_READ_KEY:
@@ -104,7 +105,7 @@ INTN main() {
 
 		Send(file,GW_FLAG_VISIBLE,0 |GW_SMG_FLAG_BIT);
 
-		if(!spin) { send_msg(MSG_READ_DIR,(UINT32)vfs,0); spin = 100000000;}
+		if(!spin) { /*send_msg(MSG_READ_DIR,(UINT32)vfs,0);*/ spin = 100000000;}
 
 			break;
 
@@ -123,6 +124,11 @@ INTN main() {
 
 	}
 
+
+
 	return 0;
+
+	//unused
+	p2 = p2;
 
 }

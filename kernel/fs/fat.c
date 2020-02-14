@@ -217,15 +217,13 @@ void FATDataUpdate(FAT_BPB *bpb,FAT_DATA *data)
 
 FAT_DIRECTORY *FatOpenRoot(FAT_BPB *_bpb,FAT_DATA *data)
 {
-	FAT_DIRECTORY *root = (FAT_DIRECTORY *)malloc(0x10000); //64 KiB = 2048 entradas
+	FAT_DIRECTORY *root = NULL;
 	FAT_BPB *bpb = _bpb;
 
-	setmem(root,0x10000,0);
-
-
 	//64 KiB = 2048 entradas
-
 	alloc_pages(0,64,(VIRTUAL_ADDRESS *)&root);
+
+	setmem(root,0x1000*64,0);
 
 	// calcular o total numero de sectores Root Directory, RootDirSectors FAT12/16
 	data->root_sectors = ((bpb->BPB_RootEntCnt * 32) + (bpb->BPB_BytsPerSec - 1)) / bpb->BPB_BytsPerSec;
@@ -808,7 +806,7 @@ successfull:
 			if(ReadFat(bpb,fat_table,FATOffset))
 				goto error;
 
-			//flag = 1;
+			flag = 1;
 
 		}
 		// Para FAT16 divide por 2

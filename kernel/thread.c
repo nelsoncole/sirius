@@ -38,6 +38,9 @@
 THREAD	*current_thread; // A tarefa actualmente em execunção
 THREAD	*thread_ready_queue; // O início da lista.
 
+THREAD	*thread_ring0;
+THREAD	*salve_thread;
+
 // O próximo ID do processo disponível.
 UINTN 	next_pid = 0; 
 
@@ -113,6 +116,7 @@ UINTN initialize_thread()
 
    
     	current_thread->next 	= NULL;
+	current_thread->tail 	= NULL;
 
 	current_thread->flag	= 0;
 
@@ -121,6 +125,10 @@ UINTN initialize_thread()
 	current_thread->stdin	= open(0,"std");
 	current_thread->stdout	= open(0,"std");
 	current_thread->stderr	= open(0,"std");
+
+
+	thread_ring0 = NULL;
+	salve_thread = NULL;
 
 
 
@@ -197,6 +205,7 @@ UINTN create_thread(	VOID (*main)(),
 	new_thread->pt   	= (PAGE_TABLE*)((UINTN)(page_directory[d].addrpt << 12));
 
     	new_thread->next 	= NULL;
+	new_thread->tail 	= NULL;
 
 	new_thread->flag	= 0;
 
@@ -217,6 +226,14 @@ UINTN create_thread(	VOID (*main)(),
     	tmp = tmp->next;
     
     	tmp->next = new_thread;
+
+
+	// Ring0
+	if(privileg&0x80) {
+
+		if(!thread_ring0) thread_ring0 = new_thread;
+
+	}
 
 
    	return (new_thread->pid);
@@ -293,8 +310,9 @@ UINTN create_thread_child(THREAD	*thread,
 	new_thread->pt   	= (PAGE_TABLE*)((UINTN)(page_directory[d].addrpt << 12));
 
     	new_thread->next 	= NULL;
+	new_thread->tail 	= NULL;
 
-	new_thread->flag	= 0;
+	new_thread->flag	= 1;
 
 	new_thread->stdin	= thread->stdin;
 	new_thread->stdout	= thread->stdout;
@@ -304,6 +322,10 @@ UINTN create_thread_child(THREAD	*thread,
 	new_thread->eax 	= (unsigned int) new_thread->stdout;
 	new_thread->esi 	= (unsigned int) new_thread->stderr;
 
+	
+
+
+	thread->tail = new_thread;
     
      
     	// Adicionar novo elemento, no final da lista
@@ -353,9 +375,24 @@ VOID task_switch(VOID){
     	// a tarefa inicializada...
     	if (!current_thread) goto end;
     	else{
+		// Obter a próxima tarefa a ser executada.
 
-    	// Obter a próxima tarefa a ser executada.
-    	current_thread 	= current_thread->next;
+		// priority
+		if((!salve_thread) && (thread_ring0)) {
+
+			salve_thread = current_thread;
+
+			current_thread = thread_ring0;
+	
+
+		} else if(salve_thread) {
+
+			current_thread = salve_thread;
+
+    			current_thread 	= current_thread->next;
+			salve_thread = NULL;
+
+		}else current_thread 	= current_thread->next;
 
     	// Se caímos no final da lista vinculada, 
     	// comece novamente do início.
