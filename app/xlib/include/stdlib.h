@@ -1,20 +1,9 @@
 #ifndef __STDLIB_H
 #define __STDLIB_H
 
+#include "size_t.h"
 
-#if defined(__x86_64__) || defined(__aarch64__)
-	#define	INT_MAX 0x7fffffffffffffff // -------	// max value of an "int"
-	#define HEX_LEN 16
-	
-#elif defined(__i386__) || defined(__arm__)
-	#define	INT_MAX	0x7fffffff // 2147483647	// max value of an "int"
-	#define HEX_LEN 8
-
-#else
-#error YOUR ARCH HERE
-#endif
-
-#include "ctype.h"
+#define NULL ((void *)0)
 
 extern void *malloc(size_t size);
 extern void *colloc(size_t num, size_t size);

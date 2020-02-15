@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdlib.h>
 
 int strtol (const char *nptr,char **endptr,int base) {

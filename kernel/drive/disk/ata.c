@@ -40,11 +40,14 @@ ATA ata[4];
 PCI_COFIG_SPACE *ata_pci = NULL;
 UINTN ata_record_dev,ata_record_channel;
 
-VOID ata_wait(UINTN val)
-{ 
-	val/=100;
-   	
-	while(val--) __asm__ __volatile__("out %%al,$0x80"::);
+VOID ata_wait(UINTN p)
+{
+	if(p > 3) return;
+
+	inportb(ata[p].cmd_block_base_addr + ATA_REG_STATUS);
+	inportb(ata[p].cmd_block_base_addr + ATA_REG_STATUS);
+	inportb(ata[p].cmd_block_base_addr + ATA_REG_STATUS);
+	inportb(ata[p].cmd_block_base_addr + ATA_REG_STATUS);
 }
 
 
@@ -103,7 +106,7 @@ VOID ata_cmd_write(UINTN p,UINTN cmd)
     	// no_busy      	
 	ata_wait_not_busy(p);
 	outportb(ata[p].cmd_block_base_addr + ATA_REG_CMD,cmd);
-	ata_wait(400);  // Esperamos 400ns
+	ata_wait(p);  // Esperamos 400ns
 
 }
 
@@ -275,12 +278,12 @@ static UINTN detect_devtype (UINTN p)
     
     	// Select device,
     	outportb(ata[p].cmd_block_base_addr + ATA_REG_DEVSEL,0xA0| ata[p].dev_num << 4);
-	ata_wait(400);
+	ata_wait(p);
 
 	ata_wait_not_busy(p);
 
 	ata_cmd_write(p,ATA_CMD_IDENTIFY_DEVICE);
-	ata_wait(400);
+	ata_wait(p);
 	
 
 	spin = 1000000;
@@ -336,7 +339,7 @@ static UINTN ata_identify_device(UINTN p,UINT16 *buffer)
 		case ATADEV_PATAPI:
 		print("Uinidade%d PATAPI\n",p);
 		ata_cmd_write(p,ATA_CMD_IDENTIFY_PACKET_DEVICE);
-        	ata_wait(400);
+        	ata_wait(p);
         	ata_wait_drq(p); 
         	ata_pio_read(p,buffer,512);
         	ata_wait_not_busy(p);
@@ -392,7 +395,7 @@ static VOID set_ata_device_and_sector(UINTN p,UINTN count,UINT64 addr)
         	outportb(ata[p].cmd_block_base_addr + ATA_REG_DEVSEL,0x40 |(ata[p].dev_num<<4) | ((UINT8)(addr>>24 &0x0f)));
         	// verifique se e a mesma unidade para nao esperar pelos 400ns
         	if(ata_record_dev != ata[p].dev_num && ata_record_channel != ata[p].channel) {
-            	ata_wait(400);
+            	ata_wait(p);
             	//verifique erro
             	ata_record_dev      = ata[p].dev_num;
             	ata_record_channel  = ata[p].channel;}
@@ -411,7 +414,7 @@ static VOID set_ata_device_and_sector(UINTN p,UINTN count,UINT64 addr)
         	outportb(ata[p].cmd_block_base_addr + ATA_REG_DEVSEL,0x40 | ata[p].dev_num<<4);   
         	// verifique se e a mesma unidade para nao esperar pelos 400ns
         	if(ata_record_dev != ata[p].dev_num && ata_record_channel != ata[p].channel) {
-            	ata_wait(400);
+            	ata_wait(p);
             	//verifique erro
             	ata_record_dev      = ata[p].dev_num;
             	ata_record_channel  = ata[p].channel;}

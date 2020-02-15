@@ -39,7 +39,7 @@ int printf(const char *format,...)
 				break;
 
 			case 'u':
-				u = va_arg (ap, uint32_t);
+				u = va_arg (ap, unsigned int);
 				strtol (buffer, (char **) NULL,u);
 				puts(buffer);
 				break;

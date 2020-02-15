@@ -1,7 +1,8 @@
 #ifndef __STRING_H
 #define __STRING_H
 
-#include "ctype.h"
+#include "size_t.h"
+#define NULL ((void *)0)
 
 extern size_t strlen(const char *s);
 

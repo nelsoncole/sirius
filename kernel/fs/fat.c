@@ -221,9 +221,9 @@ FAT_DIRECTORY *FatOpenRoot(FAT_BPB *_bpb,FAT_DATA *data)
 	FAT_BPB *bpb = _bpb;
 
 	//64 KiB = 2048 entradas
-	alloc_pages(0,64,(VIRTUAL_ADDRESS *)&root);
+	alloc_pages(0,16,(VIRTUAL_ADDRESS *)&root);
 
-	setmem(root,0x1000*64,0);
+	setmem(root,0x10000,0);
 
 	// calcular o total numero de sectores Root Directory, RootDirSectors FAT12/16
 	data->root_sectors = ((bpb->BPB_RootEntCnt * 32) + (bpb->BPB_BytsPerSec - 1)) / bpb->BPB_BytsPerSec;

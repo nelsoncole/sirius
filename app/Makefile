@@ -1,5 +1,5 @@
-ASFLAGS  :=-f elf32
-CFLAGS32 :=-Wall -m32 -ffreestanding -nostdlib -nostdinc -I ./xlib/include
+ASFLAGS  :=-f elf32 -O0
+CFLAGS32 :=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./xlib/include
 LDFLAGS  :=-m elf_i386 -T xlib/sys/link.ld
 AS=nasm
 CC=gcc

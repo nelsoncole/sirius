@@ -1,6 +1,6 @@
-
-#include <ctype.h>
 #include <stdlib.h>
+
+#define HEX_LEN 8
 
 void i2hex(unsigned int val, char* dest, int len)
 {

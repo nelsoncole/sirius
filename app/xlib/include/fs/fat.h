@@ -141,5 +141,10 @@ int FatUpdateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,FILE *fd);
 
 unsigned char ChkSum (unsigned char *pFcbName);
 
+int AddFAT(FILE *fd, FAT_BPB *bpb, unsigned int first_sector_of_cluster);
+
+
+FAT_DIRECTORY *FatOpenRoot2(FAT_BPB *bpb);
+
 
 #endif

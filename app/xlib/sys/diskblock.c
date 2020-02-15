@@ -34,7 +34,7 @@
  *
  */
  
-#include <diskblock.h>
+#include <sys/diskblock.h>
 
 
 int block_read(int media_id,int count,unsigned int offset /*LBA START*/,void *buffer)

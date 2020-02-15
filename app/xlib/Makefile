@@ -1,4 +1,4 @@
-CFLAGS=-Wall -m32 -ffreestanding -nostdlib -nostdinc -I ./include
+CFLAGS=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./include
 .PHONY: xlib clean move
 
 xlib:

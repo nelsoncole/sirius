@@ -227,8 +227,13 @@ UINTN free_frame(IN VOID *frame)
 
 }
 
+
+int al = 0;
+int fr = 0;
+
 UINTN alloc_pages_initialize()
 {
+	fr = al = 0;
 
 	AllocTablePages = (UINT8*) ((_end) + 0x1000*256);
 	
@@ -247,48 +252,73 @@ UINTN alloc_pages(	IN UINTN type,
 			OUT VIRTUAL_ADDRESS *addr)
 {
 
-	int i,e;
-	unsigned char *tmp = (unsigned char*)AllocTablePages;
+	int i;
+	char *tmp = (char*)AllocTablePages;
 	size_t count;
 	unsigned char flag;
-	unsigned char *start_buf = NULL;
-	int start = 0;
+	char *start_buf = NULL;
+	int start;
 
 	//chek space
 	count = 0;
 	flag = 1;
-	e = 0;
+	start = (-1);
 	for(i=0;i<8192;i++) {
 
-		if(!*tmp) {
-			if(!count) { start_buf = tmp; start = i; }
- 
-			count += 1; e = 1; 
+		
+		if(start == (-1)) { 
+		
+			start = i;
+			start_buf = tmp; 
 
 		}
-		if(count == _size) {flag = 0; break;}
-		if(e == _size){ count = 0; e = 0;}
+
+		if(!(*tmp)) {
+
+			count++;
+
+			if(count == _size) {
+				 
+				flag = 0; break;
+				 
+			}
+ 
+
+		}else {
+		
+			count = 0;
+			start = (-1);
+
+		}
 
 		tmp++;
-		e++;
 	}
 
 
-	if(flag) {
+	if(flag || i > 8192) {
 
-		print("KERNEL PANIC: AllocTablePages()\n"); for(;;);
+		print("KERNEL PANIC: AllocTablePages()\n"); 
+		for(;;);
 	}
-
 
 	// Marcar ocupado
-	for(i=0;i<count;i++) *start_buf++ = 0x11;
+	for(i=0;i < _size;i++){
+ 
+		*start_buf = 0x11;
+		start_buf++;
 
+	}
 
 	start_buf--;
 	*start_buf = 0xFF;
 
+	dprintf("AllocPage n:%d: solicitado %d contador %d alocado %d ",al++,_size,count,i);
 
 	*(VIRTUAL_ADDRESS*)(addr) = (START_ALLOC_PAGES_VIRTUAL_ADDRESS + (0x1000*start));
+
+
+	dprintf("VIRTUAL_ADDRES 0x%x\n",(START_ALLOC_PAGES_VIRTUAL_ADDRESS + (0x1000*start)));
+
 
 	return (0);
 
@@ -305,16 +335,22 @@ VOID free_pages(IN VOID *addr)
 
 	int i;
 
+	char c = 0;
+
 	for(i=0;i<8192;i++) {
 	
 		if(*tmp == 0xff) {
+			c = *tmp &0xff;
 			*tmp = 0;
-			return;
+			goto end;//return;
 
 		}else *tmp++ = 0;
 
 
 	}
+
+end:
+	dprintf("FreePages n:%d VIRTUAL_ADDRES 0x%x liberado %d *tmp 0x%x\n",fr++,addr,i+1,c);
 
 
 }

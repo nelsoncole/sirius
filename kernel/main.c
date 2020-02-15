@@ -88,8 +88,12 @@ VOID thread_main()
 
 }
 
+
+extern void dp_init();
 UINTN main(BOOT_INFO *boot_info)
 {	
+
+	dp_init();
 
 	//UINTN pid;
 	UINTN local_apic_virtual_addr;
@@ -132,6 +136,7 @@ UINTN main(BOOT_INFO *boot_info)
 	font = (CHAR8 *)(font8x16);
 
 	ZERO = (unsigned char *)malloc(0x10000); // 64 KiB
+
 	__vfs__ = (VFS*)malloc(0x8000); // 32 KiB
 	__vfsbuf__ = (unsigned char *)malloc(0x8000); // 32 KiB
 
@@ -215,12 +220,15 @@ UINTN main(BOOT_INFO *boot_info)
 	
 	// Multitasking
 	print("Initialize Multitasking\n",initialize_thread());
+
 	print("Initialize focus\n",initialize_focus());
 	
 	// testing thread
 	create_thread(&thread_main,kernel_page_directory,0,0,0,0,(UINT32)malloc(0x2000),0,2);
 
 
+//	print("G->BankBuffer 0x%x",G->BankBuffer);
+//	for(;;);
 
 	print("testing application on system\n");
 
@@ -254,25 +262,14 @@ UINTN main(BOOT_INFO *boot_info)
 
 	}
 
-	// initialize CHAT
-	ready_queue_host_chat = host_chat = (CHAT*)malloc(sizeof(CHAT));
-	host_chat->next = NULL;
-	host_chat->type = 0;
-
-
-
 	// USER
 	do_exec("gserver.sys",0x81);
 	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
 	//do_exec("files.sys",1);
-	
-
-	
-
-
 
 	apic_timer_umasked();
+
 
 
 	/*clearscreen();
@@ -280,15 +277,6 @@ UINTN main(BOOT_INFO *boot_info)
 	refreshrate(); */ //refresh_screen();
 
 
-	/*
-	FILE *fp = open (0,"std");
-
-	if(fp == NULL) print("open error\n");
-	else print("%c %c\n",getc(fp),putc('a',fp));
-	
-
-	for(;;);*/
-	
 	sti(); //Enable eflag interrupt
 
 	// wait

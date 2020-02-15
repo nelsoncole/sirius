@@ -60,13 +60,17 @@ FILE *open (const char *filename,const char *mode)
 
 	if(mode[0] == '\0') return NULL;
 
+	unsigned char flag = 0;
 
 
 	FILE *stream;
 	if ((mode[0] == 's') && (mode[1] == 't') && (mode[2] == 'd')) {
 
 		stream = (FILE*)malloc(0x1000);
+
 		setmem(stream,0x1000,0);
+
+		flag = 2;
 
 		stream->header.flag = 1;
 		stream->header.mode[0] = 's';
@@ -82,7 +86,7 @@ FILE *open (const char *filename,const char *mode)
 		
 	}
 	
-	unsigned char flag = 0;
+	
 
 	if ((mode[0] == 'r') && (mode[1] == 'x')) {
 
@@ -144,6 +148,7 @@ FILE *open (const char *filename,const char *mode)
 		} else { free(bpb); free_pages(root); goto error; }
 	}
 
+
 	free(volume);
 	free(mbr);
 	free_pages(root);
@@ -153,8 +158,9 @@ FILE *open (const char *filename,const char *mode)
 	stream->header.flag = 1;
 	stream->header.current 	= NULL;
 	stream->header.next 	= NULL;
-	if(flag)stream->header.buffer = (unsigned int)__vfsbuf__;
-	else stream->header.buffer = (unsigned int)malloc(0x2000);
+	if(flag == 1)stream->header.buffer = (unsigned int)__vfsbuf__;
+	else if(flag == 2);
+	else stream->header.buffer = (unsigned int)malloc(0x10000);
 	return (FILE*) stream;
 
 error:

@@ -6,10 +6,7 @@
 #define FALSE 0
 #define NULL ((void *)0)
 
-typedef unsigned char uint8_t;
-typedef	unsigned short uint16_t;
-typedef	unsigned int uint32_t;
-typedef	unsigned long long uint64_t;
+
 typedef unsigned size_t;
 
 typedef struct _FILE_HEADER 
@@ -44,7 +41,7 @@ typedef struct _FILE
 	FILE_HEADER header;
 
 	// LBA block start
-	unsigned int block[1024-128];
+	unsigned int block[1/*1024-128*/];
 
 }__attribute__ ((packed)) FILE;
 

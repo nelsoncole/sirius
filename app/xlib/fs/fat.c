@@ -41,7 +41,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <diskblock.h>
+#include <sys/sys.h>
 
 
 unsigned int fat_flag = 0;
@@ -223,7 +223,6 @@ FAT_DIRECTORY *FatOpenRoot(FAT_BPB *bpb)
 	(bpb->BPB_FATSz16 * bpb->BPB_NumFATs) + root_sectors + bpb->BPB_HiddSec;
 
 	
-
 	// Calcular o 1º sector do Root Directory, FirstRootDirSector FAT12/16
 	unsigned int first_root_sector = (first_data_sector - root_sectors);
 
@@ -236,6 +235,8 @@ FAT_DIRECTORY *FatOpenRoot(FAT_BPB *bpb)
 	return ((FAT_DIRECTORY*) root);
 
 }
+
+
 
 int FatUpdateRoot(FAT_BPB *bpb,FAT_DIRECTORY *root)
 {
@@ -907,6 +908,17 @@ int FatRemveFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename)
 
 successfull:
 
+	if(dir->DIR_Attr == FAT_ATTR_DIRECTORY) {
+
+		// FIXME, devemos dar suport a remoçao de directório
+		free(dir_salve_num);
+		free(lonf_file_name);
+		free(fat_table);
+		return -1;	
+
+	}
+
+
 	N = dir->DIR_FstClusLO | dir->DIR_FstClusHI << 16;
 
 	// remover entrada de directorio 
@@ -1236,7 +1248,7 @@ successfull:
 
 			// Estrair Long File Name
 
-			char *p = (char*) (vfs->block + (vfs->header.blocks*64));
+			char *p = (char*) (vfs->header.buffer + (vfs->header.blocks*64));
 			memset(p,0,64);
 
 
@@ -1306,7 +1318,6 @@ int FatUpdateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,FILE *fd)
 	unsigned char sum = 0;
 	int count = 0;
 	unsigned char *cur_dir;
-
 
 
 	// DATA

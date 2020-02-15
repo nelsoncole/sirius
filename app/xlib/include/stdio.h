@@ -1,6 +1,9 @@
 #ifndef __STDIO_H
 #define __STDIO_H
 
+
+#define NULL ((void *)0)
+
 #define EOF (-1)
 
 #define FOPEN_MAX	0
@@ -9,6 +12,9 @@
 #define SEEK_END	2
 
 #include "ctype.h"
+#include "size_t.h"
+
+
 
 // Standard streams.
 extern FILE *stdin;
@@ -29,16 +35,19 @@ extern int fflush(FILE *fp);
 // caracters
 extern int putc (int ch, FILE *fp);
 extern int getc (FILE *fp);
+extern int fputc (int ch, FILE *fp);
+extern int fgetc (FILE *fp);
 
 
 // string
-extern char *fgets (char *str,FILE *fp);
+char *fgets (char *str,int length,FILE *fp);
+extern int fputs (const char *str,FILE *fp);
 
 // outras
-extern size_t write (const void *buffer,size_t num_bytes, size_t count, FILE *fp);
-extern size_t read (void *buffer,size_t num_bytes, size_t count, FILE *fp);
+extern size_t fwrite (const void *buffer,size_t num_bytes, size_t count, FILE *fp);
+extern size_t fread (void *buffer,size_t num_bytes, size_t count, FILE *fp);
 
-extern int remove (const char *filename);
+extern int remove (const char *path);
 extern void rewind(FILE *fp);
 
 

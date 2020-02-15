@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <string.h>
 
 int strncpy(char *dest, const char *src,size_t count)

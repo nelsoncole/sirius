@@ -70,7 +70,6 @@ start:
 	mov dword[stdout], eax
 	mov dword[stderr], esi
 
-	
 	push ebx
 	call crt0
 	add esp,4

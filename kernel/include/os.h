@@ -245,6 +245,10 @@ UINTN file_write(IN VOID *buf,CHAR8 *name);
 
 
 
+//FIXME
+UINTN  
+dprintf(CONST CHAR8 *format,...);
+
 
 
 #endif

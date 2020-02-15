@@ -135,362 +135,367 @@ Script de ligação e mapa de memória
                 0x00000000001025a7                irq23
                 0x00000000001025b6                int113
                 0x00000000001026a0                int114
- .text          0x00000000001026db      0x596 main.o
+ .text          0x00000000001026db      0x569 main.o
                 0x00000000001026db                GraphicInitialize
                 0x00000000001026ed                thread_main
                 0x0000000000102764                main
- .text          0x0000000000102c71       0x58 os.o
-                0x0000000000102c71                wait_ns
-                0x0000000000102c97                getmsr
-                0x0000000000102cb4                setmsr
- .text          0x0000000000102cc9        0x0 data.o
- .text          0x0000000000102cc9      0x65b dscptor.o
-                0x0000000000102f1f                gdt_install
-                0x0000000000103061                tss_install
-                0x00000000001030f2                tss_esp0
-                0x0000000000103254                idt_install
-                0x00000000001032ba                trap
-                0x00000000001032ef                interrupter
- .text          0x0000000000103324      0x44f exceptions.o
-                0x0000000000103324                fault_exception
-                0x0000000000103424                exceptions_install
- .text          0x0000000000103773      0x1bb string.o
-                0x0000000000103773                strlen
-                0x000000000010379c                copymem
-                0x00000000001037df                setmem
-                0x0000000000103817                strcpy
-                0x0000000000103859                strncpy
-                0x0000000000103899                strcmp
-                0x00000000001038f0                strncmp
- .text          0x000000000010392e      0xaa1 gui.o
-                0x000000000010392e                PutPixel
-                0x0000000000103959                PutPixelBuff
-                0x00000000001039a8                refreshrate
-                0x00000000001039f2                clearscreen
-                0x0000000000103a33                LineDrawHorizontal
-                0x0000000000103a70                LineDrawVertical
-                0x0000000000103aad                DrawRect
-                0x0000000000103b2f                DrawRectC
-                0x0000000000103bcf                DrawArea
-                0x0000000000103c1a                DrawChar
-                0x0000000000103cd7                DrawCharTransparent
-                0x0000000000103d6b                InitializeBoxDraw
-                0x0000000000103e24                UpdateBoxDraw
-                0x0000000000103ebf                BoxDraw
-                0x0000000000103fbb                BoxDrawSectCursor
-                0x0000000000103fe0                BoxDrawString
-                0x000000000010405f                UpdateBoxDrawString
-                0x0000000000104102                CreateBox
-                0x00000000001041d9                __UpdateBoxDraw
-                0x000000000010429c                BoxSetAttribute
-                0x00000000001042d0                OutputString
-                0x0000000000104364                BoxClearScreen
- .text          0x00000000001043cf        0x0 font8x16.o
- .text          0x00000000001043cf      0x187 bmp.o
-                0x00000000001043cf                BitMAP
- .text          0x0000000000104556      0x378 console.o
-                0x0000000000104556                ClearScreen
-                0x0000000000104568                SetAttribute
-                0x0000000000104581                EnableCursor
-                0x0000000000104594                SetCursorPosition
-                0x00000000001046f0                print
- .text          0x00000000001048ce      0x103 cpuid.o
-                0x00000000001048ce                cpuid_vendor
-                0x0000000000104911                cpuid_processor_brand
- .text          0x00000000001049d1      0x5b5 apic.o
-                0x00000000001049f1                enableapic
-                0x0000000000104a26                apic_eoi_register
-                0x0000000000104a3c                apic_initialize
-                0x0000000000104b62                apic_initial_count_timer
-                0x0000000000104b79                apic_timer
-                0x0000000000104bb3                apic_timer_umasked
-                0x0000000000104c01                apic_timer_masked
-                0x0000000000104c2f                read_ioapic_register
-                0x0000000000104c44                write_ioapic_register
-                0x0000000000104c5f                ioapic_masked
-                0x0000000000104cb2                ioapic_umasked
-                0x0000000000104d05                set_ioapic_redir_table
-                0x0000000000104ef1                ioapic_cofiguration
-                0x0000000000104f39                ioapic_initialize
- .text          0x0000000000104f86      0x125 lvt.o
-                0x0000000000104f86                lvt_function
-                0x000000000010501a                lvt_install
- .text          0x00000000001050ab      0x2d0 irq.o
-                0x00000000001050ab                irq_function
-                0x00000000001050fc                irq_install
- .text          0x000000000010537b      0x21d paging.o
-                0x000000000010537b                load_page_diretory
-                0x0000000000105397                page_enable
-                0x00000000001053a8                __native_flush_tlb_single
-                0x00000000001053c4                flush_tlb
-                0x00000000001053e6                page_install
- .text          0x0000000000105598      0x72c memory.o
-                0x0000000000105598                ram_initialize
-                0x0000000000105658                alloc_frame
-                0x00000000001057b5                free_frame
-                0x000000000010584e                alloc_pages_initialize
-                0x000000000010587d                alloc_pages
-                0x0000000000105970                free_pages
-                0x00000000001059da                mem_map
-                0x0000000000105c74                malloc
-                0x0000000000105cb3                free
- .text          0x0000000000105cc4      0x9a8 thread.o
-                0x0000000000105cc4                initialize_thread
-                0x0000000000105ea0                create_thread
-                0x0000000000106130                create_thread_child
-                0x0000000000106396                task_switch
-                0x0000000000106652                getpid
-                0x000000000010665f                getcr3
- .text          0x000000000010666c      0x8e9 exec.o
-                0x000000000010666c                do_exec
-                0x0000000000106adf                do_exec_child
- .text          0x0000000000106f55      0x14d exit.o
-                0x0000000000106f55                exit
- .text          0x00000000001070a2      0x1a4 syscall.o
-                0x0000000000107112                sys_do_exec_child
-                0x0000000000107139                syscall_read_sector
-                0x000000000010716a                syscall_write_sector
-                0x000000000010719b                syscall_unknown
-                0x00000000001071bd                syscall_handler
-                0x0000000000107203                syscall_install
- .text          0x0000000000107246      0x4e6 pci.o
-                0x0000000000107246                read_pci_config_addr
-                0x0000000000107292                write_pci_config_addr
-                0x00000000001072d7                pci_read_config_dword
-                0x0000000000107323                pci_write_config_dword
-                0x0000000000107368                pci_get_info
-                0x000000000010747a                pci_scan_bcc
-                0x0000000000107537                pci_scan_bcc_scc
-                0x0000000000107605                pci_scan_bcc_scc_prog
-                0x00000000001076e8                pci_scan_vendor
-                0x00000000001076fc                pci_check_vendor
-                0x0000000000107710                pci_size
- .text          0x000000000010772c     0x144c ata.o
-                0x000000000010772c                ata_wait
-                0x0000000000107755                ata_status_read
-                0x0000000000107782                ata_wait_not_busy
-                0x00000000001077bb                ata_wait_busy
-                0x00000000001077f4                ata_wait_no_drq
-                0x000000000010782b                ata_wait_drq
-                0x0000000000107862                ata_cmd_write
-                0x000000000010789c                ata_soft_reset
-                0x000000000010790c                ata_pio_read
-                0x0000000000107939                ata_pio_write
-                0x000000000010861c                ata_read_sector
-                0x000000000010876f                ata_write_sector
-                0x000000000010890f                ata_initialize
- .text          0x0000000000108b78      0x116 disk.o
-                0x0000000000108b78                read_sector
-                0x0000000000108c03                write_sector
- .text          0x0000000000108c8e       0xb9 media.o
-                0x0000000000108c8e                Read
-                0x0000000000108d3d                Write
- .text          0x0000000000108d47      0x169 ps2.o
-                0x0000000000108d47                kbdc_wait
-                0x0000000000108dcd                ps2_install
- .text          0x0000000000108eb0      0x38b mouse.o
-                0x0000000000108eb0                mouse_write
-                0x0000000000108efb                mouse_read
-                0x0000000000108f73                mouse_install
-                0x00000000001090df                mouse_handler
- .text          0x000000000010923b      0x23a keyboard.o
-                0x000000000010923b                keyboard_read
-                0x0000000000109276                keyboard_write
-                0x00000000001092e8                keyboard_install
-                0x000000000010934d                keyboard_handler
- .text          0x0000000000109475      0x14c rtc.o
-                0x0000000000109475                disable_NMI
-                0x0000000000109499                enable_NMI
-                0x00000000001094bd                rtc_install
-                0x0000000000109507                rtc_handler
-                0x0000000000109590                read_time
- .text          0x00000000001095c1      0x186 i82540.o
-                0x00000000001095c1                nic_install
-                0x0000000000109664                i82540_pci_configuration_space
- .text          0x0000000000109747      0x167 process.o
-                0x0000000000109747                initialize_focus
-                0x0000000000109789                switch_cr3
-                0x00000000001097b6                set_focus
-                0x0000000000109804                msg_set_focus
- .text          0x00000000001098ae      0xff1 lib.o
-                0x00000000001098ae                open
-                0x0000000000109ca4                close
-                0x0000000000109e2b                flush
-                0x0000000000109f4c                putc
-                0x000000000010a1d4                getc
-                0x000000000010a3e0                write
-                0x000000000010a65f                read
-                0x000000000010a84f                eof
-                0x000000000010a859                rewind
-                0x000000000010a86c                seek
-                0x000000000010a88b                error
-                0x000000000010a895                remove
- .text          0x000000000010a89f     0x1c34 fat.o
-                0x000000000010a89f                ChkSum
-                0x000000000010a8fa                FATReadLFN
-                0x000000000010aa26                FileShortName
-                0x000000000010ab14                FileMountShortName
-                0x000000000010ac51                FatReadBPB
-                0x000000000010acb3                FATDataUpdate
-                0x000000000010ad40                FatOpenRoot
-                0x000000000010ae46                FatUpdateRoot
-                0x000000000010af18                ReadFat
-                0x000000000010af8b                SalveFat
-                0x000000000010b07a                AddFAT
-                0x000000000010b32b                FatCreateFile
-                0x000000000010bc82                FatOpenFile
-                0x000000000010c219                FatUpdateFile
+ .text          0x0000000000102c44       0x58 os.o
+                0x0000000000102c44                wait_ns
+                0x0000000000102c6a                getmsr
+                0x0000000000102c87                setmsr
+ .text          0x0000000000102c9c        0x0 data.o
+ .text          0x0000000000102c9c      0x65b dscptor.o
+                0x0000000000102ef2                gdt_install
+                0x0000000000103034                tss_install
+                0x00000000001030c5                tss_esp0
+                0x0000000000103227                idt_install
+                0x000000000010328d                trap
+                0x00000000001032c2                interrupter
+ .text          0x00000000001032f7      0x44f exceptions.o
+                0x00000000001032f7                fault_exception
+                0x00000000001033f7                exceptions_install
+ .text          0x0000000000103746      0x1bb string.o
+                0x0000000000103746                strlen
+                0x000000000010376f                copymem
+                0x00000000001037b2                setmem
+                0x00000000001037ea                strcpy
+                0x000000000010382c                strncpy
+                0x000000000010386c                strcmp
+                0x00000000001038c3                strncmp
+ .text          0x0000000000103901      0xaa1 gui.o
+                0x0000000000103901                PutPixel
+                0x000000000010392c                PutPixelBuff
+                0x000000000010397b                refreshrate
+                0x00000000001039c5                clearscreen
+                0x0000000000103a06                LineDrawHorizontal
+                0x0000000000103a43                LineDrawVertical
+                0x0000000000103a80                DrawRect
+                0x0000000000103b02                DrawRectC
+                0x0000000000103ba2                DrawArea
+                0x0000000000103bed                DrawChar
+                0x0000000000103caa                DrawCharTransparent
+                0x0000000000103d3e                InitializeBoxDraw
+                0x0000000000103df7                UpdateBoxDraw
+                0x0000000000103e92                BoxDraw
+                0x0000000000103f8e                BoxDrawSectCursor
+                0x0000000000103fb3                BoxDrawString
+                0x0000000000104032                UpdateBoxDrawString
+                0x00000000001040d5                CreateBox
+                0x00000000001041ac                __UpdateBoxDraw
+                0x000000000010426f                BoxSetAttribute
+                0x00000000001042a3                OutputString
+                0x0000000000104337                BoxClearScreen
+ .text          0x00000000001043a2        0x0 font8x16.o
+ .text          0x00000000001043a2      0x187 bmp.o
+                0x00000000001043a2                BitMAP
+ .text          0x0000000000104529      0x5b3 console.o
+                0x0000000000104529                ClearScreen
+                0x000000000010453b                SetAttribute
+                0x0000000000104554                EnableCursor
+                0x0000000000104567                SetCursorPosition
+                0x00000000001046c3                print
+                0x00000000001048a1                dp_init
+                0x00000000001048c2                dputs
+                0x00000000001048f9                dprintf
+ .text          0x0000000000104adc      0x103 cpuid.o
+                0x0000000000104adc                cpuid_vendor
+                0x0000000000104b1f                cpuid_processor_brand
+ .text          0x0000000000104bdf      0x5b5 apic.o
+                0x0000000000104bff                enableapic
+                0x0000000000104c34                apic_eoi_register
+                0x0000000000104c4a                apic_initialize
+                0x0000000000104d70                apic_initial_count_timer
+                0x0000000000104d87                apic_timer
+                0x0000000000104dc1                apic_timer_umasked
+                0x0000000000104e0f                apic_timer_masked
+                0x0000000000104e3d                read_ioapic_register
+                0x0000000000104e52                write_ioapic_register
+                0x0000000000104e6d                ioapic_masked
+                0x0000000000104ec0                ioapic_umasked
+                0x0000000000104f13                set_ioapic_redir_table
+                0x00000000001050ff                ioapic_cofiguration
+                0x0000000000105147                ioapic_initialize
+ .text          0x0000000000105194      0x125 lvt.o
+                0x0000000000105194                lvt_function
+                0x0000000000105228                lvt_install
+ .text          0x00000000001052b9      0x2d0 irq.o
+                0x00000000001052b9                irq_function
+                0x000000000010530a                irq_install
+ .text          0x0000000000105589      0x21d paging.o
+                0x0000000000105589                load_page_diretory
+                0x00000000001055a5                page_enable
+                0x00000000001055b6                __native_flush_tlb_single
+                0x00000000001055d2                flush_tlb
+                0x00000000001055f4                page_install
+ .text          0x00000000001057a6      0x7b7 memory.o
+                0x00000000001057a6                ram_initialize
+                0x0000000000105866                alloc_frame
+                0x00000000001059c3                free_frame
+                0x0000000000105a5c                alloc_pages_initialize
+                0x0000000000105a9f                alloc_pages
+                0x0000000000105bc3                free_pages
+                0x0000000000105c6d                mem_map
+                0x0000000000105f07                malloc
+                0x0000000000105f46                free
+ .text          0x0000000000105f5d      0x9a8 thread.o
+                0x0000000000105f5d                initialize_thread
+                0x0000000000106139                create_thread
+                0x00000000001063c9                create_thread_child
+                0x000000000010662f                task_switch
+                0x00000000001068eb                getpid
+                0x00000000001068f8                getcr3
+ .text          0x0000000000106905      0x8e9 exec.o
+                0x0000000000106905                do_exec
+                0x0000000000106d78                do_exec_child
+ .text          0x00000000001071ee      0x14d exit.o
+                0x00000000001071ee                exit
+ .text          0x000000000010733b      0x1a4 syscall.o
+                0x00000000001073ab                sys_do_exec_child
+                0x00000000001073d2                syscall_read_sector
+                0x0000000000107403                syscall_write_sector
+                0x0000000000107434                syscall_unknown
+                0x0000000000107456                syscall_handler
+                0x000000000010749c                syscall_install
+ .text          0x00000000001074df      0x4e6 pci.o
+                0x00000000001074df                read_pci_config_addr
+                0x000000000010752b                write_pci_config_addr
+                0x0000000000107570                pci_read_config_dword
+                0x00000000001075bc                pci_write_config_dword
+                0x0000000000107601                pci_get_info
+                0x0000000000107713                pci_scan_bcc
+                0x00000000001077d0                pci_scan_bcc_scc
+                0x000000000010789e                pci_scan_bcc_scc_prog
+                0x0000000000107981                pci_scan_vendor
+                0x0000000000107995                pci_check_vendor
+                0x00000000001079a9                pci_size
+ .text          0x00000000001079c5     0x14a0 ata.o
+                0x00000000001079c5                ata_wait
+                0x0000000000107a4e                ata_status_read
+                0x0000000000107a7b                ata_wait_not_busy
+                0x0000000000107ab4                ata_wait_busy
+                0x0000000000107aed                ata_wait_no_drq
+                0x0000000000107b24                ata_wait_drq
+                0x0000000000107b5b                ata_cmd_write
+                0x0000000000107b93                ata_soft_reset
+                0x0000000000107c03                ata_pio_read
+                0x0000000000107c30                ata_pio_write
+                0x0000000000108909                ata_read_sector
+                0x0000000000108a5c                ata_write_sector
+                0x0000000000108bfc                ata_initialize
+ .text          0x0000000000108e65      0x116 disk.o
+                0x0000000000108e65                read_sector
+                0x0000000000108ef0                write_sector
+ .text          0x0000000000108f7b       0xb9 media.o
+                0x0000000000108f7b                Read
+                0x000000000010902a                Write
+ .text          0x0000000000109034      0x169 ps2.o
+                0x0000000000109034                kbdc_wait
+                0x00000000001090ba                ps2_install
+ .text          0x000000000010919d      0x38b mouse.o
+                0x000000000010919d                mouse_write
+                0x00000000001091e8                mouse_read
+                0x0000000000109260                mouse_install
+                0x00000000001093cc                mouse_handler
+ .text          0x0000000000109528      0x23a keyboard.o
+                0x0000000000109528                keyboard_read
+                0x0000000000109563                keyboard_write
+                0x00000000001095d5                keyboard_install
+                0x000000000010963a                keyboard_handler
+ .text          0x0000000000109762      0x14c rtc.o
+                0x0000000000109762                disable_NMI
+                0x0000000000109786                enable_NMI
+                0x00000000001097aa                rtc_install
+                0x00000000001097f4                rtc_handler
+                0x000000000010987d                read_time
+ .text          0x00000000001098ae      0x186 i82540.o
+                0x00000000001098ae                nic_install
+                0x0000000000109951                i82540_pci_configuration_space
+ .text          0x0000000000109a34      0x167 process.o
+                0x0000000000109a34                initialize_focus
+                0x0000000000109a76                switch_cr3
+                0x0000000000109aa3                set_focus
+                0x0000000000109af1                msg_set_focus
+ .text          0x0000000000109b9b      0xffb lib.o
+                0x0000000000109b9b                open
+                0x0000000000109f9b                close
+                0x000000000010a122                flush
+                0x000000000010a243                putc
+                0x000000000010a4cb                getc
+                0x000000000010a6d7                write
+                0x000000000010a956                read
+                0x000000000010ab46                eof
+                0x000000000010ab50                rewind
+                0x000000000010ab63                seek
+                0x000000000010ab82                error
+                0x000000000010ab8c                remove
+ .text          0x000000000010ab96     0x1c34 fat.o
+                0x000000000010ab96                ChkSum
+                0x000000000010abf1                FATReadLFN
+                0x000000000010ad1d                FileShortName
+                0x000000000010ae0b                FileMountShortName
+                0x000000000010af48                FatReadBPB
+                0x000000000010afaa                FATDataUpdate
+                0x000000000010b037                FatOpenRoot
+                0x000000000010b13d                FatUpdateRoot
+                0x000000000010b20f                ReadFat
+                0x000000000010b282                SalveFat
+                0x000000000010b371                AddFAT
+                0x000000000010b622                FatCreateFile
+                0x000000000010bf79                FatOpenFile
+                0x000000000010c510                FatUpdateFile
  *(.rodata)
- *fill*         0x000000000010c4d3        0x1 
- .rodata        0x000000000010c4d4      0x175 main.o
- *fill*         0x000000000010c649        0x3 
- .rodata        0x000000000010c64c      0x437 exceptions.o
- .rodata        0x000000000010ca83       0x40 bmp.o
- *fill*         0x000000000010cac3        0x1 
- .rodata        0x000000000010cac4       0xd8 console.o
- .rodata        0x000000000010cb9c       0x1d apic.o
- *fill*         0x000000000010cbb9        0x3 
- .rodata        0x000000000010cbbc       0x70 lvt.o
- .rodata        0x000000000010cc2c       0x74 irq.o
- .rodata        0x000000000010cca0       0x21 memory.o
- .rodata        0x000000000010ccc1        0x4 thread.o
- .rodata        0x000000000010ccc5       0x3b exec.o
- .rodata        0x000000000010cd00       0x24 syscall.o
- .rodata        0x000000000010cd24     0x151e pci.o
- *fill*         0x000000000010e242        0x2 
- .rodata        0x000000000010e244       0xed ata.o
- *fill*         0x000000000010e331        0x3 
- .rodata        0x000000000010e334       0xf3 mouse.o
- .rodata        0x000000000010e427       0x11 keyboard.o
- .rodata        0x000000000010e438       0xbc i82540.o
+ *fill*         0x000000000010c7ca        0x2 
+ .rodata        0x000000000010c7cc      0x175 main.o
+ *fill*         0x000000000010c941        0x3 
+ .rodata        0x000000000010c944      0x437 exceptions.o
+ .rodata        0x000000000010cd7b       0x40 bmp.o
+ *fill*         0x000000000010cdbb        0x1 
+ .rodata        0x000000000010cdbc      0x1b0 console.o
+ .rodata        0x000000000010cf6c       0x1d apic.o
+ *fill*         0x000000000010cf89        0x3 
+ .rodata        0x000000000010cf8c       0x70 lvt.o
+ .rodata        0x000000000010cffc       0x74 irq.o
+ .rodata        0x000000000010d070       0xaa memory.o
+ .rodata        0x000000000010d11a        0x4 thread.o
+ .rodata        0x000000000010d11e       0x3b exec.o
+ *fill*         0x000000000010d159        0x3 
+ .rodata        0x000000000010d15c       0x24 syscall.o
+ .rodata        0x000000000010d180     0x151e pci.o
+ *fill*         0x000000000010e69e        0x2 
+ .rodata        0x000000000010e6a0       0xed ata.o
+ *fill*         0x000000000010e78d        0x3 
+ .rodata        0x000000000010e790       0xf3 mouse.o
+ .rodata        0x000000000010e883       0x11 keyboard.o
+ .rodata        0x000000000010e894       0xbc i82540.o
                 0x000000000010f000                . = ALIGN (0x1000)
- *fill*         0x000000000010e4f4      0xb0c 
+ *fill*         0x000000000010e950      0x6b0 
 
-.eh_frame       0x000000000010f000     0x1918 carregar endereço 0x000000000000f000
- .eh_frame      0x000000000010f000       0x78 main.o
- .eh_frame      0x000000000010f078       0x60 os.o
+.eh_frame       0x000000000010f000     0x1980 carregar endereço 0x000000000000f000
+ .eh_frame      0x000000000010f000       0x7c main.o
+ .eh_frame      0x000000000010f07c       0x60 os.o
                                          0x78 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f0d8      0x130 dscptor.o
+ .eh_frame      0x000000000010f0dc      0x130 dscptor.o
                                         0x148 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f208       0x48 exceptions.o
+ .eh_frame      0x000000000010f20c       0x48 exceptions.o
                                          0x60 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f250       0xe0 string.o
+ .eh_frame      0x000000000010f254       0xe0 string.o
                                          0xf8 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f330      0x2e0 gui.o
+ .eh_frame      0x000000000010f334      0x2e0 gui.o
                                         0x2f8 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f610       0x20 bmp.o
+ .eh_frame      0x000000000010f614       0x20 bmp.o
                                          0x38 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f630       0xe4 console.o
-                                         0xfc (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f714       0x58 cpuid.o
+ .eh_frame      0x000000000010f634      0x144 console.o
+                                        0x15c (tamanho antes do relaxamento)
+ .eh_frame      0x000000000010f778       0x58 cpuid.o
                                          0x70 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f76c      0x1e4 apic.o
+ .eh_frame      0x000000000010f7d0      0x1e4 apic.o
                                         0x1fc (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f950       0x40 lvt.o
+ .eh_frame      0x000000000010f9b4       0x40 lvt.o
                                          0x58 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f990       0x40 irq.o
+ .eh_frame      0x000000000010f9f4       0x40 irq.o
                                          0x58 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010f9d0       0xa4 paging.o
+ .eh_frame      0x000000000010fa34       0xa4 paging.o
                                          0xbc (tamanho antes do relaxamento)
- .eh_frame      0x000000000010fa74      0x158 memory.o
-                                        0x170 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010fbcc       0xc4 thread.o
+ .eh_frame      0x000000000010fad8      0x15c memory.o
+                                        0x174 (tamanho antes do relaxamento)
+ .eh_frame      0x000000000010fc34       0xc4 thread.o
                                          0xdc (tamanho antes do relaxamento)
- .eh_frame      0x000000000010fc90       0x58 exec.o
+ .eh_frame      0x000000000010fcf8       0x58 exec.o
                                          0x70 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010fce8       0x20 exit.o
+ .eh_frame      0x000000000010fd50       0x20 exit.o
                                          0x38 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010fd08      0x160 syscall.o
+ .eh_frame      0x000000000010fd70      0x160 syscall.o
                                         0x178 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010fe68      0x160 pci.o
+ .eh_frame      0x000000000010fed0      0x160 pci.o
                                         0x178 (tamanho antes do relaxamento)
- .eh_frame      0x000000000010ffc8      0x24c ata.o
+ .eh_frame      0x0000000000110030      0x24c ata.o
                                         0x264 (tamanho antes do relaxamento)
- .eh_frame      0x0000000000110214       0x50 disk.o
+ .eh_frame      0x000000000011027c       0x50 disk.o
                                          0x68 (tamanho antes do relaxamento)
- .eh_frame      0x0000000000110264       0x40 media.o
+ .eh_frame      0x00000000001102cc       0x40 media.o
                                          0x58 (tamanho antes do relaxamento)
- .eh_frame      0x00000000001102a4       0x40 ps2.o
+ .eh_frame      0x000000000011030c       0x40 ps2.o
                                          0x58 (tamanho antes do relaxamento)
- .eh_frame      0x00000000001102e4       0xc0 mouse.o
+ .eh_frame      0x000000000011034c       0xc0 mouse.o
                                          0xd8 (tamanho antes do relaxamento)
- .eh_frame      0x00000000001103a4       0xa0 keyboard.o
+ .eh_frame      0x000000000011040c       0xa0 keyboard.o
                                          0xb8 (tamanho antes do relaxamento)
- .eh_frame      0x0000000000110444       0xa0 rtc.o
+ .eh_frame      0x00000000001104ac       0xa0 rtc.o
                                          0xb8 (tamanho antes do relaxamento)
- .eh_frame      0x00000000001104e4       0x40 i82540.o
+ .eh_frame      0x000000000011054c       0x40 i82540.o
                                          0x58 (tamanho antes do relaxamento)
- .eh_frame      0x0000000000110524       0x80 process.o
+ .eh_frame      0x000000000011058c       0x80 process.o
                                          0x98 (tamanho antes do relaxamento)
- .eh_frame      0x00000000001105a4      0x180 lib.o
+ .eh_frame      0x000000000011060c      0x180 lib.o
                                         0x198 (tamanho antes do relaxamento)
- .eh_frame      0x0000000000110724      0x1f4 fat.o
+ .eh_frame      0x000000000011078c      0x1f4 fat.o
                                         0x20c (tamanho antes do relaxamento)
 
-.iplt           0x0000000000110920        0x0 carregar endereço 0x0000000000010920
- .iplt          0x0000000000110920        0x0 setup.o
+.iplt           0x0000000000110980        0x0 carregar endereço 0x0000000000010980
+ .iplt          0x0000000000110980        0x0 setup.o
 
-.rel.dyn        0x0000000000110918        0x0 carregar endereço 0x0000000000010918
- .rel.iplt      0x0000000000110918        0x0 setup.o
- .rel.text      0x0000000000110918        0x0 setup.o
+.rel.dyn        0x0000000000110980        0x0 carregar endereço 0x0000000000010980
+ .rel.iplt      0x0000000000110980        0x0 setup.o
+ .rel.text      0x0000000000110980        0x0 setup.o
 
-.data           0x0000000000110920     0x26e0 carregar endereço 0x0000000000010920
-                0x0000000000110920                data = .
+.data           0x0000000000110980     0x2680 carregar endereço 0x0000000000010980
+                0x0000000000110980                data = .
  *(.data)
- .data          0x0000000000110920        0x0 main.o
- .data          0x0000000000110920        0x0 os.o
- .data          0x0000000000110920        0xc data.o
-                0x0000000000110920                global_controll_task_switch
-                0x0000000000110924                key
-                0x0000000000110928                mouse
- .data          0x000000000011092c        0x0 dscptor.o
- *fill*         0x000000000011092c       0x14 
- .data          0x0000000000110940       0x80 exceptions.o
-                0x0000000000110940                exception_mensagem
- .data          0x00000000001109c0        0x0 string.o
- .data          0x00000000001109c0       0x40 gui.o
-                0x00000000001109c0                ColorTable
- .data          0x0000000000110a00     0x1000 font8x16.o
-                0x0000000000110a00                font8x16
- .data          0x0000000000111a00        0x0 bmp.o
- .data          0x0000000000111a00        0x0 console.o
- .data          0x0000000000111a00        0x0 cpuid.o
- .data          0x0000000000111a00        0x0 apic.o
- .data          0x0000000000111a00        0x0 lvt.o
- .data          0x0000000000111a00        0x0 irq.o
- .data          0x0000000000111a00        0x8 paging.o
-                0x0000000000111a00                kernel_page_directory
-                0x0000000000111a04                kernel_page_table
- *fill*         0x0000000000111a08       0x18 
- .data          0x0000000000111a20       0x20 memory.o
-                0x0000000000111a20                RamBitValue
- .data          0x0000000000111a40        0x0 thread.o
- .data          0x0000000000111a40        0x0 exec.o
- .data          0x0000000000111a40        0x0 exit.o
- .data          0x0000000000111a40       0x48 syscall.o
-                0x0000000000111a40                syscall_table
- *fill*         0x0000000000111a88       0x18 
- .data          0x0000000000111aa0      0xc00 pci.o
-                0x0000000000111aa0                pci_classes
-                0x0000000000111ea0                pci_class_names
- .data          0x00000000001126a0        0x0 ata.o
- .data          0x00000000001126a0        0x0 disk.o
- .data          0x00000000001126a0        0x0 media.o
- .data          0x00000000001126a0        0x0 ps2.o
- .data          0x00000000001126a0       0x20 mouse.o
-                0x00000000001126a0                id_mouse_strings
-                0x00000000001126b8                speed
- .data          0x00000000001126c0      0x200 keyboard.o
-                0x00000000001126c0                ascii_minusculas
-                0x00000000001127c0                ascii_maiusculas
- .data          0x00000000001128c0        0x4 rtc.o
-                0x00000000001128c0                clock
- .data          0x00000000001128c4        0x0 i82540.o
- .data          0x00000000001128c4        0x0 process.o
- .data          0x00000000001128c4        0x0 lib.o
- .data          0x00000000001128c4        0x0 fat.o
+ .data          0x0000000000110980        0x0 main.o
+ .data          0x0000000000110980        0x0 os.o
+ .data          0x0000000000110980        0xc data.o
+                0x0000000000110980                global_controll_task_switch
+                0x0000000000110984                key
+                0x0000000000110988                mouse
+ .data          0x000000000011098c        0x0 dscptor.o
+ *fill*         0x000000000011098c       0x14 
+ .data          0x00000000001109a0       0x80 exceptions.o
+                0x00000000001109a0                exception_mensagem
+ .data          0x0000000000110a20        0x0 string.o
+ .data          0x0000000000110a20       0x40 gui.o
+                0x0000000000110a20                ColorTable
+ .data          0x0000000000110a60     0x1000 font8x16.o
+                0x0000000000110a60                font8x16
+ .data          0x0000000000111a60        0x0 bmp.o
+ .data          0x0000000000111a60        0x4 console.o
+                0x0000000000111a60                dp_str
+ .data          0x0000000000111a64        0x0 cpuid.o
+ .data          0x0000000000111a64        0x0 apic.o
+ .data          0x0000000000111a64        0x0 lvt.o
+ .data          0x0000000000111a64        0x0 irq.o
+ .data          0x0000000000111a64        0x8 paging.o
+                0x0000000000111a64                kernel_page_directory
+                0x0000000000111a68                kernel_page_table
+ *fill*         0x0000000000111a6c       0x14 
+ .data          0x0000000000111a80       0x20 memory.o
+                0x0000000000111a80                RamBitValue
+ .data          0x0000000000111aa0        0x0 thread.o
+ .data          0x0000000000111aa0        0x0 exec.o
+ .data          0x0000000000111aa0        0x0 exit.o
+ .data          0x0000000000111aa0       0x48 syscall.o
+                0x0000000000111aa0                syscall_table
+ *fill*         0x0000000000111ae8       0x18 
+ .data          0x0000000000111b00      0xc00 pci.o
+                0x0000000000111b00                pci_classes
+                0x0000000000111f00                pci_class_names
+ .data          0x0000000000112700        0x0 ata.o
+ .data          0x0000000000112700        0x0 disk.o
+ .data          0x0000000000112700        0x0 media.o
+ .data          0x0000000000112700        0x0 ps2.o
+ .data          0x0000000000112700       0x20 mouse.o
+                0x0000000000112700                id_mouse_strings
+                0x0000000000112718                speed
+ .data          0x0000000000112720      0x200 keyboard.o
+                0x0000000000112720                ascii_minusculas
+                0x0000000000112820                ascii_maiusculas
+ .data          0x0000000000112920        0x4 rtc.o
+                0x0000000000112920                clock
+ .data          0x0000000000112924        0x0 i82540.o
+ .data          0x0000000000112924        0x0 process.o
+ .data          0x0000000000112924        0x0 lib.o
+ .data          0x0000000000112924        0x0 fat.o
                 0x0000000000113000                . = ALIGN (0x1000)
- *fill*         0x00000000001128c4      0x73c 
+ *fill*         0x0000000000112924      0x6dc 
 
 .igot.plt       0x0000000000113000        0x0 carregar endereço 0x0000000000013000
  .igot.plt      0x0000000000113000        0x0 setup.o
@@ -530,54 +535,56 @@ Script de ligação e mapa de memória
  .bss           0x0000000000143038        0x0 lvt.o
  .bss           0x0000000000143038        0x0 irq.o
  .bss           0x0000000000143038        0x0 paging.o
- .bss           0x0000000000143038        0xc memory.o
+ .bss           0x0000000000143038       0x14 memory.o
                 0x0000000000143038                index_mem_map_pt
                 0x000000000014303c                RamBMP
                 0x0000000000143040                AllocTablePages
- .bss           0x0000000000143044        0x4 thread.o
-                0x0000000000143044                next_pid
- .bss           0x0000000000143048        0x0 exec.o
- .bss           0x0000000000143048        0x4 exit.o
-                0x0000000000143048                exit_thread
- .bss           0x000000000014304c        0x0 syscall.o
- .bss           0x000000000014304c        0x0 pci.o
- .bss           0x000000000014304c        0x4 ata.o
-                0x000000000014304c                ata_pci
- .bss           0x0000000000143050        0x0 disk.o
- .bss           0x0000000000143050        0x0 media.o
- .bss           0x0000000000143050        0x0 ps2.o
- .bss           0x0000000000143050        0x8 mouse.o
-                0x0000000000143050                mouse_position
- .bss           0x0000000000143058       0x10 keyboard.o
-                0x0000000000143058                keyboard_charset
-                0x000000000014305c                count
- .bss           0x0000000000143068        0x0 rtc.o
- .bss           0x0000000000143068        0xc i82540.o
-                0x0000000000143068                nicbar0
-                0x000000000014306c                nicbar1
-                0x0000000000143070                nicbar2
- .bss           0x0000000000143074       0x14 process.o
-                0x0000000000143074                focus
-                0x0000000000143078                thread_focus
-                0x000000000014307c                zzzz_
-                0x0000000000143080                key_msg_focos
-                0x0000000000143084                key_msg_exec_console
- .bss           0x0000000000143088        0x0 lib.o
- .bss           0x0000000000143088        0x4 fat.o
-                0x0000000000143088                FAT
+                0x0000000000143044                al
+                0x0000000000143048                fr
+ .bss           0x000000000014304c        0x4 thread.o
+                0x000000000014304c                next_pid
+ .bss           0x0000000000143050        0x0 exec.o
+ .bss           0x0000000000143050        0x4 exit.o
+                0x0000000000143050                exit_thread
+ .bss           0x0000000000143054        0x0 syscall.o
+ .bss           0x0000000000143054        0x0 pci.o
+ .bss           0x0000000000143054        0x4 ata.o
+                0x0000000000143054                ata_pci
+ .bss           0x0000000000143058        0x0 disk.o
+ .bss           0x0000000000143058        0x0 media.o
+ .bss           0x0000000000143058        0x0 ps2.o
+ .bss           0x0000000000143058        0x8 mouse.o
+                0x0000000000143058                mouse_position
+ .bss           0x0000000000143060       0x10 keyboard.o
+                0x0000000000143060                keyboard_charset
+                0x0000000000143064                count
+ .bss           0x0000000000143070        0x0 rtc.o
+ .bss           0x0000000000143070        0xc i82540.o
+                0x0000000000143070                nicbar0
+                0x0000000000143074                nicbar1
+                0x0000000000143078                nicbar2
+ .bss           0x000000000014307c       0x14 process.o
+                0x000000000014307c                focus
+                0x0000000000143080                thread_focus
+                0x0000000000143084                zzzz_
+                0x0000000000143088                key_msg_focos
+                0x000000000014308c                key_msg_exec_console
+ .bss           0x0000000000143090        0x0 lib.o
+ .bss           0x0000000000143090        0x4 fat.o
+                0x0000000000143090                FAT
  *(COMMON)
- COMMON         0x000000000014308c       0x1c main.o
-                0x000000000014308c                ATA_BAR1
-                0x0000000000143090                ATA_BAR4
-                0x0000000000143094                CPUID_REQUEST
-                0x0000000000143098                ATA_BAR0
-                0x000000000014309c                ATA_BAR3
-                0x00000000001430a0                ATA_BAR2
-                0x00000000001430a4                ATA_BAR5
- COMMON         0x00000000001430a8        0x8 data.o
-                0x00000000001430a8                host_chat
-                0x00000000001430ac                ready_queue_host_chat
- *fill*         0x00000000001430b0       0x10 
+ COMMON         0x0000000000143094       0x1c main.o
+                0x0000000000143094                ATA_BAR1
+                0x0000000000143098                ATA_BAR4
+                0x000000000014309c                CPUID_REQUEST
+                0x00000000001430a0                ATA_BAR0
+                0x00000000001430a4                ATA_BAR3
+                0x00000000001430a8                ATA_BAR2
+                0x00000000001430ac                ATA_BAR5
+ COMMON         0x00000000001430b0        0x8 data.o
+                0x00000000001430b0                host_chat
+                0x00000000001430b4                ready_queue_host_chat
+ *fill*         0x00000000001430b8        0x8 
  COMMON         0x00000000001430c0     0x10aa dscptor.o
                 0x00000000001430c0                gdtr
                 0x00000000001430e0                gdt

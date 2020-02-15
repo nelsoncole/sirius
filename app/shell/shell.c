@@ -37,9 +37,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <diskblock.h>
+#include <sys/sys.h>
 
-#define SHELL_CMD_NUM 17 + 1
+#define SHELL_CMD_NUM 17 + 2
 
 void (*call_loader)  (int argc,char **argv) = 0;// NULL;
 
@@ -68,6 +68,40 @@ int cmd_cls(int argc,char **argv);
 int cmd_cd(int argc,char **argv);
 
 
+int cmd_salve(int argc,char **argv) {
+
+	const char *dp_str = (const char*)0x800000;
+
+	if(argc != 1) { 
+
+		printf("salve: error, argc %d\n",argc);
+		return -1;
+	}
+
+	FILE *fp = fopen("Sirius.txt","w+");
+
+	if(fp == NULL) {
+ 
+		printf("Errro ao abrir %s\n",argv[1]);
+
+		return 0;
+	}
+
+	fputs (dp_str,fp);
+
+	//rewind (fp);
+
+	if(fclose(fp)) {
+
+		printf("%s: successfull\nFile name: \"%s\"\n",argv[0],argv[1]);
+
+	}else printf("salve: error\n");
+
+
+	return 0;
+
+
+}
 
 COMMAND cmd_table[] = {
     	{"?",           cmd_help,           "This help"                                     	},
@@ -88,6 +122,7 @@ COMMAND cmd_table[] = {
     	{"shutdown",    cmd_shutdown,       "Shutdown your computer locally or remotely"    	},
    	{"time",        cmd_time,           "Time"                                          	},
     	{"version",     cmd_version,        "Shell version"                                 	},
+	{"salve",	cmd_salve,	    "Salve string no arquivo de nome[x]"		},
 };
 
 
@@ -107,6 +142,7 @@ int argc_num(char **argv,const char *src) {
 	int i, c = 0;
 	const char *p_src = src;
 	char *p_dest = (char *) argv[0];
+	int fl = 0;
 	
 	do{
 
@@ -118,11 +154,22 @@ int argc_num(char **argv,const char *src) {
 		}
 
 		if(*p_src) {
-		
+			fl = 0;
 			for(i=0;i < 128;i++) { 
+
+				if(*p_src == '"' && fl == 0){
+
+					fl = 1;	
+
+				}else if (*p_src == '"' && fl == 1) {
+					
+					fl = 0;	
+
+				}
+
 				*p_dest++ = *p_src++;
 
-				if(*p_src == ' '){ 
+				if(*p_src == ' ' && fl == 0 ){ 
 					*p_dest = '\0';
 					break;
 				}
@@ -141,16 +188,12 @@ int argc_num(char **argv,const char *src) {
 int main()
 {
 
-	fopen(0,0);
-
 	int i;
 	char *cmd_name = (char*) malloc(0x10000);
 
 	char **argv = argv_malloc(32);
 	int argc;
 	
-
-
 	for(;;) {
 		memset(cmd_name,0,0x1000);
 
@@ -158,7 +201,7 @@ int main()
 
 		for(i=0;i<32;i++)memset(argv[i],0,128);
 
-		fgets (cmd_name,stdin);
+		fgets (cmd_name,0x1000,stdin);
 
 		argc = argc_num(argv,cmd_name);
 
@@ -225,53 +268,15 @@ int cmd_del(int argc,char **argv)
 
 int cmd_dir(int argc,char **argv)
 {
-	// FIXME test open directory
+	FILE *fd = open(".",ATTR_DIRECTORY,"r");
 
-	FILE *fd = (FILE*)malloc(0x80000);
+	if(fd != NULL) {
+		for(int i=0;i< fd->header.blocks;i++) printf("%d - %s\n",i,(char*)(fd->header.buffer + (64*i)));
+		close(fd);
 
-	MBR *mbr	= (MBR*)malloc(0x200);
-	VOLUME *volume	= (VOLUME*)malloc(sizeof(VOLUME));
-	
-
-	if(!block_read(0,1,0,mbr) ){
-
-		volume->lba_start = mbr->part[0].lba_start;
-		volume->dev_num = 0;
-
-		//FAT TYPE
-		FAT_BPB  *bpb  	= FatReadBPB(volume);
-
-		if(bpb != 0){
-
-			// salve bpb
-			fd->header.bpb = (unsigned int)bpb;
-
-			FAT_DIRECTORY *root =FatOpenRoot(bpb);
-			if(root) {
-				if(!FatOpenFile(bpb,root,".",1,fd)) {
-
-					putchar('\n');
-					for(int i=0;i< fd->header.blocks;i++) printf("%d - %s\n",i,(char*)(fd->block + (64*i)));
-					putchar('\n');
-				
-				} else puts("Open DIR error\n");
-
-
-				free(root);
-
-
-			} else puts("Open Root error\n");
-
-		} else puts("read FAT BPB error\n");
-
-	}else puts("read mbr error\n");
-
+	}
 
 	
-	free(volume);
-	free(mbr);
-	free(fd);
-
 
     	return  0;
 }
@@ -347,13 +352,17 @@ int cmd_new(int argc,char **argv)
 
 	char *str = (char *) argv[1];
 
-	if((str[0]== '-') && (str[1] == 'a')) {
+	if((strcmp(str,"-a")) == 0) {
+
+		if(creat(argv[2],ATTR_ARCHIVE)) printf("Create new file: \"%s\" error\n",argv[2]); 
 	
-		FILE *fd = fopen(argv[2],"w+");
-		fclose(fd);
+	} else if((strcmp(str,"-d")) == 0) {
+
+		if(creat(argv[2],ATTR_DIRECTORY)) printf("Create new directory: \"%s\" error\n",argv[2]); 
+	
 	} else {
 
-		printf("new file: error\n");
+		printf("Create new file/directory: error\n");
 
 
 	}
@@ -389,6 +398,7 @@ int cmd_shutdown(int argc,char **argv)
 }
 int cmd_time(int argc,char **argv)
 {
+
     	return 0;
 
 }
