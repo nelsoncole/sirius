@@ -34,13 +34,13 @@ int printf(const char *format,...)
 			case 'd':
 			case 'i':
 				d = va_arg (ap, int);
-				strtol (buffer, (char **) NULL,d);
-				puts(buffer);
+				itoa (d,buffer);
+				puts (buffer);
 				break;
 
 			case 'u':
 				u = va_arg (ap, unsigned int);
-				strtol (buffer, (char **) NULL,u);
+				itoa  (u,buffer);
 				puts(buffer);
 				break;
 

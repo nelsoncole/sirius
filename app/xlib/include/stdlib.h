@@ -13,6 +13,10 @@ extern void *realloc(void *ptr, size_t size);
 
 extern int strtol (const char *nptr,char **endptr,int base);
 extern int atoi (const char *nptr);
+
+
+
+int itoa (int val,const char *str);
 extern void i2hex(unsigned int val, char* dest, int len);
 
 

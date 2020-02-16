@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#undef        malloc
+
 void *malloc(size_t size) {
 
 	unsigned int rc;
