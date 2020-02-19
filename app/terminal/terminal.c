@@ -45,7 +45,7 @@ INTN main()
 {
 	
 	char **buf = (char**) malloc (0x1000); //4 KiB
-	long pool  = (long) malloc (0x10000); //64 KiB
+	long pooll  = (long) malloc (0x10000); //64 KiB
 	char *line;
 	long scroll = 0;
 	int count = 0;
@@ -56,7 +56,7 @@ INTN main()
 	int num = 0;
 	long lines = 0;
 
-	memset((char*)pool,' ',0x10000);
+	memset((char*)pooll,' ',0x10000);
 	memset(buf,0,0x1000);
 
 
@@ -84,18 +84,21 @@ INTN main()
 
 	// enviar sms para box
 	Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT); 
-	line = buf[num++] = (char*) pool;
+	line = buf[num++] = (char*) pooll;
 
 	// loop
 	while(TRUE) {
 
 
-		// calculando o tamanho da tela em caracteres
+		// calculando o tamanho da lina de tela em caracteres
 		length = box->Font.SizeX;
 
 		ch = fgetc(stdout);
 
-		if(write >= 0x10000)for(;;); //Panic
+		if(write >= 0x10000 || num >= 1024)for(;;) { 
+		// Panic FIXME Nelson quando atingir o limite do buffer 64 KiB ou 1024 Linhas, chamar clear e reiniciar o stdout
+
+		}
 
 		if(ch != EOF) {
 
@@ -118,7 +121,11 @@ INTN main()
 					if(count == length) {
 						*line++ = '\0';
 						count = 0;
-						if(write >= 0x10000)for(;;); //Panic
+						if(write >= 0x10000 || num >= 1024)for(;;) { 
+						/* Panic FIXME Nelson quando atingir o limite 
+						do buffer 64 KiB ou 1024 Linhas, chamar clear e reiniciar o stdout */
+
+						}
 						line = buf[num++] = (char*) pool + write;
 						if(++lines >= box->Font.SizeY ) scroll++;
 						*line++ = ' ';

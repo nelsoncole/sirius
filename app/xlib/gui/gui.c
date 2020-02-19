@@ -436,7 +436,7 @@ UINTN
 __UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 {
 
-	UINTN i;
+	UINTN i,c;
 	GW_HAND *Hand = _Hand;
 
 	char **buf = (char**) Buffer;
@@ -452,9 +452,12 @@ __UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 
 		if(line == NULL)continue;
 
+		c = 0;
 
-		while(*line) {
-			BoxDraw(Hand,*line++,Hand->Font.FgColor,Hand->Font.BgColor,Hand->Buffer);
+		while(line[c]) {
+			BoxDraw(Hand,line[c++],Hand->Font.FgColor,Hand->Font.BgColor,Hand->Buffer);
+
+			if(c >= 256)break;
 
 		}
 
