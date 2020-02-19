@@ -36,18 +36,17 @@
  
 #include <io.h>
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
 
-INTN main()
+int main()
 {
 	
 	char **buf = (char**) malloc (0x1000); //4 KiB
 	long pooll  = (long) malloc (0x10000); //64 KiB
 	char *line;
-	long scroll = 0;
+	long scrolldown = 0;
 	int count = 0;
 	long length = 0;
 	int i = 0;
@@ -112,8 +111,8 @@ INTN main()
 				*line = '\0';
 				count = 0;
 				write++;
-				line = buf[num++] = (char*) pool + write;
-				if(++lines >= box->Font.SizeY ) scroll++;
+				line = buf[num++] = (char*) pooll + write;
+				if(++lines >= box->Font.SizeY ) scrolldown++;
 				
 			
 			}else if(ch == '\t') {
@@ -126,8 +125,8 @@ INTN main()
 						do buffer 64 KiB ou 1024 Linhas, chamar clear e reiniciar o stdout */
 
 						}
-						line = buf[num++] = (char*) pool + write;
-						if(++lines >= box->Font.SizeY ) scroll++;
+						line = buf[num++] = (char*) pooll + write;
+						if(++lines >= box->Font.SizeY ) scrolldown++;
 						*line++ = ' ';
 						count++;
 						write++;
@@ -144,8 +143,8 @@ INTN main()
 				if(count == length) {
 					*line++ = '\0';
 					count = 0;
-					line = buf[num++] = (char*) pool + write;
-					if(++lines >= box->Font.SizeY ) scroll++;
+					line = buf[num++] = (char*) pooll + write;
+					if(++lines >= box->Font.SizeY ) scrolldown++;
 					*line++ = ch;
 					count++;
 					write++;
@@ -161,7 +160,7 @@ INTN main()
 		}
 
 
-		Send(box,(unsigned int)(buf + scroll),GW_SMG_NORMAL_BIT);
+		Send(box,(unsigned int)(buf + scrolldown),GW_SMG_NORMAL_BIT);
 		WindowFocus(window);
 
 		
