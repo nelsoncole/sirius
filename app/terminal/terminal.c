@@ -44,9 +44,8 @@
 INTN main()
 {
 	
-
-	char **buf = (char**) malloc (0x1000);
-	long pool  = (long) malloc (0x10000);
+	char **buf = (char**) malloc (0x1000); //4 KiB
+	long pool  = (long) malloc (0x10000); //64 KiB
 	char *line;
 	long scroll = 0;
 	int count = 0;
@@ -72,7 +71,6 @@ INTN main()
 	
 
 	// execute shell, criando um processo filho
-
 	int rc = 0;
 	char filename[] = "shell.sys";
 	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(7),"d"(filename),"c"(0x1));
@@ -80,7 +78,6 @@ INTN main()
 	if(!rc) {
 
 		//exit();
-
 		for(;;);
 	}
 	
@@ -109,67 +106,42 @@ INTN main()
 				write--;
 
 			}else if ( (ch == '\n') || (count == length) ) {
-
 				*line = '\0';
-
 				count = 0;
 				write++;
-
 				line = buf[num++] = (char*) pool + write;
-
 				if(++lines >= box->Font.SizeY ) scroll++;
 				
 			
 			}else if(ch == '\t') {
-			
-				//
 				for(i =0;i < 8;i++) {
 					if(count == length) {
+						*line++ = '\0';
+						count = 0;
+						if(write >= 0x10000)for(;;); //Panic
+						line = buf[num++] = (char*) pool + write;
+						if(++lines >= box->Font.SizeY ) scroll++;
+						*line++ = ' ';
+						count++;
+						write++;
 
-					*line++ = '\0';
-					count = 0;
-
-				
-					if(write >= 0x10000)for(;;); //Panic
-
-					line = buf[num++] = (char*) pool + write;
-
-					if(++lines >= box->Font.SizeY ) scroll++;
-
-					*line++ = ' ';
-					count++;
-					write++;
-					
-
-
-				}else {
-					*line++ = ' ';
-					count++;
-					write++;
-				}
-
-
-
+					}else {
+						*line++ = ' ';
+						count++;
+						write++;
+					}
 
 				}
 
 			}else {
-
-
 				if(count == length) {
-
 					*line++ = '\0';
 					count = 0;
-
 					line = buf[num++] = (char*) pool + write;
-
 					if(++lines >= box->Font.SizeY ) scroll++;
-
 					*line++ = ch;
 					count++;
 					write++;
-					
-
 
 				}else {
 					*line++ = ch;
@@ -178,14 +150,11 @@ INTN main()
 				}
 
 			}
-	
-
 
 		}
 
 
 		Send(box,(unsigned int)(buf + scroll),GW_SMG_NORMAL_BIT);
-
 		WindowFocus(window);
 
 		
