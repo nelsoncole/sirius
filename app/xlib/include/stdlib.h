@@ -16,7 +16,7 @@ extern int atoi (const char *nptr);
 
 
 
-int itoa (int val,const char *str);
+extern char *itoa (int val,char *str);
 extern void i2hex(unsigned int val, char* dest, int len);
 
 

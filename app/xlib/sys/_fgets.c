@@ -7,19 +7,10 @@ extern FILE *stdout;
 char *_fgets (char *str,int length,FILE *fp)
 {
 	unsigned char* buffer = (unsigned char*) (fp->header.buffer);
-	//unsigned dev_n = stream->header.dev;
-	//unsigned count = stream->header.count;
-	//unsigned int offset = fp->header.offset;
-	//unsigned int offset2 = fp->header.offset2;
-	//unsigned int total_blocks = stream->header.blocks;
-	//unsigned int *block	= (unsigned int*)(stream->block);
-	//unsigned int bps = stream->header.bps;
-	//unsigned int lba_start;
-	//unsigned int local_offset;
-	int ch;
-	char *p_str = str;
+	int i, ch;
 	int count = 0;
-	
+	char *p_str = str;
+
 	// error
 	if(fp->header.mode[0] == '\0') return 0;
 
@@ -29,70 +20,104 @@ char *_fgets (char *str,int length,FILE *fp)
 	if ((fp->header.mode[0] == 's') \
 	&& (fp->header.mode[1] == 't') && (fp->header.mode[2] == 'd')) {
 
-		fp->header.offset = 0;
-		fp->header.offset2 = 0;
-
-		
-		for (;;) {
+		for (i=0;i < length-1;i++) {
 
 
 			if(fp->header.offset >= 65536) {
-
 				fp->header.offset  = 0;
 				fp->header.offset2 = 0;
 
 			}
 
+			if(fp->header.attr == 2/*stdin*/) {
 
 
-			while(!fp->header.offset);
-			while(!(fp->header.offset - fp->header.offset2));
+				fp->header.size = 0;
+				fp->header.offset = 0;
+				fp->header.offset2 = 0;
 
-			ch = *(unsigned char*)(buffer + fp->header.offset2);
 
-			if(ch == '\n') {
-				// display console
-				_putc(ch,stdout);
+				while(!fp->header.offset);
+				while(!(fp->header.offset - fp->header.offset2 ));
 
-				*p_str = '\0';
+				ch = *(unsigned char*)(buffer + fp->header.offset2);
 
-				return str;
-
-			}else if(ch == '\b') {
- 
-				// display console
-				if(count > 0) {
-
-					*--p_str = '\0';
-
+				if(ch == '\n') {
+					// display console
 					_putc(ch,stdout);
-					--count;
+
+					*p_str++ = ch;
+					break;
+
+				}else if(ch == '\b') {
+ 
+					// display console
+					if(count > 0) {
+						*--p_str = '\b';
+						_putc(ch,stdout);
+						--count;
+					}
+	
+					fp->header.offset2++;
+				} else {
+
+					*p_str++ = ch;
+					// display console	
+					_putc(ch,stdout);
+
+					fp->header.offset2++;
+					count++;
 				}
-	
-				fp->header.offset2++;
-	
-				
+			}else if(fp->header.attr == 3/*stdout*/) {
 
-			} else {
+				if(!fp->header.offset)break;
+				if((fp->header.offset2 >= fp->header.offset ))break;
 
-				*p_str++ = ch;
-				// display console	
-				_putc(ch,stdout);
+				ch = *(unsigned char*)(buffer + fp->header.offset2);
 
-				fp->header.offset2++;
-				count++;
+				if(ch == '\n') {
+					*p_str++ = ch;
+					fp->header.offset2++;
+					break;
+
+				}else {
+					*p_str++ = ch;
+					fp->header.offset2++;
+
+				}
+
+			}else {	// stderr
+					*p_str = '\0';
+					return str;
+
 			}
 
 		}
 
+		*p_str = '\0';
 		return str; // successfull
+
+	}else if(TRUE /*outros*/){
+	
+		for(i=0;i < length-1;i++){
+
+			ch = _getc (fp);
+			if (ch != '\n') *p_str++ = ch;
+			else {
+				*p_str++ = ch;
+				break;
+			}
+	
+		}
+
+
+
 	}
 
+	*p_str = '\0';
 
+	return (str);
 
-
-	
-	return (0); //error
 
 }
 

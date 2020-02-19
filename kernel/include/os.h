@@ -128,8 +128,10 @@ extern 	UINT32 		UID;
 extern 	UINT32 		DEV;
 
 //APP USE
-extern UINT16 		*key;
+// Ponteiros para o USER mode 
+extern UINT32 		*GwFocus;
 extern MOUSE 		*mouse;
+extern UINT32 		*rtc;
 
 // console
 extern CHAR8 *__buffer__;

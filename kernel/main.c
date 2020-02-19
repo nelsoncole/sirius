@@ -116,7 +116,11 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 	ram_initialize();
+
+
 	alloc_pages_initialize();
+
+
 
 	
 	// Mapear o  Linear Frame Buffer e alocar memoria virtal para o Bank Buffer
@@ -129,9 +133,12 @@ UINTN main(BOOT_INFO *boot_info)
 	alloc_pages(0,64/*256 KiB*/,(VIRTUAL_ADDRESS *)&G->TaskBuffer);
 
 	unsigned int phys = 0;
-	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	alloc_pages(0,2,(VIRTUAL_ADDRESS *)&phys);
+
 	G->List = phys;
-	setmem((void*)G->List,0x1000,0);
+	GW_HAND *_G = (GW_HAND*) G->List;
+	_G->next = 0;
+	_G->tail = 0;
 
 	font = (CHAR8 *)(font8x16);
 
@@ -164,6 +171,9 @@ UINTN main(BOOT_INFO *boot_info)
 	// console
 	__buffer__ = (CHAR8*)malloc(0x2000);
 	__string__ = __buffer__ + 512;
+
+
+	
 
 	// clear screen
 	ClearScreen();
@@ -205,6 +215,12 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 
+	// data initialize
+	GwFocus = (UINT32*) malloc(0x1000);
+	mouse	= (MOUSE*) malloc(0x1000);
+	rtc	= (UINT32*) malloc(0x1000);
+
+
 
 	print("Install PS/2\n"); 	ps2_install();
 	print("Instal Keyboard\n");	keyboard_install();
@@ -225,10 +241,6 @@ UINTN main(BOOT_INFO *boot_info)
 	
 	// testing thread
 	create_thread(&thread_main,kernel_page_directory,0,0,0,0,(UINT32)malloc(0x2000),0,2);
-
-
-//	print("G->BankBuffer 0x%x",G->BankBuffer);
-//	for(;;);
 
 	print("testing application on system\n");
 
@@ -266,10 +278,9 @@ UINTN main(BOOT_INFO *boot_info)
 	do_exec("gserver.sys",0x81);
 	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
-	//do_exec("files.sys",1);
+	do_exec("files.sys",1);
 
 	apic_timer_umasked();
-
 
 
 	/*clearscreen();

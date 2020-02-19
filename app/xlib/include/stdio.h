@@ -40,7 +40,7 @@ extern int fgetc (FILE *fp);
 
 
 // string
-char *fgets (char *str,int length,FILE *fp);
+extern char *fgets (char *str,int length,FILE *fp);
 extern int fputs (const char *str,FILE *fp);
 
 // outras

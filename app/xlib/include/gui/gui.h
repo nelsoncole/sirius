@@ -188,6 +188,7 @@ typedef struct _GW_HAND {
 	struct _GW_HAND *box;
 
 	struct _GW_HAND *next;
+
 	struct _GW_HAND *tail;
 
 	
@@ -352,8 +353,13 @@ UINTN ObjectSetFocus(GW_HAND *Hand);
 
 
 
+VOID DrawMouse(	UINTN X,
+		UINTN Y,	
+		UINTN FgColor, 
+		VOID *Buffer,
+		VOID *MouseBuffer);
+
 UINTN WindowFocus(GW_HAND *window);
-UINTN gui_server();
 UINTN gui_exit(GW_HAND *Hand);
 
 

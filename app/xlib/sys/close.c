@@ -42,7 +42,7 @@ int close(FILE *fd) {
 
 	if(!fd)return (0);
 
-	flush(fd);
+	if(fd->header.attr == ATTR_ARCHIVE)flush(fd);
 
 	free((void*)fd->header.bpb);	
 	free((void*)fd->header.buffer);

@@ -115,7 +115,6 @@ VOID fault_exception(INTN  n)
 	print("CS = 0x%x\nDS = 0x%x\nES = 0x%x\n",current_thread->cs, current_thread->ds, current_thread->es);
 	print("FS = 0x%x\nGS = 0x%x\nSS = 0x%x\n",current_thread->fs, current_thread->gs, current_thread->ss);
 
-
 	if(!exit());
 	else for (;;);	
 

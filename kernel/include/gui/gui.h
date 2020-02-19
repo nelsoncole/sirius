@@ -184,6 +184,7 @@ typedef struct _GW_HAND {
 	struct _GW_HAND *box;
 
 	struct _GW_HAND *next;
+
 	struct _GW_HAND *tail;
 
 	

@@ -70,7 +70,7 @@ int cmd_cd(int argc,char **argv);
 
 int cmd_salve(int argc,char **argv) {
 
-	const char *dp_str = (const char*)0x800000;
+	char *dp_str = (char*)stdout->header.buffer;
 
 	if(argc != 1) { 
 
@@ -78,7 +78,7 @@ int cmd_salve(int argc,char **argv) {
 		return -1;
 	}
 
-	FILE *fp = fopen("Sirius.txt","w+");
+	FILE *fp = fopen("stdout.txt","w+");
 
 	if(fp == NULL) {
  
@@ -87,13 +87,20 @@ int cmd_salve(int argc,char **argv) {
 		return 0;
 	}
 
-	fputs (dp_str,fp);
+	//fputs (dp_str,fp);
+
+	for(int i=0;i < 65536;i++){
+
+		if(i >= stdout->header.size)break;
+		if(!*dp_str)break;
+		fputc(*dp_str++,fp);
+	}
 
 	//rewind (fp);
 
 	if(fclose(fp)) {
 
-		printf("%s: successfull\nFile name: \"%s\"\n",argv[0],argv[1]);
+		printf("%s: successfull\nFile name: \"%s\"\n",argv[0],"stdout.txt");
 
 	}else printf("salve: error\n");
 
@@ -102,6 +109,7 @@ int cmd_salve(int argc,char **argv) {
 
 
 }
+
 
 COMMAND cmd_table[] = {
     	{"?",           cmd_help,           "This help"                                     	},
@@ -158,16 +166,19 @@ int argc_num(char **argv,const char *src) {
 			for(i=0;i < 128;i++) { 
 
 				if(*p_src == '"' && fl == 0){
+					p_src++; //FIXME nao e necessario
 
 					fl = 1;	
 
 				}else if (*p_src == '"' && fl == 1) {
 					
+					p_src++; //FIXME nao e necessario
 					fl = 0;	
 
 				}
 
-				*p_dest++ = *p_src++;
+				if(*p_src == '\n')p_src++;
+				else *p_dest++ = *p_src++;
 
 				if(*p_src == ' ' && fl == 0 ){ 
 					*p_dest = '\0';
@@ -204,7 +215,6 @@ int main()
 		fgets (cmd_name,0x1000,stdin);
 
 		argc = argc_num(argv,cmd_name);
-
 	
 		for(i=0;i < SHELL_CMD_NUM;i++) {
 
@@ -216,7 +226,7 @@ int main()
                 		break;
             		}
             		else if(i == (SHELL_CMD_NUM - 1)) {
-            			printf("%s: command not found\n",cmd_name);
+            			printf("%s: command not found\n",argv[0]);
 
 			}
 			
@@ -239,12 +249,45 @@ int cmd_cd(int argc,char **argv)
 
 int cmd_cls(int argc,char **argv)
 {
+	char str[256];
+
+	int length = 25; //argv[1];
+
+	if(argc < 2)return 0;
+
+	fgets(str,length,stdout);
+
+	FILE *fp = fopen(argv[1],"w+");
+	if(fp != NULL) { 
+
+		fputs(str,fp);
+		close(fp);
+
+	}
+
+
 	//cls();
     	return 0;
 }
 
 int cmd_copy(int argc,char **argv)
 {
+
+	if(argc < 2)return 0;
+
+	char *str = (char*)malloc(0x1000);
+
+	FILE *fd = fopen(argv[1],"r");
+
+	if(fd != NULL) {
+		fgets(str,0x1000,fd);
+		
+		puts(str);
+		putchar('\n');
+
+		close(fd);
+
+	}
 
     	return 0;
 }
@@ -284,7 +327,35 @@ int cmd_dir(int argc,char **argv)
 int cmd_echo(int argc,char **argv)
 {
 
-    	return 0;
+	if(argc != 3) { 
+
+		printf("echo: error, argc %d\n",argc);
+		return -1;
+	}
+
+	FILE *fp = fopen(argv[1],"w+");
+
+	if(fp == NULL) {
+ 
+		printf("Errro ao abrir %s\n",argv[1]);
+
+		return 0;
+	}
+
+	char *str = argv[2];
+
+	fputs (str,fp);
+
+	//rewind (fp);
+
+	if(fclose(fp)) {
+
+		printf("%s: successfull\nFile name: \"%s\"\n",argv[0],argv[1]);
+
+	}else printf("%s: error\n",argv[0]);
+
+
+	return 0;
 }	
 
 int cmd_exit(int argc,char **argv)
@@ -328,11 +399,13 @@ int cmd_info(int argc,char **argv)
 	\n0x10001104 - 0x10001107   X               // size 4 bytes\
 	\n0x10001108 - 0x1000110B   Y               // size 4 bytes\
 	\n0x1000110C - 0x1000110F  *Detail Hardware // size 4 bytesn\
-	\n0x10001110 - 0x10001113  *RCT             // size 4 bytes\
+	\n0x10001110 - 0x10001113   reserved        // size 4 bytes\
 	\n0x10001114 - 0x10001117   PID             // size 4 bytes\
 	\n0x10001118 - 0x1000111B  *FOCUS           // size 4 bytes\
-	\n0x1000111C - 0x1000111F  *MOUSE           // size 4 bytes\
-	\n0x10001120 - 0x100011FF   Reserved        // size 224 bytes\
+	\n0x1000111C - 0x1000111F  *GwFOCUS         // size 4 bytes\
+	\n0x10001120 - 0x10001123  *MOUSE           // size 4 bytes\
+	\n0x10001124 - 0x10001127  *RCT             // size 4 bytes\
+	\n0x10001128 - 0x100011FF   reserved        // size 220 bytes\
 	\n0x10001200 - 0x100012FF   Channel         // size 256 bytes\n");
 
         return 0;

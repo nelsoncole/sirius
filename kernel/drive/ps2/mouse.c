@@ -122,6 +122,8 @@ static UINTN MOUSE_BAT_TEST(){
 UINTN mouse_install(){
 
 
+	
+
 	int i = 1000000000;
 
     	print("// reseta o mouse\n");

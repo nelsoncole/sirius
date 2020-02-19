@@ -122,9 +122,9 @@ UINTN initialize_thread()
 
 
 
-	current_thread->stdin	= open(0,"std");
-	current_thread->stdout	= open(0,"std");
-	current_thread->stderr	= open(0,"std");
+	current_thread->stdin	= open(0,"stdi");
+	current_thread->stdout	= open(0,"stdo");
+	current_thread->stderr	= open(0,"stdr");
 
 
 	thread_ring0 = NULL;
@@ -209,9 +209,9 @@ UINTN create_thread(	VOID (*main)(),
 
 	new_thread->flag	= 0;
 
-	new_thread->stdin	= open(0,"std");
-	new_thread->stdout	= open(0,"std");
-	new_thread->stderr	= open(0,"std");
+	new_thread->stdin	= open(0,"stdi");
+	new_thread->stdout	= open(0,"stdo");
+	new_thread->stderr	= open(0,"stdr");
 
 	new_thread->edx 	= (unsigned int) new_thread->stdin;
 	new_thread->eax 	= (unsigned int) new_thread->stdout;

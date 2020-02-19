@@ -106,7 +106,7 @@ FILE *open(const char *path,int attr,const char *mode) {
 
 
 
-				} else if ( (mode[0] == 'w') )  {
+				} else if ( (mode[0] == 'w') || (mode[0] == 'a') )  {
 
 
 					// se o arquivo exite, devemos zerar

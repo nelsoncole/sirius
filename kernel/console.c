@@ -213,28 +213,26 @@ print(CONST CHAR8 *format,...)
 
 
 // FIXME 
-char *dp_str = (char*)0x800000;
+char *dp_str = (char*)0x00800000;
 
 void dp_init(){
 
-	setmem(dp_str,0x10000,0);
+	setmem(dp_str,0x20000,0);
 
 }
 
-void dputs(const char *str)
+void dputs(char *str)
 {
-	const char *p_str = str;
-
+	if(dp_str >= (char*)0x00820000 )return;
+	char *p_str = str;
 
 	while(*p_str) *dp_str++ = *p_str++;
-	
 	
 }
 
 UINTN  
 dprintf(CONST CHAR8 *format,...) 
 {
-
 	UINTN rc = 0;
 	
 
@@ -245,8 +243,8 @@ dprintf(CONST CHAR8 *format,...)
 	INTN c;
 	CHAR8 *s;
 	char str[256];
+	char buffer[256];
 	CHAR8 *p_strig  =(CHAR8*) str;
-
 	setmem(p_strig,256,0);
 
 	while ((*(CHAR8*)(format + index))/*format[index]*/)
@@ -273,16 +271,16 @@ dprintf(CONST CHAR8 *format,...)
 				case 'd':
 				case 'i':
 				d = va_arg (ap, UINTN);
-				atoi(d, __buffer__);
-				s = (CHAR8*)__buffer__;
+				atoi(d, buffer);
+				s = (CHAR8*)buffer;
 				while(*s)*p_strig++ = *s++;
 				break;
 
 				case 'X':
 				case 'x':
 				d = va_arg (ap, INTN);
-				i2hex(d, __buffer__,HEX_LEN);
-				s = (CHAR8*)__buffer__;
+				i2hex(d, buffer,HEX_LEN);
+				s = (CHAR8*)buffer;
 				while(*s)*p_strig++ = *s++;
 				break;
 			

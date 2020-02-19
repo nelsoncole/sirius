@@ -418,7 +418,7 @@ UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 	BoxDrawSectCursor(Hand,0,0);
 	UpdateBoxDraw(Hand);
 	
-
+	
 	for(i = 0; i < (Hand->Font.SizeX*Hand->Font.SizeY); i++)
 	BoxDraw(Hand,*Tmp++,Hand->Font.FgColor,Hand->Font.BgColor,Hand->Buffer);
 
@@ -431,6 +431,45 @@ UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 	return (0);
 	
 }
+
+UINTN 
+__UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
+{
+
+	UINTN i;
+	GW_HAND *Hand = _Hand;
+
+	char **buf = (char**) Buffer;
+	char *line;
+	
+
+
+	for(i = 0; i < Hand->Font.SizeY;i++ ) {
+		BoxDrawSectCursor(Hand,0,i);
+		UpdateBoxDraw(Hand);
+	
+		line = buf[i];
+
+		if(line == NULL)continue;
+
+
+		while(*line) {
+			BoxDraw(Hand,*line++,Hand->Font.FgColor,Hand->Font.BgColor,Hand->Buffer);
+
+		}
+
+	}
+
+
+	//salve cursor
+	Hand->Font.SetPositionCursorX = Hand->Font.CursorX;
+	Hand->Font.SetPositionCursorY = Hand->Font.CursorY;
+
+	
+	return (0);
+	
+}
+
 
 // usar no console
 GW_HAND *__CreateBox(GW_HAND *GwHand,		GW_HAND *_Hand,
@@ -1058,7 +1097,7 @@ UINTN UpdateObject(	GW_HAND *GwHand,GW_HAND *_Hand)
 		// Data
 		if((Hand->Flag &GW_FLAG_READY)) {
 
-			UpdateBoxDrawString(Hand,(UINT8*)(Hand->Msg1));
+			__UpdateBoxDrawString(Hand,(UINT8*)(Hand->Msg1));
 
 			
 		}
@@ -1077,7 +1116,8 @@ UINTN UpdateObject(	GW_HAND *GwHand,GW_HAND *_Hand)
 		x = 0;
 		for(i=0;i < vfs->header.blocks;i++) {
 	
-			text = (CHAR8*) (vfs->block + (i*64));
+			text = (CHAR8*) (vfs->header.buffer + (i*64));
+
 			BoxDrawSectCursor(Hand->box,x,y);
 			__UpdateBoxDraw(Hand,Hand->box);
 	
@@ -1284,9 +1324,12 @@ outputstring(IN CHAR8 *string)
 // Window Focus
 UINTN WindowFocus(GW_HAND *window)
 {
-	UINT32 *GwFocus = (UINT32 *)0x7C00;
+
+	UINT32 *p = (UINT32*)0x1000111C;
+	UINT32 *GwFocus = (UINT32 *)(*p);
 
 	if(__focus->pid == __pid) {
+
 		*GwFocus = (UINT32)window;
 
 	}
@@ -1346,79 +1389,6 @@ UINTN UpdateMouse(GW_HAND *Hand)
 	return 0;
 
 }
-
-
-
-
-/// SERVIDOR
-UINTN gui_server() 
-{
-
-	MOUSE *mouse = (MOUSE*)0x800000;
-	UINT32 *GwFocus = (UINT32 *)0x7C00;
-	UINTN __flag__ = 0;
-
-	GW_HAND *window = (GW_HAND*)(G->List);
-
-	window		= window->next;
-	GW_HAND *obj 	= window->tail;
-
-
-	app_clearscreen();
-
-	BitMAP(	(UINTN*)0xA00000,250,100,G->BankBuffer);
-	
-	// UPDATE
-	while(window) 
-	{
-		
-		if(*GwFocus == (UINT32)window) {
-
-			window = window->next;
-			obj = window->tail;
-
-			__flag__ = 1;
-			continue;
-		}
-
-		UpdateWindow(window);
-
-		while(obj) 
-		{
-			UpdateObject(window,obj);
-			obj = obj->tail;
-
-		}
-
-		window = window->next;
-		obj = window->tail;
-	}
-
-	// Focus
-	if(__flag__ == 1) {
-		window	= (GW_HAND *)(*GwFocus);
-		obj 	= window->tail;
-
-		UpdateWindow(window);
-
-		while(obj) 
-		{
-			UpdateObject(window,obj);
-			obj = obj->tail;
-
-		}
-
-	}
-	
-
-	DrawMouse(mouse->x,mouse->y,ColorTable[GW_WHITE], G->BankBuffer,cursor18x18);
-
-	app_refreshrate();
-
-	return 0;
-
-}
-
 
 UINTN gui_exit(GW_HAND *Hand)
 {

@@ -35,24 +35,13 @@ int _putc (int ch, FILE *fp)
 
 		}
 
-		if(ch == '\b') {
+		// write character
+		*(unsigned char*)(buffer + offset) = ch;
 
-			if(!fp->header.offset) return EOF;
-			// Update offset
-			offset = fp->header.offset -=1;
-
-			// write character
-			*(unsigned char*)(buffer + offset) = ' ';
-
-		} else {
-
-			// write character
-			*(unsigned char*)(buffer + offset) = ch;
-
-			// Update offset
-			offset = fp->header.offset +=1;
-		}
-
+		// Update offset
+		offset = fp->header.offset +=1;
+		if(fp->header.offset >fp->header.size)fp->header.size +=1;
+	
 		return  (ch&0xff); // successfull
 	}
 

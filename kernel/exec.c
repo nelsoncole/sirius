@@ -172,7 +172,11 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 		// envia o PID
 		p  	= (UINT32*)(header->start + 0x114);
 		*p++ 	= next_pid;
-		*p	= (UINT32)focus;
+		*p++	= (UINT32) focus;
+		*p++	= (UINT32) GwFocus;
+		*p++	= (UINT32) mouse;
+		*p++	= (UINT32) rtc;
+		
 
 
 		if((prv&1) == 1)esp0 =(UINT32)(&stack_esp_0);/*(UINTN)malloc(0x2000);*/

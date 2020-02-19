@@ -543,7 +543,7 @@ int FatCreateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename,unsigned
 	fat_ready = 0;
 	
 
-	name_size = strlen(filename);
+	name_size = strlen(filename) /*\0*/+ 1;
 
 	dir_size = (name_size/13);
 	if((name_size%13))dir_size++;

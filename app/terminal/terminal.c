@@ -37,32 +37,39 @@
 #include <io.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 INTN main()
 {
+	
+
+	char **buf = (char**) malloc (0x1000);
+	long pool  = (long) malloc (0x10000);
+	char *line;
+	long scroll = 0;
+	int count = 0;
+	long length = 0;
+	int i = 0;
+	int write = 0;
+	int ch;
+	int num = 0;
+	long lines = 0;
+
+	memset((char*)pool,' ',0x10000);
+	memset(buf,0,0x1000);
 
 
-	int offset = 0;
-	int div = 0;
-	int sizeout = 0;
 
-
-	GW_HAND *window = CreateWindow("# Terminal",0,100,20,800,650,
+	GW_HAND *window = CreateWindow("# Terminal",0,100,20,900,650,
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,2,2,window->Area.Width -2,
 	window->Area.Height - 2,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK)),GW_FLAG_INVISIBLE);
 
 
-	// salve tamanho do cusor
-	/*cursor_x_size = boxhd->Font.SizeX;
-	cursor_y_size = boxhd->Font.SizeY;
-
-	cursor_x 	= 0;
-	cursor_y 	= 0;
-	scroll		= 0;*/
-
+	
 
 	// execute shell, criando um processo filho
 
@@ -80,24 +87,104 @@ INTN main()
 
 	// enviar sms para box
 	Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT); 
+	line = buf[num++] = (char*) pool;
 
 	// loop
 	while(TRUE) {
 
 
 		// calculando o tamanho da tela em caracteres
-		sizeout = (box->Font.SizeX * box->Font.SizeY);
+		length = box->Font.SizeX;
 
-		div = stdout->header.offset;
+		ch = fgetc(stdout);
 
-		offset = ( (div/sizeout) * sizeout );
+		if(write >= 0x10000)for(;;); //Panic
+
+		if(ch != EOF) {
+
+			
+			if(ch == '\b') { 
+				*--line = '\0';
+				count--;
+				write--;
+
+			}else if ( (ch == '\n') || (count == length) ) {
+
+				*line = '\0';
+
+				count = 0;
+				write++;
+
+				line = buf[num++] = (char*) pool + write;
+
+				if(++lines >= box->Font.SizeY ) scroll++;
+				
+			
+			}else if(ch == '\t') {
+			
+				//
+				for(i =0;i < 8;i++) {
+					if(count == length) {
+
+					*line++ = '\0';
+					count = 0;
+
+				
+					if(write >= 0x10000)for(;;); //Panic
+
+					line = buf[num++] = (char*) pool + write;
+
+					if(++lines >= box->Font.SizeY ) scroll++;
+
+					*line++ = ' ';
+					count++;
+					write++;
+					
+
+
+				}else {
+					*line++ = ' ';
+					count++;
+					write++;
+				}
+
+
+
+
+				}
+
+			}else {
+
+
+				if(count == length) {
+
+					*line++ = '\0';
+					count = 0;
+
+					line = buf[num++] = (char*) pool + write;
+
+					if(++lines >= box->Font.SizeY ) scroll++;
+
+					*line++ = ch;
+					count++;
+					write++;
+					
+
+
+				}else {
+					*line++ = ch;
+					count++;
+					write++;
+				}
+
+			}
 	
-		//offset += ( div%sizeout);
 
 
-		//Send(boxhd,(UINTN)(vram + scroll*cursor_x_size),GW_SMG_NORMAL_BIT);	
+		}
 
-		Send(box,(unsigned int)(stdout->header.buffer + offset),GW_SMG_NORMAL_BIT);
+
+		Send(box,(unsigned int)(buf + scroll),GW_SMG_NORMAL_BIT);
 
 		WindowFocus(window);
 

@@ -36,8 +36,7 @@
  
 #include <os.h>
 
-UINT8 *clock = (UINT8*) 0x101104;
-
+UINT8 *clock = NULL;
 
 VOID disable_NMI(){
 
@@ -53,6 +52,8 @@ VOID enable_NMI(){
 
 
 UINTN rtc_install(){
+
+	clock = (UINT8*) rtc;
 
     	UINT8 status;
 

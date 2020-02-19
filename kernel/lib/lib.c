@@ -73,9 +73,18 @@ FILE *open (const char *filename,const char *mode)
 		flag = 2;
 
 		stream->header.flag = 1;
-		stream->header.mode[0] = 's';
-		stream->header.mode[1] = 't';
-		stream->header.mode[2] = 'd';
+		stream->header.mode[0] = mode[0];
+		stream->header.mode[1] = mode[1];
+		stream->header.mode[2] = mode[2];
+		if(mode[3] == 'i') {
+			stream->header.attr = 2;
+		}else if(mode[3] == 'o'){
+	
+			stream->header.attr = 3;
+
+
+		}else 	stream->header.attr = 4;
+
 		// 64 KiB
 		alloc_pages(0,16,(VIRTUAL_ADDRESS *)&stream->header.buffer);
 

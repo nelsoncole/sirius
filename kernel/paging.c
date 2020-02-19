@@ -83,12 +83,14 @@ VOID page_install(VOID)
 	__asm__ __volatile__("cli");
 
 	
+	int us = 0;
 	// PTE de identidade 48 MiB
 	for(i =0; i < (1024*KERNEL_OF_NUM_PAGE_TABLE); i++) {
 		
+		if(i >= (1024*4))us = 1;
 		pt->p = 1;
 		pt->rw= 1;
-		pt->us= 1;
+		pt->us= us;
 		pt->frames = ((physical_addr+(i*0x1000)) >>12) &0xFFFFF;
 
 		pt++;
@@ -96,10 +98,12 @@ VOID page_install(VOID)
 	}
 
 	// PDE de identidade 48 MiB
+	us = 0;
 	for(i =0; i < KERNEL_OF_NUM_PAGE_TABLE; i++){
+		if(i >= 4)us = 1;
 		pd->p = 1;
 		pd->rw= 1;
-		pd->us= 1;
+		pd->us= us;
 		table_addr =(UINT32)(kernel_page_table + (1024 *i));
 		pd->addrpt = (table_addr >>12) &0xFFFFF;
 		pd++;

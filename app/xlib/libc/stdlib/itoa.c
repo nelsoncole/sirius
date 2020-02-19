@@ -1,7 +1,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-int itoa (int val,const char *str) {
+char *itoa (int val, char *str) {
   	
 
 	char* valuestring = (char*) str;
@@ -38,5 +38,5 @@ int itoa (int val,const char *str) {
     		*p-- = swap;
   	}
 
-	return val;
+	return str;
 }

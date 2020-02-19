@@ -25,15 +25,31 @@ int _getc (FILE *fp)
 	if ((fp->header.mode[0] == 's') \
 	&& (fp->header.mode[1] == 't') && (fp->header.mode[2] == 'd')) {
 
-		fp->header.offset = 0;
-		fp->header.offset2 = 0;
+		if(fp->header.attr == 2/*stdin*/) {
+			fp->header.offset = 0;
+			fp->header.offset2 = 0;
 
-		while(!fp->header.offset);
+			while(!fp->header.offset);
 
-		ch = *(unsigned char*)(buffer + fp->header.offset2);
+			ch = *(unsigned char*)(buffer + fp->header.offset2);
 
-		// display console	
-		if(ch != '\b')_putc(ch,stdout);
+			// display console	
+			if(ch != '\b')_putc(ch,stdout);
+			else {
+			
+		
+			}
+		}else  { //stdout stderr
+
+			if(!fp->header.offset)return (EOF);
+			if((fp->header.offset2 >= fp->header.offset ))return (EOF);
+
+			ch = *(unsigned char*)(buffer + fp->header.offset2);
+
+			fp->header.offset2++;
+
+
+		}
 
 		return ch; // successfull
 	}

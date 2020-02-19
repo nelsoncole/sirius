@@ -51,6 +51,8 @@ typedef struct _BOOT_INFO{
 int crt0(BOOT_INFO *boot_info)
 {
 
+	
+
 	UINT32 *p = NULL;
 
 	// GUI	
@@ -61,7 +63,6 @@ int crt0(BOOT_INFO *boot_info)
 	p = (UINT32*)0x10001114;
 	__pid = *p;
 	__focus = (FOCUS*)(*++p);
-
 
 
 	exit(main());

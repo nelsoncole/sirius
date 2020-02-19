@@ -38,13 +38,16 @@
 #include <io.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/sys.h>
+
 
 INTN main() {
 
 
 	UINT32 p1,p2;
 	UINTN i;
-	UINTN spin = 0;
 
 	GW_HAND *gw = CreateWindow(TEXT(" Files "),NULL,50,50,900,600, 
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_WHITE/*GW_DARKGRAY*/) | BACK_GROUND_STYLE(GW_BLUE)),GW_FLAG_VISIBLE);
@@ -53,20 +56,35 @@ INTN main() {
 	GW_HAND *file = CreateObject(gw,TEXT("FILE NAME"),GW_HANDLE_FILE,200,20,gw->Area.Width -200,gw->Area.Height - 20, 
 	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_GRAY)),GW_FLAG_INVISIBLE);
 
-	VFS *vfs = (VFS*)malloc(0x10000);
+	FILE *vfs;
+	FILE *vfs1 = (FILE*)malloc(0x10000);
+	FILE *vfs2 = (FILE*)malloc(0x10000);
+	memset(vfs1,0,0x10000);
+	memset(vfs1,0,0x10000);
 
-	
-	
+	FILE *fd = open(".",ATTR_DIRECTORY,"r");
+
+	if(fd != NULL) {
 
 
+		vfs = vfs1;
+		__copymem(vfs,fd,fd->header.blocks*64);
+		
+		Send(file,(UINT32)vfs,0 &GW_SMG_NORMAL_BIT);
 
-	//send_msg(MSG_READ_DIR,(UINT32)vfs,0);
+		Send(file,GW_FLAG_VISIBLE,0 |GW_SMG_FLAG_BIT);
+
+		close(fd);
+
+	}
+
 	
 
 	i = 0;
 	while(TRUE) {
 
-		switch(0/*read_msg(&p1,&p2)*/) {
+
+		switch(MSG_READ_DIR) {
 
 
 		case MSG_READ_KEY:
@@ -101,18 +119,27 @@ INTN main() {
 
 		case MSG_READ_DIR:
 
-		Send(file,(UINT32)vfs,0 &GW_SMG_NORMAL_BIT);
+		fd = open(".",ATTR_DIRECTORY,"r");
 
-		Send(file,GW_FLAG_VISIBLE,0 |GW_SMG_FLAG_BIT);
+		if(fd != NULL) {
 
-		if(!spin) { /*send_msg(MSG_READ_DIR,(UINT32)vfs,0);*/ spin = 100000000;}
+			__copymem(vfs,fd,fd->header.blocks*64);
+		
+			Send(file,(UINT32)vfs,0 &GW_SMG_NORMAL_BIT);
+
+			if(vfs==vfs1) vfs = vfs2;
+			else vfs = vfs1;
+
+			close(fd);
+
+		}	
+
 
 			break;
 
 
 		default:
-
-			spin--;		
+	
 
 			break;
 

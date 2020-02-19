@@ -40,7 +40,8 @@ FOCUS 	*focus		= NULL;
 THREAD	*thread_focus 	= NULL;
 THREAD	*zzzz_		= NULL;
 UINTN	key_msg_focos   = 0; 
-UINTN	key_msg_exec_console   = 0; 
+UINTN	key_msg_exec_console   = 0;
+
 
 UINTN initialize_focus()
 {
