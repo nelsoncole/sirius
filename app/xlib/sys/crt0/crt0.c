@@ -35,7 +35,7 @@
  */
  
 #include <io.h>
-#include <ctype.h>
+#include <sys/sys.h>
 
 extern int main();
 void exit(int rc);
@@ -64,8 +64,7 @@ int crt0(BOOT_INFO *boot_info)
 	__pid = *p;
 	__focus = (FOCUS*)(*++p);
 
-
-	exit(main());
+	exit(main(__argc,__argv));
 
 	for(;;);
 }

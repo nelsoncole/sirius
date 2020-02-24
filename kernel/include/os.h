@@ -252,5 +252,10 @@ UINTN
 dprintf(CONST CHAR8 *format,...);
 
 
+// Exectve
+
+int exectve(int argc,char **argv,FILE *fp);
+
+
 
 #endif

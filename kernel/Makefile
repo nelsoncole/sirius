@@ -6,7 +6,7 @@ CC=gcc
 LD=ld
 
 
-OBJS= setup.o vector.o main.o os.o data.o dscptor.o exceptions.o string.o gui.o font8x16.o bmp.o console.o cpuid.o apic.o lvt.o irq.o paging.o memory.o thread.o exec.o exit.o syscall.o pci.o ata.o disk.o media.o ps2.o mouse.o keyboard.o rtc.o i82540.o process.o lib.o fat.o
+OBJS= setup.o vector.o main.o os.o data.o dscptor.o exceptions.o string.o gui.o font8x16.o bmp.o console.o cpuid.o apic.o lvt.o irq.o paging.o memory.o thread.o exec.o exit.o syscall.o pci.o ata.o disk.o media.o ps2.o mouse.o keyboard.o rtc.o i82540.o process.o lib.o fat.o exectve.o
 
 .PHONY: kernel.bin clean move clearscreen
 

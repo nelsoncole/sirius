@@ -278,7 +278,7 @@ UINTN main(BOOT_INFO *boot_info)
 	do_exec("gserver.sys",0x81);
 	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
-	do_exec("files.sys",1);
+	//do_exec("files.sys",1);
 
 	apic_timer_umasked();
 

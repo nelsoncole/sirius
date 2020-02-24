@@ -60,7 +60,7 @@ int main()
 
 
 
-	GW_HAND *window = CreateWindow("# Terminal",0,100,20,900,650,
+	GW_HAND *window = CreateWindow("# Terminal",0,400,200,600,500,/*0,100,20,900,650,*/
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,2,2,window->Area.Width -2,

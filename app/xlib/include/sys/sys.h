@@ -12,6 +12,12 @@
 #include <fs/fat.h>
 
 
+extern char **__argv;
+extern int __argc;
+#define __argv __argv
+#define __argc __argc
+
+
 FILE *open(const char *path,int attr,const char *mode);
 int close(FILE *fd);
 int flush(FILE *fp);

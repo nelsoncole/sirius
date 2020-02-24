@@ -75,6 +75,16 @@ UINTN sys_do_exec_child(CONST CHAR8 *name,UINT8 prv) {
 
 }
 
+int syscall_exectve(int argc,char **argv,FILE *fp) {
+
+	int pid = exectve(argc,argv,fp);
+
+	if(pid) set_focus(pid);
+
+	return pid;
+
+}
+
 
 int syscall_read_sector(int p,int count,unsigned int lba32_47 ,void *buffer,unsigned int lba0_31) {
 
@@ -105,7 +115,7 @@ VOID *syscall_table[SYSCALL_NUM]={
 	&syscall_unknown,	// eax, 5	reserved
 	&syscall_unknown,	// eax, 9	reserved
 	&sys_do_exec_child,	// eax, 7	sys_do_exec_child, edx = filename, ecx = prv
-	&syscall_unknown,	// eax, 8	reserved
+	&syscall_exectve,	// eax, 8	syscall_exectve, edx = argc, ecx = argv, ebx = FILE
 	&syscall_unknown,	// eax, 9	reserved
 	&syscall_unknown,	// eax, 10	reserved
 	&syscall_unknown,	// eax, 11	reserved
@@ -113,8 +123,8 @@ VOID *syscall_table[SYSCALL_NUM]={
 	&syscall_unknown,	// eax, 13	reserved
 	&syscall_unknown,	// eax, 14	reserved
 	&syscall_unknown,	// eax, 15	reserved
-	&syscall_read_sector,	// eax, 0x10	read_sector, edx = MediaID, ecx = count, cbx = LBA32-47, edi = buffer, esi = LBA0-31
-	&syscall_write_sector,	// eax, 0x11	write_sector, edx = MediaID, ecx = count, cbx = LBA32-47, edi = buffer, esi = LBA0-31
+	&syscall_read_sector,	// eax, 0x10	read_sector, edx = MediaID, ecx = count, ebx = LBA32-47, edi = buffer, esi = LBA0-31
+	&syscall_write_sector,	// eax, 0x11	write_sector, edx = MediaID, ecx = count, ebx = LBA32-47, edi = buffer, esi = LBA0-31
 };
 
 static VOID invalidsyscall(UINT32 num)

@@ -152,12 +152,12 @@ UINTN create_thread(	VOID (*main)(),
     	THREAD	*new_thread	=(THREAD*)malloc(sizeof(THREAD)); 
     	new_thread->pid 	= next_pid++;
 
-    	new_thread->eax 	= eax;
-    	new_thread->ebx 	= ebx;
-    	new_thread->ecx 	= ecx;
-    	new_thread->edx 	= edx;
-    	new_thread->edi 	= 0;
-    	new_thread->esi 	= new_thread->pid;
+    	new_thread->eax 	= eax;	// argv	
+    	new_thread->ebx 	= ebx;	// bootinfo
+    	new_thread->ecx 	= ecx;	// argc
+    	new_thread->edx 	= edx; 	// stdin
+    	new_thread->edi 	= 0;	// stdout
+    	new_thread->esi 	= 0;	// stderr
     	new_thread->ebp 	= 0;
     	new_thread->esp 	= esp;
 	new_thread->eip  	= (UINT32)main;
@@ -214,7 +214,7 @@ UINTN create_thread(	VOID (*main)(),
 	new_thread->stderr	= open(0,"stdr");
 
 	new_thread->edx 	= (unsigned int) new_thread->stdin;
-	new_thread->eax 	= (unsigned int) new_thread->stdout;
+	new_thread->edi 	= (unsigned int) new_thread->stdout;
 	new_thread->esi 	= (unsigned int) new_thread->stderr;
 
     
@@ -257,12 +257,12 @@ UINTN create_thread_child(THREAD	*thread,
     	THREAD	*new_thread	=(THREAD*)malloc(sizeof(THREAD)); 
     	new_thread->pid 	= next_pid++;
 
-    	new_thread->eax 	= eax;
-    	new_thread->ebx 	= ebx;
-    	new_thread->ecx 	= ecx;
-    	new_thread->edx 	= edx;
-    	new_thread->edi 	= 0;
-    	new_thread->esi 	= new_thread->pid;
+	new_thread->eax 	= eax;	// argv	
+    	new_thread->ebx 	= ebx;	// bootinfo
+    	new_thread->ecx 	= ecx;	// argc
+    	new_thread->edx 	= edx; 	// stdin
+    	new_thread->edi 	= 0;	// stdout
+    	new_thread->esi 	= 0;	// stderr
     	new_thread->ebp 	= 0;
     	new_thread->esp 	= esp;
 	new_thread->eip  	= (UINT32)main;
@@ -319,7 +319,7 @@ UINTN create_thread_child(THREAD	*thread,
 	new_thread->stderr	= thread->stderr;
 
 	new_thread->edx 	= (unsigned int) new_thread->stdin;
-	new_thread->eax 	= (unsigned int) new_thread->stdout;
+	new_thread->edi 	= (unsigned int) new_thread->stdout;
 	new_thread->esi 	= (unsigned int) new_thread->stderr;
 
 	

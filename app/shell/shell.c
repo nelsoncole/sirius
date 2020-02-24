@@ -39,7 +39,7 @@
 #include <stdlib.h>
 #include <sys/sys.h>
 
-#define SHELL_CMD_NUM 17 + 2
+#define SHELL_CMD_NUM 17 + 3
 
 void (*call_loader)  (int argc,char **argv) = 0;// NULL;
 
@@ -52,6 +52,7 @@ typedef struct _COMMAND {
 int cmd_version(int argc,char **argv);
 int cmd_time(int argc,char **argv);
 int cmd_shutdown(int argc,char **argv);
+int cmd_run(int argc,char **argv);
 int cmd_rename(int argc,char **argv);
 int cmd_reboot(int argc,char **argv);
 int cmd_new(int argc,char **argv);
@@ -66,6 +67,7 @@ int cmd_date(int argc,char **argv);
 int cmd_copy(int argc,char **argv);
 int cmd_cls(int argc,char **argv);
 int cmd_cd(int argc,char **argv);
+
 
 
 int cmd_salve(int argc,char **argv) {
@@ -127,6 +129,7 @@ COMMAND cmd_table[] = {
     	{"new",         cmd_new,            "New file or directory"                         	},
     	{"reboot",      cmd_reboot,         "Reboot system"                                 	},
     	{"rename",      cmd_rename,         "Rename file or directory"                      	},
+	{"run",		cmd_run,	    "Execute or run application"			},
     	{"shutdown",    cmd_shutdown,       "Shutdown your computer locally or remotely"    	},
    	{"time",        cmd_time,           "Time"                                          	},
     	{"version",     cmd_version,        "Shell version"                                 	},
@@ -459,6 +462,38 @@ int cmd_rename(int argc,char **argv)
 {
     	puts("Function not implemented\n");
     	return 0;
+}
+
+int cmd_run(int argc,char **argv)
+{
+	int rc = 0;
+
+
+	if(argc < 2) { 
+
+		printf("Run: \"%s\" error\n",argv[1]);
+		return 0;
+
+	}
+
+	FILE *fp = fopen(argv[1],"rb");
+
+	if(fp == NULL) { 
+
+		printf("Run: \"%s\" error\n",argv[1]);
+		return 0;
+
+	}
+
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(8),"d"(argc),"c"(argv),"b"(fp));
+
+
+	fclose(fp);
+
+
+	return rc;
+
+
 }
 
 

@@ -595,6 +595,7 @@ int113:
     	iretd
 
 
+sytem_num dd 0;
 int114:   
 	cli
 	push ds
@@ -620,10 +621,10 @@ int114:
 	pop eax
 
 
-	mov ebx, eax
-	push ebx
+	mov dword[sytem_num], eax
+	push dword[sytem_num]
 	call syscall_handler
-   	pop ebx
+	add esp, 4
 
     	pop esp
     	pop ebp
