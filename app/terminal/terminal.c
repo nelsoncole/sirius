@@ -44,7 +44,7 @@ int main()
 {
 	
 	char **buf = (char**) malloc (0x1000); //4 KiB
-	long pooll  = (long) malloc (0x10000); //64 KiB
+	long pool  = (long) malloc (0x10000); //64 KiB
 	char *line;
 	long scrolldown = 0;
 	int count = 0;
@@ -55,7 +55,7 @@ int main()
 	int num = 0;
 	long lines = 0;
 
-	memset((char*)pooll,' ',0x10000);
+	memset((char*)pool,' ',0x10000);
 	memset(buf,0,0x1000);
 
 
@@ -83,7 +83,7 @@ int main()
 
 	// enviar sms para box
 	Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT); 
-	line = buf[num++] = (char*) pooll;
+	line = buf[num++] = (char*) pool;
 
 	// loop
 	while(TRUE) {
@@ -111,7 +111,7 @@ int main()
 				*line = '\0';
 				count = 0;
 				write++;
-				line = buf[num++] = (char*) pooll + write;
+				line = buf[num++] = (char*) pool + write;
 				if(++lines >= box->Font.SizeY ) scrolldown++;
 				
 			
@@ -125,7 +125,7 @@ int main()
 						do buffer 64 KiB ou 1024 Linhas, chamar clear e reiniciar o stdout */
 
 						}
-						line = buf[num++] = (char*) pooll + write;
+						line = buf[num++] = (char*) pool + write;
 						if(++lines >= box->Font.SizeY ) scrolldown++;
 						*line++ = ' ';
 						count++;
@@ -143,7 +143,7 @@ int main()
 				if(count == length) {
 					*line++ = '\0';
 					count = 0;
-					line = buf[num++] = (char*) pooll + write;
+					line = buf[num++] = (char*) pool + write;
 					if(++lines >= box->Font.SizeY ) scrolldown++;
 					*line++ = ch;
 					count++;

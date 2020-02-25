@@ -1,5 +1,5 @@
 /*
- * File Name: gserver.c
+ * File Name: mouse.c
  *
  *
  * BSD 3-Clause License
@@ -33,83 +33,96 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+ 
 #include <io.h>
-#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 
-extern GUI *G;
+#define TRUE 1
 
-INTN main(INTN argc,CHAR8 *argv[])
+
+const char *str_mouse_menu[10] = {
+	"Open",
+	"Open with",
+	"Run Terminal",
+	"Cut",
+	"Copy",
+	"Paste",
+	"Delete",
+	"New folder",
+	"New document",
+	"Properties",
+};
+
+int main()
 {
 
+	unsigned int *p = (unsigned int*)0x10001120;
+	MOUSE *mouse = (MOUSE*)(*p);
 
-	UINT32 *p = (UINT32*)0x1000111C;
-	UINT32 *GwFocus = (UINT32 *)(*p++);
-	MOUSE *mouse = (MOUSE*)(*p++);
+	long pool  = (long) malloc (0x10000); //64 KiB
+	memset((char*)pool,0,0x10000);
 
-	UINTN __flag__ = 0;
+	char **buf = (char**) malloc(0x1000); // 4KiB
+	memset(buf,0,0x1000);
+	char *line;
+	int i;
 
-	GW_HAND *obj = NULL;
 
-	GW_HAND *list = (GW_HAND*)(G->List);
+	GW_HAND *window = create_window_mouse(mouse->x,mouse->y,160,180,
+	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_WHITE) | BACK_GROUND_STYLE(GW_BLUE)),GW_FLAG_INVISIBLE);
 
-	GW_HAND *window	= list->next;
+
 	
-	if(window) obj = window->tail;
+	for(i=0;i<65536/256;i++)
+	{
+
+		buf[i] = (char*) pool + (i*256);
+
+	}
+
+	for(i=0;i < 10;i++)
+	{
+
+		line = buf[i];
+		strcpy(line,str_mouse_menu[i]);
+
+	}
 
 
-	while(TRUE) {
+	window->Msg1 = (unsigned int )buf;
+	window->box->Flag = GW_FLAG_READY;
 
-		app_clearscreen();
-	
 
-		//BitMAP(	(UINTN*)0xA00000,250,100,G->BankBuffer);
-	
-		// UPDATE
-		while(window) {
+	while (TRUE) {
 
-			if(*GwFocus == (UINT32)window) {
-				window = window->next;
-				if(window) obj = window->tail;
-				__flag__ = 1;
-				continue;
-			}
 
-			UpdateWindow(window);
-			while(obj) {
-				UpdateObject(window,obj);
-				obj = obj->tail;
-			}
+		
 
-			window = window->next;
-			if(window) obj = window->tail;	
 
-		}
+		if(mouse->b&0x2) 
+		{
 
-		// Focus
-		if(__flag__ == 1) {
-			window	= (GW_HAND *)(*GwFocus);
-			if(window) obj 	= window->tail;
+			while(mouse->b&0x2);
 
-			UpdateWindow(window);
-
-			while(obj) 
+			if(window->Flag == GW_FLAG_VISIBLE) 
 			{
-				UpdateObject(window,obj);
-				obj = obj->tail;
+				window->Flag = GW_FLAG_INVISIBLE;
 
+			} else { 
+
+				window->Flag = GW_FLAG_VISIBLE;
+
+				window->X = mouse->x;
+				window->Y = mouse->y;
 			}
-
 		}
-	
 
-		if(mouse->handle)update_window_mouse((GW_HAND *)mouse->handle);
 
-		DrawMouse(mouse->x,mouse->y,ColorTable[GW_GREEN], G->BankBuffer,cursor18x18);
 
-		app_refreshrate();
 
-		//rewind
-		window = list;
+
+
 
 	}
 

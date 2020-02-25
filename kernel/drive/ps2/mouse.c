@@ -242,8 +242,9 @@ static VOID mouse_refresh(){
 	mouse->z		= 0;
 	mouse->b		= buttons;
 
-    	/*ClearScreen();	
-     	print("((%d)   (%d,%d,%d)) ",mouse_position, mouse_x, buttons ,mouse_y );*/
+	/*
+    	ClearScreen();	
+     	print("(%d,%x,%d) ",mouse_x, mouse->b ,mouse_y ); */
     
 
 }

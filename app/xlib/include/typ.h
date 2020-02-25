@@ -150,6 +150,7 @@ typedef struct _MOUSE {
 	UINT32	y;
 	UINT32	z;
 	UINT32	b;
+	UINT32	handle;
 
 }__attribute__((packed)) MOUSE;
 

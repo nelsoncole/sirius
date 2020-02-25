@@ -474,6 +474,48 @@ __UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 }
 
 
+UINTN 
+____UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
+{
+
+	UINTN i,c;
+	GW_HAND *Hand = _Hand->box;
+
+	char **buf = (char**) Buffer;
+	char *line;
+	
+
+
+	for(i = 0; i < Hand->Font.SizeY;i++ ) {
+		BoxDrawSectCursor(Hand,0,i);
+		__UpdateBoxDraw(_Hand,Hand);
+	
+		line = buf[i];
+
+		if(line == NULL)continue;
+
+		c = 0;
+
+		while(line[c]) {
+			BoxDraw(Hand,line[c++],Hand->Font.FgColor,Hand->Font.BgColor,Hand->Buffer);
+
+			if(c >= 256)break;
+
+		}
+
+	}
+
+
+	//salve cursor
+	Hand->Font.SetPositionCursorX = Hand->Font.CursorX;
+	Hand->Font.SetPositionCursorY = Hand->Font.CursorY;
+
+	
+	return (0);
+	
+}
+
+
 // usar no console
 GW_HAND *__CreateBox(GW_HAND *GwHand,		GW_HAND *_Hand,
 						UINTN X,

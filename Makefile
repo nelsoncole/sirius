@@ -21,12 +21,13 @@ mount:
 	sudo cp bin/stage1.bin /mnt/
 	sudo cp bin/logo.bmp /mnt/
 	sudo cp bin/kernel.bin /mnt/
-	sudo cp bin/task.sys /mnt/
-	sudo cp bin/gserver.sys /mnt/
-	sudo cp bin/files.sys /mnt/
-	sudo cp bin/msgbox.sys /mnt/
-	sudo cp bin/terminal.sys /mnt/
-	sudo cp bin/shell.sys /mnt/
+	#sudo cp bin/task.sys /mnt/
+	#sudo cp bin/gserver.sys /mnt/
+	#sudo cp bin/files.sys /mnt/
+	#sudo cp bin/msgbox.sys /mnt/
+	#sudo cp bin/terminal.sys /mnt/
+	#sudo cp bin/shell.sys /mnt/
+	sudo cp bin/*.sys /mnt/
 	sudo umount /mnt
 
 	./pcopy bin/stage0.bin part.img sirius.vhd

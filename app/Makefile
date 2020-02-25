@@ -16,8 +16,9 @@ GSERVER	:=gserver.o
 FILES	:=files.o
 TERMINAL:=terminal.o
 _SHELL	:=shell.o
+MOUSE	:=mouse.o
 
-.PHONY: task.sys msgbox.sys gserver.sys files.sys terminal.sys shell.sys clean move
+.PHONY: task.sys msgbox.sys gserver.sys files.sys terminal.sys shell.sys mouse.sys clean move
 
 task.sys: $(HEAD) $(TASK) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
@@ -35,6 +36,9 @@ terminal.sys: $(HEAD) $(TERMINAL) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 shell.sys: $(HEAD) $(_SHELL) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+mouse.sys: $(HEAD) $(MOUSE) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 
@@ -59,6 +63,9 @@ shell.sys: $(HEAD) $(_SHELL) $(XLIB)
 
 #SHELL
 %.o:shell/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
+#SHELL
+%.o:mouse/%.c
 	$(CC) $(CFLAGS32) -c -o $@ $<
 
 move:

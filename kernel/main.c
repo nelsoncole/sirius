@@ -220,6 +220,10 @@ UINTN main(BOOT_INFO *boot_info)
 	mouse	= (MOUSE*) malloc(0x1000);
 	rtc	= (UINT32*) malloc(0x1000);
 
+	setmem(GwFocus,0x1000,0);
+	setmem(mouse,0x1000,0);
+	setmem(rtc,0x1000,0);
+
 
 
 	print("Install PS/2\n"); 	ps2_install();
@@ -279,6 +283,7 @@ UINTN main(BOOT_INFO *boot_info)
 	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
 	//do_exec("files.sys",1);
+	do_exec("mouse.sys",1);
 
 	apic_timer_umasked();
 

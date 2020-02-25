@@ -283,6 +283,12 @@ BoxDrawString(GW_HAND *_Hand,CHAR8 *string);
 UINTN 
 UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer);
 
+UINTN 
+__UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer);
+
+UINTN 
+____UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer);
+
 // Usar no console
 GW_HAND *__CreateBox(GW_HAND *GwHand,		GW_HAND *_Hand,
 						UINTN X,
@@ -362,6 +368,12 @@ VOID DrawMouse(	UINTN X,
 UINTN WindowFocus(GW_HAND *window);
 UINTN gui_exit(GW_HAND *Hand);
 
+
+
+
+
+GW_HAND *create_window_mouse(long X,long Y, long Width, long Height,long Style,long Flag);
+int update_window_mouse(GW_HAND *_GwHand);
 
 
 #endif
