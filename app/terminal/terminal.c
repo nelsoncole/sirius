@@ -42,6 +42,11 @@
 
 int main()
 {
+
+
+	unsigned int *p = (unsigned int*)0x10001120;
+	MOUSE *mouse = (MOUSE*)(*p);
+
 	
 	char **buf = (char**) malloc (0x1000); //4 KiB
 	long pool  = (long) malloc (0x10000); //64 KiB
@@ -60,7 +65,7 @@ int main()
 
 
 
-	GW_HAND *window = CreateWindow("# Terminal",0,400,200,600,500,/*0,100,20,900,650,*/
+	GW_HAND *window = CreateWindow("# Terminal",0,mouse->x,mouse->y,500,300,/*0,100,20,900,650,*/
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,2,2,window->Area.Width -2,

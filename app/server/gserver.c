@@ -56,12 +56,10 @@ INTN main(INTN argc,CHAR8 *argv[])
 	
 	if(window) obj = window->tail;
 
-
 	while(TRUE) {
 
 		app_clearscreen();
-	
-
+		
 		//BitMAP(	(UINTN*)0xA00000,250,100,G->BankBuffer);
 	
 		// UPDATE
@@ -108,8 +106,12 @@ INTN main(INTN argc,CHAR8 *argv[])
 
 		app_refreshrate();
 
+
 		//rewind
-		window = list;
+		//window = list;
+		//list = (GW_HAND*)(G->List);
+		window	= list->next;
+		if(window) obj = window->tail;
 
 	}
 

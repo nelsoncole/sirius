@@ -56,10 +56,11 @@ GraphicInitialize(GUI *Graphic)
 }
  
 
-
+int terminal = 0;
 VOID thread_main()
 {
 	UINTN pid;
+	terminal = 0;
 
 
 	debug("Initialize thread main\n");
@@ -76,12 +77,16 @@ VOID thread_main()
 		}
 
 		// execute console
-		if(key_msg_exec_console) {
+		if(key_msg_exec_console || terminal != 0) {
 			cli();
 			pid = do_exec("terminal.sys",1);
 			set_focus(pid);
 			key_msg_exec_console = 0;
+
+			terminal = 0;
 			sti();	
+
+		
 		}
 
 	}

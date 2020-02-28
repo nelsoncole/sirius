@@ -68,16 +68,18 @@ int main()
 	char *line;
 	int i;
 
+	long x,y, open = 0, count =0;
 
-	GW_HAND *window = create_window_mouse(mouse->x,mouse->y,160,180,
+
+	GW_HAND *window = create_window_mouse(mouse->x,mouse->y,160,170,
 	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_WHITE) | BACK_GROUND_STYLE(GW_BLUE)),GW_FLAG_INVISIBLE);
 
 
 	
-	for(i=0;i<65536/256;i++)
+	for(i=0;i< 0x10000/0x100;i++)
 	{
 
-		buf[i] = (char*) pool + (i*256);
+		buf[i] = (char*) (pool + (i*0x100));
 
 	}
 
@@ -103,11 +105,12 @@ int main()
 		if(mouse->b&0x2) 
 		{
 
-			while(mouse->b&0x2);
+			while(mouse->b&0x2); // espera soltar
 
 			if(window->Flag == GW_FLAG_VISIBLE) 
 			{
 				window->Flag = GW_FLAG_INVISIBLE;
+				open = 0;
 
 			} else { 
 
@@ -115,12 +118,48 @@ int main()
 
 				window->X = mouse->x;
 				window->Y = mouse->y;
+
+				open = 1;
 			}
+
+			count = 0;
+
+		}
+
+
+		x = mouse->x;  
+		y = mouse->y;
+
+
+		if(window->X <= x && (window->X + 160) >= x)
+		{
+			if(window->Y <= y && (window->Y + 170) >= y)
+			{
+				window->Msg2  = (y - window->Y) /16;
+			}
+	
 		}
 
 
 
+		if(mouse->b&0x1) 
+		{
+			while(mouse->b&0x1); // espera soltar
 
+			if(open) 
+			{
+				if(count++ >= 0/*um clique*/) {
+
+					// send
+					if(window->Msg2 == 2)
+					__asm__ __volatile__("int $0x72"::"a"(0));
+
+					window->Flag = GW_FLAG_INVISIBLE;
+					open = 0;				
+				}
+			}
+
+		}
 
 
 

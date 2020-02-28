@@ -102,7 +102,11 @@ int syscall_write_sector(int p,int count,unsigned int lba32_47 ,void *buffer,uns
 
 }
 
+
+extern int terminal;
 void syscall_unknown(void){
+
+	terminal = 1;
 
 }
 
