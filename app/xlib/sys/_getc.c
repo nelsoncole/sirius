@@ -10,6 +10,7 @@ int _getc (FILE *fp)
 	unsigned char* buffer = (unsigned char*) (fp->header.buffer);
 	unsigned dev_n = fp->header.dev;
 	unsigned count = fp->header.count;
+	unsigned count2 = 0;
 	unsigned int *block	= (unsigned int*)(fp->block);
 	unsigned int bps = fp->header.bps;
 	unsigned int lba_start;
@@ -19,6 +20,54 @@ int _getc (FILE *fp)
 	
 	// error
 	if(fp->header.mode[0] == '\0') return EOF;
+
+	if(fp->header.flag&0x80)
+	{
+		// Arquivo null
+		if(!fp->header.blocks) return EOF;
+
+		// first operation
+		if(!(fp->header.flag&0x10)) {
+
+			// ler primeiros 64 KiB e manter em cache
+
+
+			
+			if(fp->header.size >= 65536 ) {
+
+				count2 = 8;
+ 
+				block_count = 0x10000/(bps*count2);
+
+			}
+			else {
+
+				count2 = 1;
+				block_count = fp->header.size/(bps*count2);
+			}
+
+			
+			for(i = 0;i< block_count;i++) { // 64 KiB
+
+				lba_start = block[0] + (fp->header.offset/bps);
+				if(block_read(dev_n,count2,lba_start,buffer+(count2*bps*i))) return EOF;
+
+			}
+				
+					
+			// bit 0x10 primeira eitura
+			// bit 0x20 perminsao de leitura
+			fp->header.flag |= 0x30;
+
+
+		}
+
+	
+
+		goto _default;
+
+
+	}
 
 	
 	// std
@@ -78,7 +127,7 @@ int _getc (FILE *fp)
 			for(i = 0;i<block_count;i++) {
 
 				lba_start = block[(fp->header.offset/bps/count) + i] + (fp->header.offset/bps%count);
-				if(block_read(dev_n,count,lba_start,buffer)) return EOF;
+				if(block_read(dev_n,count,lba_start,buffer + (count*bps*i))) return EOF;
 
 			}
 
@@ -90,6 +139,8 @@ int _getc (FILE *fp)
 
 	}
 
+
+_default:
 	// checar perminsao de leitura
 	if(!(fp->header.flag&0x20))return EOF; 
 

@@ -775,6 +775,8 @@ GW_HAND *CreateWindow(	CONST CHAR8 *Title,
 
 	// Registrar janela
 	//
+	GwHand->Flag |= 1;
+
 	//
 	//
 
@@ -1376,14 +1378,11 @@ UINTN WindowFocus(GW_HAND *window)
 	if(__focus->pid == __pid) {
 
 		*GwFocus = (UINT32)window;
-
 	}
 
 	return 0;
 
 }
-
-
 
 VOID DrawMouse(	UINTN X,
 		UINTN Y,	
@@ -1435,18 +1434,40 @@ UINTN UpdateMouse(GW_HAND *Hand)
 
 }
 
+// Window Focus
+int ExitWindowFocus()
+{
+	UINT32 *p = (UINT32*)0x1000111C;
+	UINT32 *GwFocus = (UINT32 *)(*p);
+
+	*GwFocus = (UINT32) 0;
+
+	return 0;
+
+}
+
 UINTN gui_exit(GW_HAND *Hand)
 {
 
 	GW_HAND *next 		= Hand->next;
-	GW_HAND *obj 		= Hand->tail;
-	GW_HAND *p 		= (GW_HAND *)(G->List);
+	GW_HAND *obj = NULL;
+
+	if(Hand) obj 	= Hand->tail;
+
+	GW_HAND *list = (GW_HAND*)(G->List);
 	GW_HAND *current 	= Hand;
 
+
+	// desabilitar janela
+	// exit foco
+	ExitWindowFocus();
+
 	while(obj) {
+
 		free(obj->Title);
 		free(obj->box);
 		free(obj);
+
 	 	obj = obj->tail;
 		
 	}
@@ -1454,29 +1475,21 @@ UINTN gui_exit(GW_HAND *Hand)
 	// Percorre a lista ate achar o p->next igual ao current
 	do{
 
-		if(p->next == current)break;
-		p = p->next;
+		if(list->next == current) break;
 
-	}while(TRUE);
+		list = list->next;
+
+	}while(list);
+
+	if(!list) return -1;
 
 	// aponta o p->next para o next
-	p->next = next;
+	list->next = next;
 
 	// remove a janela da lista
 	free(current->Title);
 	free(current->box);
 	free(current);
 
-
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-

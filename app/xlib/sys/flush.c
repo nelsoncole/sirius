@@ -4,6 +4,8 @@
 
 #define EOF (-1)
 
+#include <stdio.h>
+
 int flush(FILE *fp) {
 
 	unsigned char* buffer = (unsigned char*) (fp->header.buffer);
@@ -19,6 +21,18 @@ int flush(FILE *fp) {
 
 	// error
 	if(fp->header.mode[0] == '\0') return EOF;
+
+	if(fp->header.flag&0x80)
+	{
+		// atquivo null
+		return 0;
+
+
+	}
+
+
+
+
 
 	// error error fat
 	if((FAT_BPB *)fp->header.bpb == NULL) return EOF;

@@ -1,5 +1,5 @@
 /*
- * File Name: crt0.c
+ * File Name: xserver.c
  *
  *
  * BSD 3-Clause License
@@ -33,98 +33,167 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
-#include <io.h>
+
 #include <sys/sys.h>
 #include <stdlib.h>
+#include <string.h>
 
 
-extern int main();
-void exit(int rc);
+#define true 1
 
-FOCUS 	*__focus	= NULL;
-UINT32	__pid = -1;
+STDX *pipe = NULL;
+unsigned int *idt = NULL;
 
-typedef struct _BOOT_INFO{
-	void *Graphic;
-	
-}__attribute__((packed)) BOOT_INFO;
-
-FILE *stdsd = NULL;
-FILE *stdxserver = NULL;
-FILE *stdgserver = NULL;
-
-char *pwd = NULL;
-const char **__argv;
-
-int crt0(BOOT_INFO *boot_info)
-{
-	unsigned int *device = NULL;
-
-	UINT32 *p = NULL;
-
-	// GUI	
-	G = (GUI *)&boot_info->Graphic;
-
-	// pid e focus
-	p = (UINT32*)0x1000110C;
-
-	p++; // Detail Hardware
-	device = (unsigned int*)(*p++); // device
-	stdsd = (FILE*)(device[0]);
-	stdxserver = (FILE*)(device[1]);
-	stdgserver = (FILE*)(device[2]);
-	__pid = *p++;
-	__focus = (FOCUS*)(*p++);
-
-
-	// pwd, argc end argv
-	int argc;
-
-	p  	= (UINT32*)0x100011F4;
-	pwd = (char*)*p++;
-	argc = *p++;
-	__argv = (const char**) *p++;
-
-
-
-	exit(main(argc,__argv));
-
-	for(;;);
-}
-
-
-void exit(int rc)
+unsigned int write_idt(unsigned int pid_ret,unsigned int pid_cur)
 {
 
-	
-	//free(pwd);
+	unsigned int *p_idt = idt;
+	int i;
 
-	write_stx(X_MSG_INT,0,0,stdxserver);
 
-	__asm__ __volatile__("int $0x71"::);
+	if(!cheksum_pid(pid_ret)) return -1;
+
+
+	while(true) {
+
+		for(i=0;i<512;i++)
+		{
+			if(*p_idt == 0)
+			{ 
+				*p_idt++ = pid_ret;
+				*p_idt++ = pid_cur;
+
+				return 0;
+
+			}
+
+			p_idt++;
+			p_idt++; 
+
+		}
+
+
+		p_idt = idt;
+
+	}
+
+
+	return -1;
 
 }
 
 
-VOID  *copymem(IN VOID *Destination,IN VOID *Source,IN UINTN Length)
-{	
+unsigned int read_idt(unsigned int pid)
+{
 
-	UINTN i;
-	UINTN *p_dest = (UINTN*)Destination;
-	UINTN *p_src  = (UINTN*)Source;
-	
-	for(i = 0;i < Length;i++)
-		*p_dest++ = *p_src++;
+	unsigned int *p_idt = idt;
+	int i;
 
-	return p_dest;
+	unsigned int rc = 0;
+
+	for(i=0;i<512;i++)
+	{
+		if(pid == *p_idt)
+		{ 
+
+			*p_idt++ = 0;
+			rc = *p_idt;
+			*p_idt = 0;
+
+			return rc;
+
+		}
+
+		p_idt++;
+		p_idt++; 
+
+	}
+
+
+	return 0;
+
 }
 
 
-VOID *setmem(IN VOID *Buffer,IN UINTN Size,IN UINT8 Value)
+int main(int argc,const char **argv)
 {
-	UINT8 *tmp = (UINT8 *)Buffer;
-	UINTN count = Size;
-    	for(; count != 0; count--) *tmp++ = Value;
-	return Buffer;
+	int flg = 0;
+
+	idt = (unsigned int*) malloc(0x1000);
+
+	memset(idt,0,0x1000);
+
+	unsigned int pid = 0;
+	int i;
+
+	// 1 - All mount devices disks // IDE
+	for(i=0;i < 4;i++)
+	{
+		mount_sd(i);
+	}
+
+
+
+
+	while(true) 
+	{
+		pipe = read_stx(stdxserver);
+
+		if(pipe != NULL)
+		{
+			switch(pipe->id) 
+			{
+				case X_MSG_WAIT_PID:
+
+				if(!write_idt(pipe->data1,pipe->pid))
+				{
+					flg = 0; // sem retorno
+					pipe->pid = 0xFFFFFFFF;
+
+				}else {
+
+					flg = 1;
+					pipe->id  = -1; // return
+
+				}
+					break;
+
+				case X_MSG_INT:
+
+				pid = read_idt(pipe->pid);
+
+				if(pid) {
+
+					unlockthread(pid);
+				}
+
+				flg = 1;
+				pipe->id  = 0; // return
+
+					break;
+
+				default:
+
+					flg = 0;
+
+					break;
+
+			}
+		
+			if(flg) 
+			{
+				pid = pipe->pid;
+				pipe->pid = 0xFFFFFFFF; // lock
+				flg = 0;
+				// desbloquear processo
+				// task switch
+				unlockthread(pid);
+				taskswitch_pid(pid);
+			}
+		}
+
+
+	}
+
+	return 0;
 }

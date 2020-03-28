@@ -146,12 +146,21 @@ extern FAT_DATA 	*__data__;
 extern VFS 		*__vfs__;
 
 
+
+// FILE
+extern unsigned int *device;
+extern FILE *sd;
+extern FILE *xserver;
+extern FILE *gserver;
+
+
 // OS
 VOID wait_ns(UINTN count);
+
 // Memory
-UINTN ram_initialize();
-UINTN alloc_frame(IN OUT PAGE_TABLE *pt,IN UINTN size,OUT VIRTUAL_ADDRESS *frame);
-UINTN free_frame(IN VOID *frame);
+unsigned int ram_initialize(); 
+int alloc_frame(PAGE_TABLE *pt,int count,VIRTUAL_ADDRESS *frame);
+void free_frame(void *frame);
 
 UINTN alloc_pages_initialize();
 
@@ -177,8 +186,7 @@ UINTN idt_install(VOID);
 
 UINTN do_exec(CONST CHAR8 *name,UINT8 prv);
 UINTN do_exec_child(THREAD *father_thread,CONST CHAR8 *name,UINT8 prv);
-UINTN exit();
-
+int exit();
 
 //  MSR
 UINTN 
@@ -254,8 +262,14 @@ dprintf(CONST CHAR8 *format,...);
 
 // Exectve
 
-int exectve(int argc,char **argv,FILE *fp);
+int exectve(int argc,char **argv,char *pwd,FILE *fp);
+int exectve_child(int argc,char **argv,char *pwd,FILE *fp,THREAD *father_thread);
 
+
+// Devices
+int conect_sd(int dev);
+SD *read_sdx(const char *s);
+SD *read_sdn(const char *s,SD *sdx);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * File Name: vfs.h
+ * File Name: stdx.h
  *
  *
  * BSD 3-Clause License
@@ -33,53 +33,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+#ifndef __STDX_H__
+#define __STDX_H__
+
+#include "ctype.h"
+#include "size_t.h"
+
+typedef struct _STDX {
+	unsigned int	id;
+	unsigned int	pid;
+	unsigned int	data1;
+	unsigned int	data2;
+
+}__attribute__((packed)) STDX;
+
+int write_stx(unsigned int id, unsigned int data1,unsigned int data2,FILE *fd);
+STDX *read_stx(FILE *fd);
 
 
-#ifndef __VFS_H__
-#define __VFS_H__
+// syscall
+int getpid();
+void taskswitch();
+void taskswitch_pid(unsigned int pid);
+int lockthread();
+int unlockthread(unsigned int pid);
+int cheksum_pid(unsigned int pid);
 
-#define ATTR_ARCHIVE 	0
-#define ATTR_DIRECTORY 	1
+// Devices
+int mount_sd(int dev);
+SD *read_sdx(const char *s);
+SD *read_sdn(const char *s,SD *sdx);
 
-struct _FAT_BPB;
-
-typedef struct _VFS_FILE_HEADER 
-{
-	// File Header 4 KiB
-	CHAR8	filename[256];
-	UINT8 	attr;
-	UINT32	size;
-	UINT32	size2;
-	UINT8	dev;
-	UINT8	p_entry;
-	UINT32	bps;
-	// números de sector por bloco
-	UINT32	count;
-	// número total de blocos
-	UINT32	blocks;	
-	UINT32	offset;
-	UINT32	offset2;
-	UINT32	buffer;
-	// definido em libc padrão
-	UINT8	mode[4];
-	UINT8	flag;
-	struct _FAT_BPB  *bpb; 
-	struct _VFS_FILE_HEADER *current;
-	struct _VFS_FILE_HEADER *next;
-	UINT8	rsvx[256 - 43];
-
-}__attribute__ ((packed)) VFS_FILE_HEADER;
-
-typedef struct _VFS 
-{
-	// File Header 512 Bytes
-	VFS_FILE_HEADER header;
-
-	// LBA block start
-	UINT32	block[1024-128];
-
-}__attribute__ ((packed)) VFS;
-
-
+char *pathneme(char *dest,const char *src);
 
 #endif

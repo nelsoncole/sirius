@@ -259,6 +259,36 @@ UINTN main(BOOT_INFO *boot_info)
 	while(1);*/
 
 
+	// TODO inicializacao do device
+
+	device =(unsigned int*) malloc(0x1000);
+	setmem(device,0x1000,0);
+
+	sd = open(0,"std");
+	xserver = open(0,"std");
+	gserver = open(0,"std");
+
+	device[0] = (unsigned int) sd;
+	device[1] = (unsigned int) xserver;
+	device[2] = (unsigned int) gserver;
+
+
+	// Montar partiao do sistema
+	if(conect_sd(DEV)) {
+		print("PANIC: System partition not fould\n");
+		for(;;);
+
+	}
+	
+	SD *sdax = read_sdx("sdax");
+	SD *sda0 = read_sdn("sda0",sdax);
+	print("%s/",sdax);
+	print("%s:\nUID %x\nDevice Number %d\n",sda0,sda0->UID,sda0->devnum);
+	print("LBA Start %d\nLBA End %d\n",sda0->lba_start,sda0->lba_end);
+	print("Byte Of Sector %d\nPartition Number %d\n",sda0->byte_of_sector,sda0->partnum);
+	print("Number Of Sector %d\nPartition Size %d\n",sda0->num_sectors,sda0->num_sectors*sda0->byte_of_sector/1024/1024);
+
+
 	// LOADER MBR
 	MBR *mbr = (MBR*)malloc(0x1000);
 
@@ -283,15 +313,26 @@ UINTN main(BOOT_INFO *boot_info)
 
 	}
 
+
+
+
+	// FIXME debug
+	ClearScreen();	
+		
+
+
 	// USER
-	do_exec("gserver.sys",0x81);
-	//do_exec("msgbox.sys",1);
 	do_exec("task.sys",1);
-	//do_exec("files.sys",1);
+	do_exec("xserver.sys",1);
+	do_exec("gserver.sys",0x81);
 	do_exec("mouse.sys",1);
+
+	//do_exec("files.sys",1);
 
 	apic_timer_umasked();
 
+
+	
 
 	/*clearscreen();
 	BitMAP(	(UINTN*)0xA00000,260,50,G->BankBuffer);
@@ -303,10 +344,6 @@ UINTN main(BOOT_INFO *boot_info)
 	// wait
 	/*UINTN i = 700000000;
 	while(i--);*/
-
-	
-
-	
 
 
 	global_controll_task_switch = 0;

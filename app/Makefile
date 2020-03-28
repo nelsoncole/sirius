@@ -13,12 +13,17 @@ LIB	:=xlib/xlib.so
 MSGBOX	:=msgbox.o
 TASK	:=task.o
 GSERVER	:=gserver.o
+XSERVER	:=xserver.o
 FILES	:=files.o
 TERMINAL:=terminal.o
 _SHELL	:=shell.o
 MOUSE	:=mouse.o
+EDIT	:=edit.o
+TEST	:=test.o
 
-.PHONY: task.sys msgbox.sys gserver.sys files.sys terminal.sys shell.sys mouse.sys clean move
+DISK	:=disk.o
+
+.PHONY: task.sys msgbox.sys gserver.sys xserver.sys files.sys terminal.sys shell.sys mouse.sys edit.sys test.bin disk.sys clean move
 
 task.sys: $(HEAD) $(TASK) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
@@ -27,6 +32,9 @@ msgbox.sys: $(HEAD) $(MSGBOX) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 gserver.sys: $(HEAD) $(GSERVER) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+xserver.sys: $(HEAD) $(XSERVER) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 files.sys: $(HEAD) $(FILES) $(XLIB)
@@ -41,6 +49,18 @@ shell.sys: $(HEAD) $(_SHELL) $(XLIB)
 mouse.sys: $(HEAD) $(MOUSE) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
+edit.sys: $(HEAD) $(EDIT) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+disk.sys: $(HEAD) $(DISK) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+test.bin: $(HEAD) $(TEST) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+#LOCAL
+%.o:%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
 
 #TASK
 %.o:task/%.c
@@ -64,12 +84,21 @@ mouse.sys: $(HEAD) $(MOUSE) $(XLIB)
 #SHELL
 %.o:shell/%.c
 	$(CC) $(CFLAGS32) -c -o $@ $<
-#SHELL
+#MOUSE
 %.o:mouse/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
+
+#EDIT
+%.o:edit/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
+
+#UTIL
+%.o:util/%.c
 	$(CC) $(CFLAGS32) -c -o $@ $<
 
 move:
 	-mv *.sys ../bin
+	-mv *.bin ../bin
 
 clean: move
 	rm *.o

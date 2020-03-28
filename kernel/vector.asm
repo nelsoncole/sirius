@@ -515,10 +515,12 @@ irq23:
 
 
 
-global int113,int114,
+global int112,int113,int114,
 extern syscall_handler
+extern exit
 
-int113:
+
+int112:
 	cli
 
 	pop dword [context_eip	]
@@ -593,6 +595,86 @@ int113:
 	push dword [context_eip	 ]
 	sti
     	iretd
+
+int113:
+	cli
+
+	pop dword [context_eip	]
+    	pop dword [context_cs	]
+    	pop dword [context_eflag]
+    	pop dword [context_esp	]
+    	pop dword [context_ss	]
+
+
+	;registers 
+    	mov dword [context_eax], eax 
+    	mov dword [context_ebx], ebx 
+    	mov dword [context_ecx], ecx
+    	mov dword [context_edx], edx
+
+	;registers  
+    	mov dword [context_edi], edi
+    	mov dword [context_esi], esi
+	
+	;registers
+	mov dword [context_ebp], ebp
+
+	;segments
+    	xor eax, eax
+    	mov ax, ds
+    	mov word [context_ds], ax
+    	mov ax, es
+    	mov word [context_es], ax
+    	mov ax, fs
+    	mov word [context_fs], ax
+    	mov ax, gs
+    	mov word [context_gs], ax
+
+
+	mov eax, cr3
+    	mov dword [context_cr3], eax
+    	
+
+
+
+	call exit
+	call task_switch
+
+
+	;segments
+    	xor eax, eax
+    	mov ax,	word [context_ds]
+    	mov ds,	ax
+	mov ax,	word [context_es]
+    	mov es,	ax
+	mov ax,	word [context_fs]
+    	mov fs,	ax
+	mov ax,	word [context_gs]
+    	mov gs,	ax
+    	
+
+	;registers
+	mov ebp, dword [context_ebp]
+
+	;registers  
+    	mov edi, dword [context_edi]
+    	mov esi, dword [context_esi]
+
+	;registers 
+    	mov eax, dword [context_eax]
+    	mov ebx, dword [context_ebx]
+    	mov ecx, dword [context_ecx]
+    	mov edx, dword [context_edx]
+
+
+	push dword [context_ss	 ]
+	push dword [context_esp	 ]
+	push dword [context_eflag]
+	push dword [context_cs	 ]
+	push dword [context_eip	 ]
+	sti
+    	iretd
+
 
 
 sytem_num dd 0;

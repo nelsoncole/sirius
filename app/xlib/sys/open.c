@@ -41,13 +41,122 @@
 #define NULL ((void *)0)
 
 
+
+static int open_null(SD *sdx,FILE *fd) 
+{
+	fd->header.count = 0xFFFFFFFF; // 4GiB por sector
+
+	if((sdx->num_sectors*sdx->byte_of_sector/1024/1024) > 4096) return -1; 
+
+	fd->header.bps = sdx->byte_of_sector;
+
+	fd->header.size = sdx->num_sectors*sdx->byte_of_sector;
+
+	fd->header.dev = sdx->devnum;
+
+	fd->header.blocks = 1; // FIXME apenas suporta 4 GiB
+
+	fd->block[0] =  sdx->lba_start;
+
+	fd->header.attr = ATTR_ARCHIVE;
+
+	return 0;
+}
+
 FILE *open(const char *path,int attr,const char *mode) {
 
 	FILE *fd = NULL;
 
-	const char *filename = path;
+	SD *sdx = NULL;
+
+	const char *filename = NULL;
 
 	if(mode[0] == '\0') return NULL;
+
+	unsigned int strsdx[2];
+	unsigned int strsdn[2];
+	memset(strsdx,0,8);
+	memset(strsdn,0,8);
+
+	int null = 0;
+	int chil = 0;
+	char *p_path;
+	char *t_path;
+
+
+	p_path = (char*)malloc(0x1000);
+
+	if(path[0] == '/') 
+	{
+
+		if(!strncmp(path,"/dev/",5)) 
+		{
+			// null device
+			null = 12345;
+			chil = 0;
+			
+
+			t_path = pathneme(p_path,path+1);
+
+			if(strncmp(p_path,"dev",3)) {
+				
+				free(p_path);
+				return (NULL);
+
+			}
+
+			if(!t_path[0]) 
+			{
+				free(p_path);
+				return (NULL);
+			}
+
+
+			t_path = pathneme(p_path,t_path);
+			memcpy(strsdx,p_path,4);
+
+			if(t_path[0]) 
+			{
+				chil = 1;
+				t_path = pathneme(p_path,t_path);
+				memcpy(strsdn,p_path,4);
+
+				if(t_path[0]) 
+				{
+					// local
+					filename = t_path;
+					null = 0;
+				}
+
+			} 	
+
+		} else {
+				// Local desconhecido
+	
+				free(p_path);
+				return (NULL);
+
+
+		}
+
+
+	} else {
+		// pwd + path
+		memcpy(strsdx,"sdax",4);
+		memcpy(strsdn,"sda0",4);
+
+		filename = path;
+
+		if(!filename[0]) 
+		{
+			free(p_path);
+			return (NULL);
+		}
+
+	}
+
+	free(p_path);
+
 
 	// FIXME test open directory
 	if((attr == ATTR_DIRECTORY) || (attr == ATTR_ARCHIVE)){
@@ -62,14 +171,44 @@ FILE *open(const char *path,int attr,const char *mode) {
 	}
 
 
-	MBR *mbr	= (MBR*)malloc(0x200);
+	if(null == 12345) 
+	{
+
+		fd->header.flag |= 0x80;
+
+		sdx = read_sdx((const char*)strsdx);
+		if(chil) sdx = read_sdn((const char*)strsdn,sdx);
+
+		if(open_null(sdx,fd))
+		{
+			free((void*)fd->header.buffer);
+			free(fd);
+			return (NULL);
+
+		}
+
+
+		fd->header.bpb = (unsigned int)malloc(0x1000);
+
+		goto successfull;
+
+	} else {
+
+
+
+	}
+
+
+	sdx = read_sdx((const char*)strsdx);
+	sdx = read_sdn((const char*)strsdn,sdx);
+
 	VOLUME *volume	= (VOLUME*)malloc(sizeof(VOLUME));
 	
 
-	if(!block_read(0,1,0,mbr) ){
+	if(sdx){
 
-		volume->lba_start = mbr->part[0].lba_start;
-		volume->dev_num = 0;
+		volume->lba_start = sdx->lba_start;
+		volume->dev_num = sdx->devnum;
 
 		//FAT TYPE
 		FAT_BPB  *bpb  	= FatReadBPB(volume);
@@ -92,9 +231,8 @@ FILE *open(const char *path,int attr,const char *mode) {
 
 						free(root);
 						free(volume);
-						free(mbr);
 
-						if(mode[0] == 'a' && attr == ATTR_ARCHIVE) { 
+						if((mode[0] == 'a') && (attr == ATTR_ARCHIVE)) { 
 							fd->header.offset2 = fd->header.size;
 							fd->header.offset = fd->header.size;
 						}
@@ -149,8 +287,7 @@ FILE *open(const char *path,int attr,const char *mode) {
 
 							free(root);
 							free(volume);
-							free(mbr);
-
+			
 							goto successfull;
 
 						}else { free(bpb); free(root); /*Open DIR/FILE error*/}
@@ -169,7 +306,6 @@ FILE *open(const char *path,int attr,const char *mode) {
 abort:
 	
 	free(volume);
-	free(mbr);
 	free((void*)fd->header.buffer);
 	free(fd);
 	return (NULL);

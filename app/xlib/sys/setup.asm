@@ -42,8 +42,7 @@ extern crt0
 global stdin
 global stdout
 global stderr
-global __argv
-global __argc
+global stdx
 global _start
 _start:
 	jmp start
@@ -64,9 +63,7 @@ header:
 stdin 	dd 0
 stdout 	dd 0
 stderr 	dd 0
-stdmsg 	dd 0
-__argc 	dd 0
-__argv 	dd 0
+stdx 	dd 0
 start:
 
 	; i386
@@ -74,9 +71,8 @@ start:
 	mov dword[stdin],  edx
 	mov dword[stdout], edi
 	mov dword[stderr], esi
-
-	mov dword[__argv], eax
-	mov dword[__argc], ecx
+	mov dword[stdx], ecx
+	
 
 	push ebx
 	call crt0

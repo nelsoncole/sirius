@@ -39,6 +39,30 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <sys/sys.h>
+
+
+#define MSG_CLEARSCREEN 0x1
+#define MSG_SETCURSOR 0x2
+#define MSG_EXIT 0x80
+
+
+void clearscreen(char **buf,char *line,long pool,int *write,
+int *count,int *num,long *scrolldown,long *lines) 
+{
+
+	memset((char*)pool,0,0x10000);
+	memset(buf,0,0x1000);
+	*scrolldown = 0;
+	*count = 0;
+	*write = 0;
+	*num = 0;
+	*lines = 0;
+
+	rewind (stdout);
+
+}
+
 
 int main()
 {
@@ -46,7 +70,6 @@ int main()
 
 	unsigned int *p = (unsigned int*)0x10001120;
 	MOUSE *mouse = (MOUSE*)(*p);
-
 	
 	char **buf = (char**) malloc (0x1000); //4 KiB
 	long pool  = (long) malloc (0x10000); //64 KiB
@@ -60,12 +83,15 @@ int main()
 	int num = 0;
 	long lines = 0;
 
-	memset((char*)pool,' ',0x10000);
+	memset((char*)pool,0,0x10000);
 	memset(buf,0,0x1000);
 
+	int flg = 0;
+	unsigned int pid = 0;
 
 
-	GW_HAND *window = CreateWindow("# Terminal",0,mouse->x,mouse->y,500,300,/*0,100,20,900,650,*/
+
+	GW_HAND *window = CreateWindow("# Terminal",0,mouse->x,mouse->y,600,560,/*0,100,20,900,650,*/
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,2,2,window->Area.Width -2,
@@ -93,18 +119,21 @@ int main()
 	// loop
 	while(TRUE) {
 
-
 		// calculando o tamanho da lina de tela em caracteres
 		length = box->Font.SizeX;
 
 		ch = fgetc(stdout);
 
-		if(write >= 0x10000 || num >= 1024)for(;;) { 
-		// Panic FIXME Nelson quando atingir o limite do buffer 64 KiB ou 1024 Linhas, chamar clear e reiniciar o stdout
+		if(write >= 0x10000 || num >= 1024)
+		{ 
+			//FIXME Limite do buffer 64 KiB ou 1024 Linhas, 
+			// chamar clear e reiniciar o stdout
+
+			clearscreen(buf,line,pool,&write,&count,&num,&scrolldown,&lines);
+			line = buf[num++] = (char*) pool;
 
 		}
-
-		if(ch != EOF) {
+		if((ch != EOF) && (ch != 0)) {
 
 			
 			if(ch == '\b') { 
@@ -125,11 +154,16 @@ int main()
 					if(count == length) {
 						*line++ = '\0';
 						count = 0;
-						if(write >= 0x10000 || num >= 1024)for(;;) { 
-						/* Panic FIXME Nelson quando atingir o limite 
-						do buffer 64 KiB ou 1024 Linhas, chamar clear e reiniciar o stdout */
+						if(write >= 0x10000 || num >= 1024) 
+						{ 
+							//FIXME Limite do buffer 64 KiB ou 1024 Linhas, 
+							// chamar clear e reiniciar o stdout
+
+							clearscreen(buf,line,pool,&write,&count,&num,&scrolldown,&lines);
+							line = buf[num++] = (char*) pool;
 
 						}
+
 						line = buf[num++] = (char*) pool + write;
 						if(++lines >= box->Font.SizeY ) scrolldown++;
 						*line++ = ' ';
@@ -162,6 +196,88 @@ int main()
 
 			}
 
+		} else {
+
+
+			
+
+
+			// FIXME tratamento da comunicacao entre processos
+			STDX *pipe = read_stx(stdx);
+
+			if(pipe != NULL)
+			{
+				switch(pipe->id) 
+				{
+					case MSG_CLEARSCREEN:
+
+					clearscreen(buf,line,pool,&write,&count,&num,&scrolldown,&lines);
+					line = buf[num++] = (char*) pool;
+
+					pipe->id  = 0; // return
+					flg = 1;
+
+						break;
+
+					case MSG_SETCURSOR:
+					length = box->Font.SizeX;
+
+					if(pipe->data1 >= length || pipe->data1 == 0) 
+					{ 
+						pipe->id  = -1; // return
+						flg = 1;
+						break;
+					}
+
+
+					line = buf[num - 1]; //inicio na linha
+					for(i = 0;i < pipe->data1;i++) 
+					{
+						if(!(*line))
+						{
+							*line++ = ' ';
+							count++;
+							write++;
+						} else line++;	
+
+					}
+
+					pipe->id  = 0; // return
+					flg = 1;
+
+						break;
+					case MSG_EXIT:
+					gui_exit(window);
+					exit(0);
+					flg = 1;
+						break;
+
+					default:
+						flg = 0;
+
+						break;
+
+					}
+		
+					if(flg) 
+					{
+						pid = pipe->pid;
+						pipe->pid = 0xFFFFFFFF; // lock
+						flg = 0;
+						// desbloquear processo
+						// task switch
+						unlockthread(pid);
+						taskswitch_pid(pid);
+					}
+			
+
+			}
+
+
+			//////////////////////////////////////////////////
+		
+
+
 		}
 
 
@@ -171,6 +287,6 @@ int main()
 		
 	}
 
-	//exit();
+	//exit(0);
 	return 0;
 }

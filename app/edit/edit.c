@@ -1,5 +1,5 @@
 /*
- * File Name: vfs.h
+ * File Name: edit.c
  *
  *
  * BSD 3-Clause License
@@ -33,53 +33,73 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+ 
+#include <io.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
+FILE *fd;
 
-#ifndef __VFS_H__
-#define __VFS_H__
-
-#define ATTR_ARCHIVE 	0
-#define ATTR_DIRECTORY 	1
-
-struct _FAT_BPB;
-
-typedef struct _VFS_FILE_HEADER 
+int main(int argc, char **argv)
 {
-	// File Header 4 KiB
-	CHAR8	filename[256];
-	UINT8 	attr;
-	UINT32	size;
-	UINT32	size2;
-	UINT8	dev;
-	UINT8	p_entry;
-	UINT32	bps;
-	// números de sector por bloco
-	UINT32	count;
-	// número total de blocos
-	UINT32	blocks;	
-	UINT32	offset;
-	UINT32	offset2;
-	UINT32	buffer;
-	// definido em libc padrão
-	UINT8	mode[4];
-	UINT8	flag;
-	struct _FAT_BPB  *bpb; 
-	struct _VFS_FILE_HEADER *current;
-	struct _VFS_FILE_HEADER *next;
-	UINT8	rsvx[256 - 43];
 
-}__attribute__ ((packed)) VFS_FILE_HEADER;
+	GW_HAND *window = CreateWindow(TEXT("# Edit"),0,200,200,400,200,
+	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_WHITE) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
-typedef struct _VFS 
-{
-	// File Header 512 Bytes
-	VFS_FILE_HEADER header;
 
-	// LBA block start
-	UINT32	block[1024-128];
+	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,0,0,window->Area.Width,
+	window->Area.Height,GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_WHITE)),GW_FLAG_INVISIBLE);
 
-}__attribute__ ((packed)) VFS;
+
+	if ( argc != 3) {
+
+		//msgbox(error)
+		//exit(1);
+		for(;;)WindowFocus(window);
+
+	}
+
+
+	fd = fopen(argv[2],"r+");
+
+	if ( fd == NULL) {
+
+		//msgbox(error)
+		//exit(1);
+		for(;;)WindowFocus(window);
+
+
+	}
 
 
 
-#endif
+	char **buf = (char**) malloc (0x1000); //4 KiB
+	long pool  = (long) malloc (0x10000); //64 KiB
+
+	memset((char*)pool,0,0x10000);
+	memset(buf,0,0x1000);
+
+	buf[0] = (char*) pool;
+
+
+	char *line = buf[0];
+	fgets(line,0x1000,fd);
+
+
+	// enviar sms para box
+	Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT); 
+
+	// loop
+	while(TRUE) 
+	{
+
+		Send(box,(unsigned int)(buf),GW_SMG_NORMAL_BIT);
+		WindowFocus(window);
+
+		
+	}
+
+	//exit();
+	return 0;
+}

@@ -50,6 +50,8 @@ extern size_t fread (void *buffer,size_t num_bytes, size_t count, FILE *fp);
 extern int remove (const char *path);
 extern void rewind(FILE *fp);
 
+int fseek (FILE *fp, long num_bytes, int origin );
+
 
 // E/S pelo console
 extern int putchar(int c);

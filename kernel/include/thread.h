@@ -81,16 +81,18 @@ typedef struct _THREAD {
 	FRAME *frame;
 
 	UINT32 _static;
-	UINT32 flag;
+	UINT32 status;
 
 	// Stream default
 	FILE 	*stdin;
 	FILE 	*stdout;
 	FILE	*stderr;
+	FILE	*stdx;
 
 	// linker do próximo     
     	struct _THREAD *next;
 	struct _THREAD *tail;
+	struct _THREAD *alpha;
 
 
 }__attribute__((packed)) THREAD;
@@ -130,6 +132,13 @@ UINTN create_thread_child(THREAD	*thread,
 			UINT8 privileg);
 UINTN getpid();
 UINTN getcr3();
+
+int lockthread();
+int unlockthread(unsigned int pid);
+
+void taskswitch_pid(unsigned int pid);
+
+int cheksum_pid(unsigned int pid);
 
 
 

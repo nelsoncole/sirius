@@ -118,13 +118,14 @@ UINTN initialize_thread()
     	current_thread->next 	= NULL;
 	current_thread->tail 	= NULL;
 
-	current_thread->flag	= 0;
+	current_thread->status	= 0;
 
 
 
 	current_thread->stdin	= open(0,"stdi");
 	current_thread->stdout	= open(0,"stdo");
 	current_thread->stderr	= open(0,"stdr");
+	current_thread->stdx	= open(0,"std");
 
 
 	thread_ring0 = NULL;
@@ -154,7 +155,7 @@ UINTN create_thread(	VOID (*main)(),
 
     	new_thread->eax 	= eax;	// argv	
     	new_thread->ebx 	= ebx;	// bootinfo
-    	new_thread->ecx 	= ecx;	// argc
+    	new_thread->ecx 	= ecx;	// stdx
     	new_thread->edx 	= edx; 	// stdin
     	new_thread->edi 	= 0;	// stdout
     	new_thread->esi 	= 0;	// stderr
@@ -207,15 +208,17 @@ UINTN create_thread(	VOID (*main)(),
     	new_thread->next 	= NULL;
 	new_thread->tail 	= NULL;
 
-	new_thread->flag	= 0;
+	new_thread->status	= 0;
 
 	new_thread->stdin	= open(0,"stdi");
 	new_thread->stdout	= open(0,"stdo");
 	new_thread->stderr	= open(0,"stdr");
+	new_thread->stdx	= open(0,"stdi");
 
 	new_thread->edx 	= (unsigned int) new_thread->stdin;
 	new_thread->edi 	= (unsigned int) new_thread->stdout;
 	new_thread->esi 	= (unsigned int) new_thread->stderr;
+	new_thread->ecx		= (unsigned int) new_thread->stdx;
 
     
      
@@ -259,7 +262,7 @@ UINTN create_thread_child(THREAD	*thread,
 
 	new_thread->eax 	= eax;	// argv	
     	new_thread->ebx 	= ebx;	// bootinfo
-    	new_thread->ecx 	= ecx;	// argc
+    	new_thread->ecx 	= ecx;	// stdx
     	new_thread->edx 	= edx; 	// stdin
     	new_thread->edi 	= 0;	// stdout
     	new_thread->esi 	= 0;	// stderr
@@ -303,7 +306,6 @@ UINTN create_thread_child(THREAD	*thread,
 	new_thread->eflag 	= 0x3202;
     	new_thread->cr3 	= (UINT32)page_directory;
 
-
 	new_thread->pd   	= (PAGE_DIRECTORY*)page_directory;
 
 	UINTN d = (UINTN) (APP_VIRTUAL_ADDRESS >> 22 &0x3FF);
@@ -311,16 +313,19 @@ UINTN create_thread_child(THREAD	*thread,
 
     	new_thread->next 	= NULL;
 	new_thread->tail 	= NULL;
+	new_thread->alpha	= thread;
 
-	new_thread->flag	= 1;
+	new_thread->status	= 1;
 
 	new_thread->stdin	= thread->stdin;
 	new_thread->stdout	= thread->stdout;
 	new_thread->stderr	= thread->stderr;
+	new_thread->stdx	= thread->stdx;
 
 	new_thread->edx 	= (unsigned int) new_thread->stdin;
 	new_thread->edi 	= (unsigned int) new_thread->stdout;
 	new_thread->esi 	= (unsigned int) new_thread->stderr;
+	new_thread->ecx		= (unsigned int) new_thread->stdx;
 
 	
 
@@ -371,6 +376,8 @@ VOID task_switch(VOID){
 
 	}else exit_thread = 0;
 
+
+_switch:
     	// Pula, se ainda não tiver 
     	// a tarefa inicializada...
     	if (!current_thread) goto end;
@@ -400,6 +407,20 @@ VOID task_switch(VOID){
     	current_thread = thread_ready_queue->next;
 
     	}
+
+
+
+	// teste de execuncao
+
+	if (current_thread->status&0x2)  //processo bloqueado
+	{
+
+		goto _switch;
+
+	}
+
+
+
 
     	// Restaura o contexto da próxima
     	// tarefa a ser executada...
@@ -458,3 +479,74 @@ UINTN getcr3()
 {
     return current_thread->cr3;
 }
+
+
+int lockthread()
+{
+	return (current_thread->status |= 0x2);
+
+}
+
+int unlockthread(unsigned int pid)
+{
+
+	THREAD	*thread = thread_ready_queue;
+
+		
+	while(thread) {
+
+		if(thread->pid == pid)
+		{
+			return (thread->status &=~0x2);
+
+		} else thread = thread->next;
+	}
+
+	return 0;
+
+}
+
+
+
+void taskswitch_pid(unsigned int pid)
+{
+
+	THREAD	*thread = thread_ready_queue;
+
+		
+	while(thread) {
+
+		if(thread->pid == pid)
+		{
+
+			// task switch
+			return;
+
+		} else thread = thread->next;
+	}
+
+
+
+
+}
+
+int cheksum_pid(unsigned int pid) {
+
+	THREAD *thread 	= thread_ready_queue;
+
+	while(thread) 
+	{
+		if(thread->pid == pid) return thread->pid;
+		else if(thread->pid > pid) return 0;
+
+		thread = thread->next;
+	}
+
+
+	return 0;
+
+}
+
+
+
+

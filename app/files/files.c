@@ -57,10 +57,13 @@ INTN main() {
 	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_GRAY)),GW_FLAG_INVISIBLE);
 
 	FILE *vfs;
-	FILE *vfs1 = (FILE*)malloc(0x10000);
-	FILE *vfs2 = (FILE*)malloc(0x10000);
-	memset(vfs1,0,0x10000);
-	memset(vfs1,0,0x10000);
+	FILE *vfs1 = (FILE*)malloc(sizeof(FILE));
+	FILE *vfs2 = (FILE*)malloc(sizeof(FILE));
+
+	vfs1->header.buffer = (unsigned int)malloc(0x10000);
+	vfs2->header.buffer = (unsigned int)malloc(0x10000);
+	
+	
 
 	FILE *fd = open(".",ATTR_DIRECTORY,"r");
 
@@ -68,7 +71,8 @@ INTN main() {
 
 
 		vfs = vfs1;
-		__copymem(vfs,fd,fd->header.blocks*64);
+		vfs->header.blocks = fd->header.blocks;
+		__copymem((void*)vfs->header.buffer,(void*)fd->header.buffer,0x10000);
 		
 		Send(file,(UINT32)vfs,0 &GW_SMG_NORMAL_BIT);
 
@@ -77,7 +81,6 @@ INTN main() {
 		close(fd);
 
 	}
-
 	
 
 	i = 0;
@@ -123,14 +126,18 @@ INTN main() {
 
 		if(fd != NULL) {
 
-			__copymem(vfs,fd,fd->header.blocks*64);
+			vfs->header.blocks = fd->header.blocks;
+			__copymem((void*)vfs->header.buffer,(void*)fd->header.buffer,0x10000);
 		
 			Send(file,(UINT32)vfs,0 &GW_SMG_NORMAL_BIT);
 
 			if(vfs==vfs1) vfs = vfs2;
-			else vfs = vfs1;
+
+			else  vfs = vfs1;
+
 
 			close(fd);
+
 
 		}	
 

@@ -1,5 +1,5 @@
 /*
- * File Name: type.c
+ * File Name: typ.h
  *
  *
  * BSD 3-Clause License
@@ -113,11 +113,12 @@ typedef struct _VFS_FILE_HEADER
 	CHAR8	filename[256];
 	UINT8 	attr;
 	UINT32	size;
+	UINT32	size2;
 	UINT8	dev;
 	UINT8	p_entry;
-	UINT16	bps;
+	UINT32	bps;
 	// números de sector por bloco
-	UINT8	count;
+	UINT32	count;
 	// número total de blocos
 	UINT32	blocks;	
 	UINT32	offset;
@@ -153,6 +154,19 @@ typedef struct _MOUSE {
 	UINT32	handle;
 
 }__attribute__((packed)) MOUSE;
+
+typedef struct _SD {
+	char id[4];
+	unsigned int devnum;
+	unsigned int UID;
+	unsigned int partnum;
+	unsigned int lba_start;
+	unsigned int lba_end;
+	unsigned int num_sectors;
+	unsigned short byte_of_sector;
+	unsigned short pid;
+
+}__attribute__((packed)) SD;
 
 
 

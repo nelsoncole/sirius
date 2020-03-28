@@ -15,11 +15,12 @@ typedef struct _FILE_HEADER
 	unsigned char	filename[256];
 	unsigned char 	attr;
 	unsigned int	size;
+	unsigned int 	size2;
 	unsigned char	dev;
 	unsigned char	p_entry;
-	unsigned short	bps;
+	unsigned int	bps;
 	// números de sector por bloco
-	unsigned char	count;
+	unsigned int	count;
 	// número total de blocos
 	unsigned int	blocks;	
 	unsigned int	offset;

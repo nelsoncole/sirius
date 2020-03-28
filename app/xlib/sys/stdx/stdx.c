@@ -1,5 +1,5 @@
 /*
- * File Name: vfs.h
+ * File Name: stdx.c
  *
  *
  * BSD 3-Clause License
@@ -34,52 +34,70 @@
  *
  */
 
+#include <sys/sys.h>
 
-#ifndef __VFS_H__
-#define __VFS_H__
 
-#define ATTR_ARCHIVE 	0
-#define ATTR_DIRECTORY 	1
+// 32 KiB ----> keyboard mensagem 
+// 28 KiB ----> normal mensagem 
+// 4 KiB ----> mouse mensagem 
 
-struct _FAT_BPB;
+// fd->header.offset for keyboard
+// fd->header.offset2 for normal
+// fd->header.block for mouse
 
-typedef struct _VFS_FILE_HEADER 
+
+#define SIZE_NORMAL_MENSAGEM 1792
+
+int write_stx(unsigned int id, unsigned int data1,unsigned int data2,FILE *fd)
 {
-	// File Header 4 KiB
-	CHAR8	filename[256];
-	UINT8 	attr;
-	UINT32	size;
-	UINT32	size2;
-	UINT8	dev;
-	UINT8	p_entry;
-	UINT32	bps;
-	// números de sector por bloco
-	UINT32	count;
-	// número total de blocos
-	UINT32	blocks;	
-	UINT32	offset;
-	UINT32	offset2;
-	UINT32	buffer;
-	// definido em libc padrão
-	UINT8	mode[4];
-	UINT8	flag;
-	struct _FAT_BPB  *bpb; 
-	struct _VFS_FILE_HEADER *current;
-	struct _VFS_FILE_HEADER *next;
-	UINT8	rsvx[256 - 43];
 
-}__attribute__ ((packed)) VFS_FILE_HEADER;
+	STDX *pipe = (STDX*) (fd->header.buffer + (32*1024));
+	int i;
 
-typedef struct _VFS 
+	for(i=0;i<SIZE_NORMAL_MENSAGEM;i++)
+	{
+		if(pipe->pid == 0) break;
+		else pipe++;
+
+	}
+
+	// test
+	if(i >= SIZE_NORMAL_MENSAGEM) return 0;
+
+	pipe->id = id;
+	pipe->pid = getpid();
+	pipe->data1 = data1;
+	pipe->data2 = data2;
+	
+
+	// bloquear processo
+	// task switch
+	lockthread();
+	taskswitch();
+
+	i = pipe->id;
+
+	pipe->pid = 0;
+
+	return i;
+}
+
+
+STDX *read_stx(FILE *fd)
 {
-	// File Header 512 Bytes
-	VFS_FILE_HEADER header;
+	STDX *pipe = (STDX*) (fd->header.buffer + (32*1024));
+	int i;
 
-	// LBA block start
-	UINT32	block[1024-128];
+	for(i=0;i<SIZE_NORMAL_MENSAGEM;i++)
+	{
+		if((pipe->pid != 0) && (pipe->pid != 0xFFFFFFFF) ) break;
+		else pipe++;
 
-}__attribute__ ((packed)) VFS;
+	}
 
 
+	// test
+	if(i >= SIZE_NORMAL_MENSAGEM) return 0;
 
-#endif
+	return pipe;
+}

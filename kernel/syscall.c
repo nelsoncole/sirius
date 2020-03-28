@@ -40,11 +40,7 @@
 extern VOID interrupter(INTN n,UINT32 offset,UINT16 sel,UINT8 dpl );
 extern void int114(); // system call
 extern void int113(); // exit
-
-static VOID sys_exit()
-{
-    	exit();
-}
+extern void int112(); // taskswitch
 
 
 static VOID *sys_malloc(UINTN size)
@@ -75,16 +71,52 @@ UINTN sys_do_exec_child(CONST CHAR8 *name,UINT8 prv) {
 
 }
 
-int syscall_exectve(int argc,char **argv,FILE *fp) {
+int syscall_exectve(int argc,char **argv,char *pwd,FILE *fp) {
 
-	int pid = exectve(argc,argv,fp);
+	int pid = exectve(argc,argv,pwd,fp);
 
 	if(pid) set_focus(pid);
 
 	return pid;
 
 }
+int syscall_exectve_child(int argc,char **argv,char *pwd,FILE *fp)
+{
 
+	THREAD *father_thread = current_thread;
+
+	return exectve_child(argc,argv,pwd,fp,father_thread);
+
+}
+
+int syscall_getpid() {
+
+	return getpid();
+
+}
+
+int syscall_cheksum_pid(unsigned int pid)
+{
+
+	return cheksum_pid(pid);
+}
+
+int syscall_lockthread()
+{
+	return lockthread();
+}
+
+int syscall_unlockthread(unsigned int pid)
+{
+
+	return unlockthread(pid);
+
+}
+
+void syscall_taskswitch_pid(unsigned int pid) 
+{
+	taskswitch_pid(pid);
+}
 
 int syscall_read_sector(int p,int count,unsigned int lba32_47 ,void *buffer,unsigned int lba0_31) {
 
@@ -102,31 +134,44 @@ int syscall_write_sector(int p,int count,unsigned int lba32_47 ,void *buffer,uns
 
 }
 
+unsigned int syscall_sectors(int devnum)
+{
+	return ata_sectors(devnum);
+}
+
+unsigned int syscall_bps(int devnum)
+{
+	return ata_bps(devnum);
+
+}
 
 extern int terminal;
 void syscall_unknown(void){
 
-	terminal = 1;
+	terminal = 1; // FIXME improvisorio, faz com que o kernel execute o Terminal
 
 }
 
+
+// eax, edx, ecx, ebx, edi, esi
+
 VOID *syscall_table[SYSCALL_NUM]={
-    	syscall_unknown,	// eax, 0	null
-    	&sys_exit,       	// eax, 1    	sys_exit
+    	&syscall_unknown,	// eax, 0	null
+    	&syscall_unknown,       // eax, 1    	reserved
 	&sys_malloc,       	// eax, 2    	sys_malloc, edx = size
 	&sys_free,       	// eax, 3    	sys_free, edx = buf
 	&sys_reboot,       	// eax, 4    	sys_reboot
 	&syscall_unknown,	// eax, 5	reserved
-	&syscall_unknown,	// eax, 9	reserved
+	&syscall_exectve_child, // eax, 6	syscall_exectve_child, edx = argc, ecx = argv, ebx = pwd, edi = FILE
 	&sys_do_exec_child,	// eax, 7	sys_do_exec_child, edx = filename, ecx = prv
-	&syscall_exectve,	// eax, 8	syscall_exectve, edx = argc, ecx = argv, ebx = FILE
-	&syscall_unknown,	// eax, 9	reserved
-	&syscall_unknown,	// eax, 10	reserved
-	&syscall_unknown,	// eax, 11	reserved
-	&syscall_unknown,	// eax, 12	reserved
-	&syscall_unknown,	// eax, 13	reserved
-	&syscall_unknown,	// eax, 14	reserved
-	&syscall_unknown,	// eax, 15	reserved
+	&syscall_exectve,	// eax, 8	syscall_exectve, edx = argc, ecx = argv, ebx = pwd, edi = FILE
+	&syscall_getpid,	// eax, 9	syscall_getpid
+	&syscall_lockthread,	// eax, 10	syscall_lockthread
+	&syscall_unlockthread,	// eax, 11	syscall_unlockthread edx = pid
+	&syscall_taskswitch_pid,// eax, 12	syscall_taskswitch_pid, edx = pid
+	&syscall_cheksum_pid,	// eax, 13	syscall_cheksum_pid, edx = pid
+	&syscall_sectors,	// eax, 14	syscall_sectors, edx = devnum
+	&syscall_bps,		// eax, 15	syscall_bps, edx = devnum
 	&syscall_read_sector,	// eax, 0x10	read_sector, edx = MediaID, ecx = count, ebx = LBA32-47, edi = buffer, esi = LBA0-31
 	&syscall_write_sector,	// eax, 0x11	write_sector, edx = MediaID, ecx = count, ebx = LBA32-47, edi = buffer, esi = LBA0-31
 };
@@ -170,9 +215,9 @@ VOID syscall_install()
 	REG reg;
 	reg.cs = 0x8; 
 
-
-	interrupter(0x71,(UINTN)int113,reg.cs,0);
 	// ring 3
+	interrupter(0x70,(UINTN)int112,reg.cs,3);
+	interrupter(0x71,(UINTN)int113,reg.cs,3);
     	interrupter(0x72,(UINTN)int114,reg.cs,3);
 	
 }

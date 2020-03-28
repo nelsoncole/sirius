@@ -88,7 +88,7 @@ FILE *open (const char *filename,const char *mode)
 		// 64 KiB
 		alloc_pages(0,16,(VIRTUAL_ADDRESS *)&stream->header.buffer);
 
-		setmem((void*)(stream->header.buffer),0x10000,' ');
+		setmem((void*)(stream->header.buffer),0x10000,0);
 
 
 		return (FILE*) stream;

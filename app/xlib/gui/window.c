@@ -65,7 +65,7 @@ GW_HAND *create_window_mouse(long X,long Y, long Width, long Height,long Style,l
 
 
 
-	GwHand->box = CreateBox(GwHand,8,8,GwHand->Width,GwHand->Height, 
+	GwHand->box = CreateBox(GwHand,8,0,GwHand->Width,GwHand->Height, 
 	GW_STYLE(FORE_GROUND(GwHand->Style &0xff) | BACK_GROUND(GwHand->Style >> 8 &0xff)),GW_FLAG_VISIBLE);
 	
 
@@ -99,6 +99,7 @@ int update_window_mouse(GW_HAND *_GwHand)
 	// Area da borda
 	DrawRect (GwHand->X,GwHand->Y,GwHand->Width,GwHand->Height,ColorTable[GW_GRAY],GwHand->Buffer);
 
+
 	// Data
 	if((GwHand->box->Flag &GW_FLAG_READY)) {
 
@@ -111,8 +112,8 @@ int update_window_mouse(GW_HAND *_GwHand)
 	// Select item
 	//if(GlobalObjectFocus == Hand) {
 		if((GwHand->Msg2 * 16) < (GwHand->Area.Height - 16) )
-		DrawRect (GwHand->X + 4,GwHand->Y + 8 + (GwHand->Msg2 *16),\
-		GwHand->Width - 20 ,16,0x808080,GwHand->Buffer);
+		DrawRect (GwHand->X + 4,GwHand->Y + (GwHand->Msg2 *16),\
+		GwHand->Width - 8,16,ColorTable[GW_GRAY],GwHand->Buffer);
 	//}
 	
 	

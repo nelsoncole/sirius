@@ -333,6 +333,9 @@ static UINTN ata_identify_device(UINTN p,UINT16 *buffer)
         	ata[p].lba_type	= (buffer[83]&0x0400)? ATA_LBA48:ATA_LBA28;
         	ata[p].mode 	= ATA_PIO_MODO;//FIXME(buffer[49]&0x0100)? ATA_DMA_MODO:ATA_PIO_MODO;
 		ata[p].bps 	= 512; 
+		// Total number of sectors = LBA28 60-61, LBA48 100-103
+		ata[p].sectors	= buffer[60] &0xffff;
+		ata[p].sectors	+= buffer[61] << 16 &0xffffffff;
 
 			break;
 
@@ -350,7 +353,9 @@ static UINTN ata_identify_device(UINTN p,UINT16 *buffer)
 		ata[p].dev_type	=(buffer[0]&0x8000)? ATADEV_PATAPI : 0xffff;
         	ata[p].lba_type	= ATA_LBA28;
         	ata[p].mode 	= ATA_PIO_MODO;//FIXME(buffer[49]&0x0100)? ATA_DMA_MODO:ATA_PIO_MODO;
-        	ata[p].bps 	= 2048; 
+        	ata[p].bps 	= 2048;
+
+		ata[p].sectors	= 0; 
 
 			break;
 
@@ -614,3 +619,13 @@ UINTN ata_initialize()
                                                                                                  
 }
 
+
+unsigned int ata_sectors(int devnum)
+{
+	return ata[devnum].sectors;
+}
+
+unsigned int ata_bps(int devnum)
+{
+	return ata[devnum].bps;
+}

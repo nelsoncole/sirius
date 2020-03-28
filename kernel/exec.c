@@ -115,7 +115,7 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 	int pagesize = (physize/4096);
 	if((physize%4096)) pagesize++;
 
-	for(i = 0; i < pagesize +1;i++){
+	for(i = 0; i < pagesize;i++){
 
 		_pt->p = 1;
 		_pt->rw= 1;
@@ -133,9 +133,8 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 	int physblocks = ((pagesize*4)/64);
 	if(((pagesize*4)%64)) physblocks++;
 
-	alloc_frame(pt,physblocks +1,(VIRTUAL_ADDRESS *)&frame);
+	alloc_frame(pt,physblocks,(VIRTUAL_ADDRESS *)&frame);
 
-	
 
 	// Page Directory
 	pd[d].p = 1;
@@ -170,7 +169,9 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 		copymem((UINT8*)header->start + 0x20,(UINT8*)0x101038,sizeof(GUI));
 
 		// envia o PID
-		p  	= (UINT32*)(header->start + 0x114);
+		p  	= (UINT32*)(header->start + 0x10C);
+		*p++	= 0; // Detail Hardware
+		*p++	= (unsigned int) device;
 		*p++ 	= next_pid;
 		*p++	= (UINT32) focus;
 		*p++	= (UINT32) GwFocus;
@@ -286,7 +287,7 @@ UINTN do_exec_child(THREAD *father_thread,CONST CHAR8 *name,UINT8 prv)
 	int pagesize = (physize/4096);
 	if((physize%4096)) pagesize++;
 
-	for(i = 0; i < pagesize +1;i++){
+	for(i = 0; i < pagesize;i++){
 
 		_pt->p = 1;
 		_pt->rw= 1;
@@ -304,7 +305,7 @@ UINTN do_exec_child(THREAD *father_thread,CONST CHAR8 *name,UINT8 prv)
 	int physblocks = ((pagesize*4)/64);
 	if(((pagesize*4)%64)) physblocks++;
 
-	alloc_frame(pt,physblocks +1,(VIRTUAL_ADDRESS *)&frame);
+	alloc_frame(pt,physblocks,(VIRTUAL_ADDRESS *)&frame);
 
 	
 
@@ -341,9 +342,14 @@ UINTN do_exec_child(THREAD *father_thread,CONST CHAR8 *name,UINT8 prv)
 		copymem((UINT8*)header->start + 0x20,(UINT8*)0x101038,sizeof(GUI));
 
 		// envia o PID
-		p  	= (UINT32*)(header->start + 0x114);
+		p  	= (UINT32*)(header->start + 0x10C);
+		*p++	= 0; // Detail Hardware
+		*p++	= (unsigned int) device;
 		*p++ 	= next_pid;
-		*p	= (UINT32)focus;
+		*p++	= (UINT32) focus;
+		*p++	= (UINT32) GwFocus;
+		*p++	= (UINT32) mouse;
+		*p++	= (UINT32) rtc;
 
 
 		if((prv&1) == 1)esp0 =(UINT32)(&stack_esp_0);/*(UINTN)malloc(0x2000);*/

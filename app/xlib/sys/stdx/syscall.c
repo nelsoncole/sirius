@@ -1,5 +1,5 @@
 /*
- * File Name: vfs.h
+ * File Name: syscall.c
  *
  *
  * BSD 3-Clause License
@@ -34,52 +34,58 @@
  *
  */
 
+#include <sys/sys.h>
 
-#ifndef __VFS_H__
-#define __VFS_H__
 
-#define ATTR_ARCHIVE 	0
-#define ATTR_DIRECTORY 	1
-
-struct _FAT_BPB;
-
-typedef struct _VFS_FILE_HEADER 
+int getpid() 
 {
-	// File Header 4 KiB
-	CHAR8	filename[256];
-	UINT8 	attr;
-	UINT32	size;
-	UINT32	size2;
-	UINT8	dev;
-	UINT8	p_entry;
-	UINT32	bps;
-	// números de sector por bloco
-	UINT32	count;
-	// número total de blocos
-	UINT32	blocks;	
-	UINT32	offset;
-	UINT32	offset2;
-	UINT32	buffer;
-	// definido em libc padrão
-	UINT8	mode[4];
-	UINT8	flag;
-	struct _FAT_BPB  *bpb; 
-	struct _VFS_FILE_HEADER *current;
-	struct _VFS_FILE_HEADER *next;
-	UINT8	rsvx[256 - 43];
+	
+	int rc = 0;
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(9));
+	
+	return rc;
+}
 
-}__attribute__ ((packed)) VFS_FILE_HEADER;
-
-typedef struct _VFS 
+void taskswitch() 
 {
-	// File Header 512 Bytes
-	VFS_FILE_HEADER header;
 
-	// LBA block start
-	UINT32	block[1024-128];
+	__asm__ __volatile__("int $0x70"::);
+	
+}
 
-}__attribute__ ((packed)) VFS;
+void taskswitch_pid(unsigned int pid) 
+{
+	//__asm__ __volatile__("int $0x72":"=a"(rc):"a"(12),"d"(pid));
+	__asm__ __volatile__("int $0x70"::);
+	
+}
 
+int lockthread() 
+{
+	
+	int rc = 0;
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(10));
+	
+	return rc;
+}
 
+int unlockthread(unsigned int pid) 
+{
+	
+	int rc = 0;
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(11),"d"(pid));
+	
+	return rc;
+}
 
-#endif
+int cheksum_pid(unsigned int pid) 
+{
+
+	int rc = 0;
+
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(13),"d"(pid));
+
+	return rc;
+
+}
+

@@ -43,20 +43,28 @@
 
 UINTN exit_thread = 0;
 
-UINTN exit()
-{
-	UINTN rc = 0;
 
-	// retorna error se nao tiver nenhuma thread na lista
-	if (!current_thread) rc = -1;
-	else if(!current_thread->pid) rc = -1;
-	else {
+THREAD *exit_child(THREAD *thread)
+{
+
+	
+	if(!thread) return 0;
+	else if(!thread->pid) return 0;
+
+
+	THREAD *tail = thread->tail;
+
+	if(!tail) return 0;
+
+	if(tail) thread->tail  = tail->tail;
+
 
 	// Pega o proximo item e aponta para o inicio
-	THREAD	*next = current_thread->next;
+	THREAD	*next = tail->next;
 	THREAD	*p = thread_ready_queue;
 	// salve ponteiro
-	THREAD	*current = current_thread;
+	THREAD	*current = tail;
+
 
 	// Percorre a lista ate achar o p->next igual ao current_thread
 	do{
@@ -64,47 +72,117 @@ UINTN exit()
 		if(p->next == current)break;
 		p = p->next;
 
-	}while(TRUE);
+	}while(p);
+
+	if(!p) return 0;
 
 	// aponta o p->next para o next
 	p->next = next;
-	
 
-	if(!current->_static) {
-		current->flag = -1;
-		free_pages(current->pd);
-		free_pages(current->pt);
-		free_frame(current->frame);
-	}
-
-
-	// Exit focos
-	if(focus->pid == current->pid ){
-
-		focus->pd = thread_ready_queue->cr3;
-		focus->pid = thread_ready_queue->pid;
-	}
-
-
-	
-
-	close(current->stdin);
-	close(current->stdout);
-	close(current->stderr);
+	current->status = -1; // Processo morto
+	free_pages(current->pd);
+	free_pages(current->pt);
+	free_frame(current->frame);
 	free(current);
 
-	exit_thread = 1;
+	return thread;
+
+}
 
 
-	// Tast switch
-	__asm__ __volatile__("int $0x71"::);
+
+
+int exit() 
+{
+	// Pega o proximo item e aponta para o inicio
+	THREAD	*next = current_thread->next;
+	THREAD	*p = thread_ready_queue;
+	// salve ponteiro
+	THREAD	*current = current_thread;
+	
+	THREAD *thread_child = current_thread;
+
+	// Percorre a lista ate achar o p->next igual ao current_thread
+	do{
+
+		if(p->next == current)break;
+		p = p->next;
+
+	}while(p);
+
+	if(!p) return -1;
+
+	// aponta o p->next para o next
+	p->next = next;
+
+
+	if(!(current->status&1)) // processo pai
+	{
+		// exit processo filho
+		while(thread_child)
+		{	
+			thread_child = exit_child(thread_child);
+		}
+
+		if(!current->_static) 
+		{
+			current->status = -1; // Processo morto
+			free_pages(current->pd);
+			free_pages(current->pt);
+			free_frame(current->frame);
+		}
+
+
+		// Exit focos
+		if(focus->pid == current->pid ) 
+		{
+			focus->pd = thread_ready_queue->cr3;
+			focus->pid = thread_ready_queue->pid;
+		}
+
+
+		close(current->stdin);
+		close(current->stdout);
+		close(current->stderr);
+		close(current->stdx);
+		free(current);
 
 
 
-	rc = 0;
+	} else if(current->status&1) { // processo filho
+
+		// exit processo filho
+		while(thread_child)
+		{	
+			thread_child = exit_child(thread_child);
+		}
+
+		if(!current->_static) 
+		{
+			current->status = -1; // Processo morto
+			free_pages(current->pd);
+			free_pages(current->pt);
+			free_frame(current->frame);
+		}
+
+
+		// Exit focos
+		if(focus->pid == current->pid ) 
+		{
+			focus->pd = thread_ready_queue->cr3;
+			focus->pid = thread_ready_queue->pid;
+		}
+
+
+		current->alpha->tail = NULL;
+		free(current);
 
 	}
 
 
-	return rc;
+	return 0;
+
 }
+
+
+

@@ -39,6 +39,10 @@
 #include <stdlib.h>
 #include <sys/sys.h>
 
+#define MSG_CLEARSCREEN 1
+#define MSG_SETCURSOR 2
+#define MSG_EXIT 0x80
+
 #define SHELL_CMD_NUM 17 + 3
 
 void (*call_loader)  (int argc,char **argv) = 0;// NULL;
@@ -203,20 +207,19 @@ int main()
 {
 
 	int i;
-	char *cmd_name = (char*) malloc(0x10000);
+	char *cmd_name = (char*) malloc(0x1000);
 
 	char **argv = argv_malloc(32);
 	int argc;
 	
 	for(;;) {
 		memset(cmd_name,0,0x1000);
-
+		//fputs( "__________________\n",stdout);
 		printf("[ sirius@nelson ]# ");
-
-		for(i=0;i<32;i++)memset(argv[i],0,128);
 
 		fgets (cmd_name,0x1000,stdin);
 
+		for(i=0;i<32;i++)memset(argv[i],0,128);
 		argc = argc_num(argv,cmd_name);
 	
 		for(i=0;i < SHELL_CMD_NUM;i++) {
@@ -246,30 +249,14 @@ int main()
 
 int cmd_cd(int argc,char **argv)
 {
-
     	return 0;
 }
 
 int cmd_cls(int argc,char **argv)
 {
-	char str[256];
 
-	int length = 25; //argv[1];
+	write_stx(MSG_CLEARSCREEN,0,0,stdx);
 
-	if(argc < 2)return 0;
-
-	fgets(str,length,stdout);
-
-	FILE *fp = fopen(argv[1],"w+");
-	if(fp != NULL) { 
-
-		fputs(str,fp);
-		close(fp);
-
-	}
-
-
-	//cls();
     	return 0;
 }
 
@@ -363,6 +350,8 @@ int cmd_echo(int argc,char **argv)
 
 int cmd_exit(int argc,char **argv)
 {
+	write_stx(MSG_EXIT,0,0,stdx);
+
     	return 0;
 }
 int cmd_help(int argc,char **argv)
@@ -371,8 +360,9 @@ int cmd_help(int argc,char **argv)
        	puts("Commands:\n");
         for(i=0;i< SHELL_CMD_NUM;i++){
         	puts(cmd_table[i].name);
-        	//set_cursor_x(15);
-		puts("     ");
+        	//set_cursor
+		write_stx(MSG_SETCURSOR,15,0,stdx);
+
         	puts(cmd_table[i].help);
 		putchar('\n');
 
@@ -402,14 +392,17 @@ int cmd_info(int argc,char **argv)
 	\n0x10001104 - 0x10001107   X               // size 4 bytes\
 	\n0x10001108 - 0x1000110B   Y               // size 4 bytes\
 	\n0x1000110C - 0x1000110F  *Detail Hardware // size 4 bytesn\
-	\n0x10001110 - 0x10001113   reserved        // size 4 bytes\
+	\n0x10001110 - 0x10001113  *Device          // size 4 bytes\
 	\n0x10001114 - 0x10001117   PID             // size 4 bytes\
 	\n0x10001118 - 0x1000111B  *FOCUS           // size 4 bytes\
 	\n0x1000111C - 0x1000111F  *GwFOCUS         // size 4 bytes\
 	\n0x10001120 - 0x10001123  *MOUSE           // size 4 bytes\
 	\n0x10001124 - 0x10001127  *RCT             // size 4 bytes\
-	\n0x10001128 - 0x100011FF   reserved        // size 220 bytes\
-	\n0x10001200 - 0x100012FF   Channel         // size 256 bytes\n");
+	\n0x10001128 - 0x100011F3   reserved        // size 208 bytes\
+	\n0x100011F4 - 0x100011F7   pwd             // size 4 bytes\
+	\n0x100011F8 - 0x100011FB   argc            // size 4 bytes\
+	\n0x100011FC - 0x100011FF   **argv          // size 4 bytes\
+	\n0x10001200 - 0x100012FF   **argv data     // size 256 bytes\n");
 
         return 0;
 
@@ -465,33 +458,23 @@ int cmd_rename(int argc,char **argv)
 }
 
 int cmd_run(int argc,char **argv)
-{
-	int rc = 0;
+{		
 
+	unsigned int pid_ret = exectve(argc,argv);
 
-	if(argc < 2) { 
-
-		printf("Run: \"%s\" error\n",argv[1]);
-		return 0;
-
-	}
-
-	FILE *fp = fopen(argv[1],"rb");
-
-	if(fp == NULL) { 
+	if(!pid_ret) {
 
 		printf("Run: \"%s\" error\n",argv[1]);
-		return 0;
-
+		return -1;
 	}
 
-	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(8),"d"(argc),"c"(argv),"b"(fp));
 
+	// wait pid
+	write_stx(X_MSG_WAIT_PID,pid_ret,0,stdxserver);
 
-	fclose(fp);
+	fputc('\n',stdout);
 
-
-	return rc;
+	return 0;
 
 
 }
@@ -506,6 +489,13 @@ int cmd_shutdown(int argc,char **argv)
 }
 int cmd_time(int argc,char **argv)
 {
+	unsigned i = 0;
+	while(1) {
+
+		printf("%d ",i++);	
+
+	}
+
 
     	return 0;
 

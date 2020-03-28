@@ -79,7 +79,7 @@ int _putc (int ch, FILE *fp)
 				for(i = 0;i<block_count;i++) {
 
 					lba_start = block[(fp->header.offset/bps/count) + i] + (fp->header.offset/bps%count);
-					if(block_read(dev_n,count,lba_start,buffer)) return EOF;
+					if(block_read(dev_n,count,lba_start,buffer+(count*bps*i))) return EOF;
 
 				}
 

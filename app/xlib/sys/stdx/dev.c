@@ -1,5 +1,5 @@
 /*
- * File Name: os.c
+ * File Name: dev.c
  *
  *
  * BSD 3-Clause License
@@ -33,43 +33,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#include <os.h>
- 
 
-VOID wait_ns(UINTN count)
-{
-	count /=100;	 
-	while(--count)__asm__ __volatile__("out %%al,$0x80"::);
-}
+#include <sys/sys.h>
+#include <stdlib.h>
 
-
-//  MSR
-UINTN 
-getmsr(UINT32 msr, UINT32 *low, UINT32 *hight)
-{
-	__asm__ __volatile__("rdmsr":"=a"(*low),"=d"(*hight):"c"(msr));
-	return 0;
-}
-
-UINTN 
-setmsr(UINT32 msr, UINT32 low, UINT32 hight)
-{
-	__asm__ __volatile__("wrmsr": :"a"(low),"d"(hight),"c"(msr));
-	return 0;
-}
-
-
-SD *request_sdx()
+static int checksum_sdx(int dev)
 {
 
-	unsigned int *bf = (unsigned int *) (sd->header.buffer);
+	SD *sdx = (SD*) (stdsd->header.buffer);
 
 	int i;
 	for(i=0;i<64;i++)
 	{
-		if(bf[3] == 0) break;
+		if((sdx->devnum == dev) && (sdx->partnum == 12345)) {
+			return -1;
+		}
 
-		bf = (unsigned int *) (sd->header.buffer + (i*1024));
+		sdx = (SD*) (stdsd->header.buffer + (i*1024));
+	}
+
+	if(i >= 64) return 0;
+
+
+	return  -1;
+}
+
+SD *request_sdx()
+{
+
+	unsigned int *bf = (unsigned int *) (stdsd->header.buffer);
+	SD *sdx = NULL;
+
+	int i;
+	for(i=0;i<64;i++)
+	{
+		if(bf[3] == 0) {
+			sdx = (SD*) bf;
+			sdx->pid = i;
+			break;
+		}
+
+		bf = (unsigned int *) (stdsd->header.buffer + (i*1024));
 	}
 
 	if(i >= 64) return  (SD*)0;
@@ -81,7 +85,8 @@ SD *request_sdx()
 SD *request_sdn(unsigned int addr)
 {
 
-	unsigned int _addr = addr + 32;
+	unsigned int _addr = addr;
+
 	unsigned int *bf = (unsigned int *) (_addr);
 
 	int i;
@@ -98,72 +103,88 @@ SD *request_sdn(unsigned int addr)
 	return  (SD*)bf;
 }
 
-int conect_sd(int dev)
+int mount_sd(int dev)
 {
 	int i;
 	int rc = -1;
+	int pid = 0;
+	int bps = 0;
+
 	// LOADER MBR
 	MBR *mbr = (MBR*)malloc(0x1000);
 
-	if(read_sector(dev,1,0,mbr) ) { 
+	if(block_read(dev,1,0,mbr) ) 
+	{ 
+
 		free(mbr);
 		return -1;
 	} 
 	else {
 
+
+		// cheksum
+		if(checksum_sdx(dev))
+		{
+
+			free(mbr);
+			return -1;
+
+		}
+
 		// conect device
 		SD *sdx = request_sdx();
 
 		if(!sdx) { 
+	
 			free(mbr);
 			return -1;
 		} 
 
+
+		pid = 0x61 + sdx->pid - 1;
+
 		sdx->id[0] = 's';
 		sdx->id[1] = 'd';
-		sdx->id[2] = 'a';
+		sdx->id[2] = pid;
 		sdx->id[3] = 'x';
 
 		sdx->devnum = dev;
 		sdx->partnum = 12345;
 		sdx->UID = mbr->unique_disk_id;
 		sdx->lba_start = 0;
-		sdx->lba_end = ata_sectors(sdx->devnum);
+		sdx->lba_end = block_sectors(sdx->devnum);
 		sdx->num_sectors = sdx->lba_end;
-		sdx->byte_of_sector = ata_bps(sdx->devnum);
-		sdx->pid	= 0;
+		sdx->byte_of_sector =  bps = block_bps(sdx->devnum);
 
+		sdx++;
 
-
-		// montar particao
+		// montar particao MBR
 		for(i=0;i<4;i++) {
 
 			sdx = request_sdn((unsigned int)sdx);
 			if(!sdx) { 
 				continue;
 			} 
-
-
-			sdx->devnum = dev;
-			sdx->partnum	=  i; 
-
-			if(!mbr->part[sdx->partnum].num_sectors) {
-
-				sdx->num_sectors = 0;
-				continue;
-			}
-
 			
 			sdx->id[0] = 's';
 			sdx->id[1] = 'd';
-			sdx->id[2] = 'a';
+			sdx->id[2] = pid;
 			sdx->id[3] = 0x30 + i;
+
+			sdx->devnum = dev;
+			sdx->partnum	= i;
+
+			if(!mbr->part[sdx->partnum].num_sectors) {
+				sdx->num_sectors = 0;
+				continue;
+			} 
+
 
 			sdx->UID = mbr->unique_disk_id;
 			sdx->lba_start = mbr->part[sdx->partnum].lba_start;
 			sdx->lba_end = mbr->part[sdx->partnum].lba_start + mbr->part[sdx->partnum].num_sectors;
 			sdx->num_sectors = mbr->part[sdx->partnum].num_sectors;
-			sdx->byte_of_sector = 512;
+			sdx->byte_of_sector = bps;
 
 			rc = 0;
 		}
@@ -177,7 +198,7 @@ int conect_sd(int dev)
 
 SD *read_sdx(const char *s)
 {
-	unsigned int *bf = (unsigned int*) (sd->header.buffer);
+	unsigned int *bf = (unsigned int*) (stdsd->header.buffer);
 	SD *_sd = NULL;
 
 	int i;
@@ -190,7 +211,7 @@ SD *read_sdx(const char *s)
 
 		}
 
-		bf = (unsigned int *) (sd->header.buffer + (i*1024));
+		bf = (unsigned int *) (stdsd->header.buffer + (i*1024));
 	}
 
 
@@ -201,6 +222,9 @@ SD *read_sdx(const char *s)
 
 SD *read_sdn(const char *s,SD *sdx)
 {
+
+
+	if(!sdx) return 0;
 
 	unsigned int addr = (unsigned int) (sdx);
 	addr +=32;
@@ -225,4 +249,29 @@ SD *read_sdn(const char *s,SD *sdx)
 	if(i >= 32-1) return _sd;
 
 	return _sd;
+}
+
+
+char *pathneme(char *dest,const char *src)
+{
+	char *p_dest = dest;
+	const char *p_src = src;
+
+	while(*p_src) 
+	{	
+		if(*p_src == '/') { 
+
+			*p_dest = '\0';
+			p_src++;
+
+			return (char*)p_src;
+
+		}
+
+		*p_dest++ = *p_src++;
+	}
+
+	*p_dest = '\0';
+
+	return (char*)p_src;
 }

@@ -84,3 +84,21 @@ int block_write(int media_id,int count,unsigned int offset /*LBA START*/,void *b
 	return rc; 
 
 }
+
+unsigned int block_sectors(int media_id)
+{
+	unsigned int rc = 0;
+	
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0xE),"d"(media_id));
+
+	return rc;
+}
+
+unsigned int block_bps(int media_id)
+{
+	unsigned int rc = 0;
+	
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0xF),"d"(media_id));
+
+	return rc;
+}

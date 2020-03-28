@@ -135,5 +135,19 @@ typedef struct _FRAME
 	}__attribute__((packed)) FRAME;
 
 
+typedef struct _SD {
+	char id[4];
+	unsigned int devnum;
+	unsigned int UID;
+	unsigned int partnum;
+	unsigned int lba_start;
+	unsigned int lba_end;
+	unsigned int num_sectors;
+	unsigned short byte_of_sector;
+	unsigned short pid;
+
+}__attribute__((packed)) SD;
+
+
 
 #endif

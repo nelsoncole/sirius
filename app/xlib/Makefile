@@ -7,7 +7,8 @@ xlib:
 	gcc ${CFLAGS} -c libc/string/*.c
 	gcc ${CFLAGS} -c sys/*.c
 	gcc ${CFLAGS} -c gui/*.c
-	gcc ${CFLAGS} -c fs/*.c
+	gcc ${CFLAGS} -c fs/*.c	
+	gcc ${CFLAGS} -c sys/stdx/*.c
 	ar -rcs xlib.a *.o
 	gcc -shared -fPIC -o xlib.so *.o
 	gcc ${CFLAGS} -c sys/crt0/*.c

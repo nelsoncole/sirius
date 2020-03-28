@@ -198,13 +198,19 @@ typedef struct _ATA
     	UINT32	bus_master_base_addr;
 
 	// IRQn 14 or 15 
-	UINT32	irqn;    
+	UINT32	irqn;
+
+	UINT32	sectors;    
 
 
 }__attribute__ ((packed)) ATA;
 
 
 UINTN ata_initialize();
+
+unsigned int ata_sectors(int devnum);
+unsigned int ata_bps(int devnum);
+
 UINTN ata_read_sector(	IN UINTN p,
 			IN UINTN count,
 			IN UINT64 addr,

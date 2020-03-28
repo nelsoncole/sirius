@@ -40,8 +40,6 @@ extern GUI *G;
 
 INTN main(INTN argc,CHAR8 *argv[])
 {
-
-
 	UINT32 *p = (UINT32*)0x1000111C;
 	UINT32 *GwFocus = (UINT32 *)(*p++);
 	MOUSE *mouse = (MOUSE*)(*p++);
@@ -49,12 +47,13 @@ INTN main(INTN argc,CHAR8 *argv[])
 	UINTN __flag__ = 0;
 
 	GW_HAND *obj = NULL;
-
+	GW_HAND *window	= NULL;
 	GW_HAND *list = (GW_HAND*)(G->List);
 
-	GW_HAND *window	= list->next;
-	
+	window	= list->next;
 	if(window) obj = window->tail;
+	else obj = NULL;
+
 
 	while(TRUE) {
 
@@ -66,6 +65,7 @@ INTN main(INTN argc,CHAR8 *argv[])
 		while(window) {
 
 			if(*GwFocus == (UINT32)window) {
+				
 				window = window->next;
 				if(window) obj = window->tail;
 				__flag__ = 1;
@@ -78,13 +78,17 @@ INTN main(INTN argc,CHAR8 *argv[])
 				obj = obj->tail;
 			}
 
+
+			
 			window = window->next;
-			if(window) obj = window->tail;	
+			if(window) obj = window->tail;
+			else obj = NULL;	
 
 		}
 
 		// Focus
 		if(__flag__ == 1) {
+			__flag__ = 0;
 			window	= (GW_HAND *)(*GwFocus);
 			if(window) obj 	= window->tail;
 
@@ -109,9 +113,10 @@ INTN main(INTN argc,CHAR8 *argv[])
 
 		//rewind
 		//window = list;
-		//list = (GW_HAND*)(G->List);
 		window	= list->next;
 		if(window) obj = window->tail;
+		else obj = NULL;
+		
 
 	}
 

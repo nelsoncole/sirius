@@ -1,5 +1,5 @@
 /*
- * File Name: vfs.h
+ * File Name: console.c
  *
  *
  * BSD 3-Clause License
@@ -33,53 +33,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+ 
+#include <sys/sys.h>
 
+#define MSG_CLEARSCREEN 1
+#define MSG_SETCURSOR 2
 
-#ifndef __VFS_H__
-#define __VFS_H__
-
-#define ATTR_ARCHIVE 	0
-#define ATTR_DIRECTORY 	1
-
-struct _FAT_BPB;
-
-typedef struct _VFS_FILE_HEADER 
+int set_cursor_x(int x) 
 {
-	// File Header 4 KiB
-	CHAR8	filename[256];
-	UINT8 	attr;
-	UINT32	size;
-	UINT32	size2;
-	UINT8	dev;
-	UINT8	p_entry;
-	UINT32	bps;
-	// números de sector por bloco
-	UINT32	count;
-	// número total de blocos
-	UINT32	blocks;	
-	UINT32	offset;
-	UINT32	offset2;
-	UINT32	buffer;
-	// definido em libc padrão
-	UINT8	mode[4];
-	UINT8	flag;
-	struct _FAT_BPB  *bpb; 
-	struct _VFS_FILE_HEADER *current;
-	struct _VFS_FILE_HEADER *next;
-	UINT8	rsvx[256 - 43];
 
-}__attribute__ ((packed)) VFS_FILE_HEADER;
+	if(!write_stx(MSG_SETCURSOR,x,0,stdx)) return 0;
 
-typedef struct _VFS 
-{
-	// File Header 512 Bytes
-	VFS_FILE_HEADER header;
+	return x;
 
-	// LBA block start
-	UINT32	block[1024-128];
-
-}__attribute__ ((packed)) VFS;
-
-
-
-#endif
+}

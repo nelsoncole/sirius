@@ -42,8 +42,8 @@ int close(FILE *fd) {
 
 	if(!fd)return (0);
 
-	if((fd->header.attr == ATTR_ARCHIVE) && (fd->header.mode[0] == 'w' ||\
-	fd->header.mode[0] == 'a' || fd->header.mode[1] == '+'))flush(fd);
+	if((fd->header.attr == ATTR_ARCHIVE) && ((fd->header.mode[0] == 'w') ||\
+	(fd->header.mode[0] == 'a') || (fd->header.mode[1] == '+')))flush(fd);
 
 	free((void*)fd->header.bpb);	
 	free((void*)fd->header.buffer);

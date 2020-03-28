@@ -68,45 +68,46 @@ UINTN RamBitValue[8]={1,2,4,8,16,32,64,128};
  *
  *
  */
-UINTN ram_initialize() 
+
+unsigned int ram_initialize() 
 {
 
-	RamBMP = (UINT8*) (_end);
-
+	RamBMP = (unsigned char*) (_end);
 
 	// For 4 GiB
-	setmem((UINT8*)RamBMP,(RAM_BLOCK_SIZE*1024)/8,0);
+	setmem((unsigned char*)RamBMP,(RAM_BLOCK_SIZE*1024)/8,0);
 
 	// Mask first 48 MiB, reserved KERNEL_OF_NUM_PAGE_TABLE
-	setmem((UINT8*)RamBMP,(KERNEL_OF_NUM_PAGE_TABLE*RAM_BLOCK_SIZE)/8,-1);
+	setmem((unsigned char*)RamBMP,(KERNEL_OF_NUM_PAGE_TABLE*RAM_BLOCK_SIZE)/8,-1);
 
 	index_mem_map_pt = 0;
 
 
-	return ((UINTN)RamBMP);
+	return ((unsigned int)RamBMP);
 
 }
 
-
-static UINTN ram_free()
+static unsigned int ram_free()
 {
 
-	UINT8 *p = (UINT8*)(RamBMP);
+	unsigned char *bmp = (unsigned char*)(RamBMP);
 	
-	UINTN offset = (KERNEL_OF_NUM_PAGE_TABLE*RAM_BLOCK_SIZE);
+	unsigned int offset = (KERNEL_OF_NUM_PAGE_TABLE*RAM_BLOCK_SIZE);
+
 
 	// determinar offset byte e bit
-	UINTN byte = (offset - 1) /8;
-	UINTN bit  = ((offset -1) %8) &0xf;
+	int byte = offset /8;
+	int bit  = (offset %8);
 
 
-	while(TRUE) {
+	while(TRUE/*deve depender da memoria maxima*/) {
 
 	
-		if( !(*(UINT8*)(p + byte)&RamBitValue[bit]) )break;
+		if( !(*(unsigned char*)(bmp + byte)&RamBitValue[bit]) ) break;
+
 		offset++;
-		byte = (offset - 1) /8;
-		bit  = ((offset -1) %8) &0xf;
+		byte = offset /8;
+		bit  = (offset %8) &0xf;
 
 
 	}
@@ -116,116 +117,115 @@ static UINTN ram_free()
 
 }
 
-UINTN alloc_frame(IN OUT PAGE_TABLE *pt,IN UINTN size,OUT VIRTUAL_ADDRESS *frame)
+
+int alloc_frame(PAGE_TABLE *pt,int count,VIRTUAL_ADDRESS *frame)
 {
 
+	if(!count) 
+	{
+		*(VIRTUAL_ADDRESS*)(frame) = (unsigned int)0;
+		return -1;
+	}
+
+
+
+
 	// First block
-	FRAME *__frame = (FRAME*)malloc(sizeof(FRAME));
-	FRAME *__new_frame = NULL;
+	unsigned int *__frame;
 
-
-	PAGE_TABLE *_pt = pt;
-
-	UINT8 *p = (UINT8*)(RamBMP);
-	UINTN offset;
-	UINTN byte;
-	UINTN bit;
-	UINTN phy_addr;
-
-	UINTN i,i2,i3 = size;
-
-
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&__frame);
+	setmem((unsigned char*)__frame,0x1000,0);
+	
 	// OUT frist frame
-	*(VIRTUAL_ADDRESS*)(frame) = (UINTN)__frame;
+	*(VIRTUAL_ADDRESS*)(frame) = (unsigned int)__frame;
 
 
-	for(i = 0; i < size; i++) {
+	PAGE_TABLE *p_pt = pt;
 
-		i3--;
+	unsigned char *bmp = (unsigned char*)(RamBMP);
+	unsigned int offset;
+	unsigned int phy_addr;
+	int byte;
+	int bit;
+	int i,t;
 
+
+	for(i=0;i < count;i++)
+	{
+
+		// localizar area livre
 		offset = ram_free();
 
+		// salve offset
+		*__frame++ = offset;
+
+
 		// determinar offset byte e bit
-		byte = (offset - 1) /8;
-		bit  = ((offset -1) %8) &0xf;
+		byte = offset /8;
+		bit  = offset %8;
 
 	
 		// busy
-		*(UINT8*)(p + byte) |=  1 << bit;
+		*(unsigned char*)(bmp + byte) |= RamBitValue[bit];
 
 
 		// determine o endereço físico
 		phy_addr = ( (offset*RAM_BLOCK_SIZE)*1024 );
 
 		// alocar memória fisica
-		for(i2 = 0; i2 < (RAM_BLOCK_SIZE/4);i2++) {
+		for(t = 0; t < (RAM_BLOCK_SIZE/4);t++) {
 
-			_pt->frames = (phy_addr >>12) &0xFFFFF;
-			_pt++;
+			p_pt->frames = (phy_addr >>12) &0xFFFFF;
+			p_pt++;
 			phy_addr += 0x1000;
 		}
 
-		__frame->offset = offset;
-
-		if(i3) {
-
-			__new_frame = (FRAME*)malloc(sizeof(FRAME));
-
-			__frame->next = __new_frame;
-
-			__frame	      = __new_frame;
-
-		} else __frame->next	= NULL;
-
+		
 
 	}
-
-	
 
 	return 0;
 
 }
 
-UINTN free_frame(IN VOID *frame)
+
+void free_frame(void *frame)
 {
 
-	UINT8 *p = (UINT8*)(RamBMP);
 
-	FRAME *__frame = (FRAME *) frame;
-	FRAME *__current_frame = NULL;
+	if(!frame) return;
 
-	UINTN offset;
-	UINTN byte;
-	UINTN bit;
+	unsigned char *bmp = (unsigned char*)(RamBMP);
 
-	while(__frame) {
+	unsigned int *__frame = (unsigned int *) frame;
+	unsigned int offset;
+	int byte;
+	int bit;
+	int i;
 
 
-		offset = __frame->offset;
+	for(i=0;i<1024;i++)
+	{
+		offset = *__frame++;
+
+		if(!offset) break;
 
 		// determinar offset byte e bit
-		byte = (offset - 1) /8;
-		bit  = ((offset -1) %8) &0xf;
+		byte = offset /8;
+		bit  = offset %8;
 
-	
 		// busy
-		*(UINT8*)(p + byte) &=  ~1 << bit;
+		*(unsigned char*)(bmp + byte) &=~RamBitValue[bit];;
 
-		__current_frame = __frame;
-
-		__frame = __frame->next;
-
-		free(__current_frame);
 	}
 
+
 	
-	
 
-
-
-	return 0;
+	free_pages(frame);
 
 }
+
 
 
 UINTN alloc_pages_initialize()
