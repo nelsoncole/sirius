@@ -48,6 +48,9 @@ unsigned int fat_flag = 0;
 unsigned int fat_ready = 0;
 
 
+//FIXME Nelson nao deixar de olhar o fixme em AddFat(); 
+
+
 // 1 Read BPB
 // 2 Read Root
 // 3 Read FAT
@@ -378,7 +381,7 @@ int AddFAT(FILE *fd, FAT_BPB *bpb, unsigned int first_sector_of_cluster)
 	if(fd->header.blocks >= 896) {
 		
 		//FIXME aqui devemos adicionar um novo bloco de 4KiB no *vfs 
-
+		fputs("FIXME AddFAT(), limite de bloco no vfs\n",stdout); 
 		free(fat_table);
 		return EOF;
 	}

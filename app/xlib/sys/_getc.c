@@ -1,12 +1,14 @@
 #include <sys/sys.h>
+#include <stdio.h>
+#include <string.h>
 
 #define EOF (-1)
 
-// Standard streams.
-extern FILE *stdout;
-
 int _getc (FILE *fp)
 {
+
+	if(!fp) return EOF;
+
 	unsigned char* buffer = (unsigned char*) (fp->header.buffer);
 	unsigned dev_n = fp->header.dev;
 	unsigned count = fp->header.count;
@@ -17,58 +19,14 @@ int _getc (FILE *fp)
 	int block_count;
 	int i;
 	int ch;
+
+	unsigned int start = 0;
+	unsigned int offset = 0;
+	unsigned int offset2 = 0;
+
 	
 	// error
 	if(fp->header.mode[0] == '\0') return EOF;
-
-	if(fp->header.flag&0x80)
-	{
-		// Arquivo null
-		if(!fp->header.blocks) return EOF;
-
-		// first operation
-		if(!(fp->header.flag&0x10)) {
-
-			// ler primeiros 64 KiB e manter em cache
-
-
-			
-			if(fp->header.size >= 65536 ) {
-
-				count2 = 8;
- 
-				block_count = 0x10000/(bps*count2);
-
-			}
-			else {
-
-				count2 = 1;
-				block_count = fp->header.size/(bps*count2);
-			}
-
-			
-			for(i = 0;i< block_count;i++) { // 64 KiB
-
-				lba_start = block[0] + (fp->header.offset/bps);
-				if(block_read(dev_n,count2,lba_start,buffer+(count2*bps*i))) return EOF;
-
-			}
-				
-					
-			// bit 0x10 primeira eitura
-			// bit 0x20 perminsao de leitura
-			fp->header.flag |= 0x30;
-
-
-		}
-
-	
-
-		goto _default;
-
-
-	}
-
 	
 	// std
 	if ((fp->header.mode[0] == 's') \
@@ -100,45 +58,126 @@ int _getc (FILE *fp)
 
 		}
 
-		return ch; // successfull
+		return (ch&0xff); // successfull
 	}
 
 
+	// stream de arquivo
+	if(!fp->header.blocks) return EOF;
+	if(fp->header.offset >= fp->header.size) return EOF;
 
-	if(!fp->header.blocks) { 
-		return EOF;
-	}
+	offset = fp->header.offset/0x10000;
+	offset2 = fp->header.offset%0x10000;
 
-	// primeira operacao
-	if(!(fp->header.flag&0x10)){
-		if(fp->header.size) {
+	if(fp->header.flag&0x80)
+	{
+		if(((offset2 == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10))) 
+		{	//FIXME cache cheio
 
-			// ler os primeiros 64KiB ou < 64KiB
-			if(fp->header.size >= 65536 ) {
-				block_count = 65536 /(bps*count);
+			fp->header.flag &=~0x20;
+
+			// chamar flush()
+			// ler blocos e armazenar em cache
+			if ( ( (fp->header.mode[0] == 'w') || (fp->header.mode[0] == 'a') \
+			|| (fp->header.mode[1] == '+') ) && (fp->header.flag&0x10) ) { flush(fp); }
+
+
+			memset(buffer,0,0x10000);
+
+
+			if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
+			|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
+			{
+				offset = fp->header.offset/0x10000;
+
+				if( ( (fp->header.size >= (0x10000*offset)) && (offset != 0) ) || \
+				( (!fp->header.offset) && (fp->header.size >= 0x10000) ) || \
+				( (fp->header.offset != 0) && (fp->header.size >= (0x10000+fp->header.offset)) ) ) {
+
+					count2 = 8;
+					block_count = 0x10000 /(bps*count2);
 					
-			} else {
-				block_count = fp->header.size/(bps*count);
-				if(fp->header.size%(bps*count)) block_count++;
+				} else {
+
+					count2 = 1;
+					block_count = fp->header.size/(bps*count2);
+
+					if(fp->header.size%(bps*count2) ) block_count++;
+
+					block_count -= ((0x10000/(bps*count2))*(offset));
+
+				}
+
+				start = (offset*(0x10000/(count2*bps)));
+
+				for(i = 0;i<block_count;i++) {
+
+					lba_start = block[0] + (count2*i) + start;
+					if(block_read(dev_n,count2,lba_start,buffer+(count2*bps*i))) return EOF;
+
+				}
+
+
 
 			}
 
-		
+			// bit 0x10 primeira eitura
+			// bit 0x20 permissao para leitura
+			fp->header.flag |= 0x30;
+
+		}
+
+		goto _default;
+	}
+
+	if(((offset2 == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10))) 
+	{	//FIXME cache cheio
+
+		fp->header.flag &=~0x20;
+
+		// chamar flush()
+		// ler blocos e armazenar em cache
+		if ( ( (fp->header.mode[0] == 'w') || (fp->header.mode[0] == 'a') \
+		|| (fp->header.mode[1] == '+') ) && (fp->header.flag&0x10) ) flush(fp);
+
+
+		memset(buffer,0,0x10000);
+
+		if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
+		|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
+		{
+			offset = fp->header.offset/0x10000;
+
+			if( ( (fp->header.size >= (0x10000*offset)) && (offset != 0) ) || \
+			((!fp->header.offset) && (fp->header.size >= 0x10000) ) ) {
+
+				block_count = 0x10000 /(bps*count);
+					
+			} else {
+
+				block_count = fp->header.size/(bps*count);
+
+				if(fp->header.size%(bps*count) ) block_count++;
+
+				block_count -= ((0x10000/(bps*count))*(offset));
+
+			}
+
+			start = (offset*(0x10000/(count*bps)));	
+
 			for(i = 0;i<block_count;i++) {
 
-				lba_start = block[(fp->header.offset/bps/count) + i] + (fp->header.offset/bps%count);
-				if(block_read(dev_n,count,lba_start,buffer + (count*bps*i))) return EOF;
-
+				lba_start = block[i + start];
+				if(block_read(dev_n,count,lba_start,buffer+(count*bps*i))) return EOF;
 			}
 
 		}
 
 		// bit 0x10 primeira eitura
-		// bit 0x20 perminsao de leitura
+		// bit 0x20 permissao para leitura
 		fp->header.flag |= 0x30;
 
 	}
-
 
 _default:
 	// checar perminsao de leitura
@@ -150,10 +189,9 @@ _default:
 
 	}
 
-	ch = *(unsigned char*)(buffer + fp->header.offset2);
+	ch = *(unsigned char*)(buffer + offset2);
 	// Update offset
 	fp->header.offset +=1;
-	fp->header.offset2 +=1;
 
 	return (ch&0xff); // successfull
 }

@@ -95,11 +95,13 @@ int cmd_salve(int argc,char **argv) {
 
 	//fputs (dp_str,fp);
 
-	for(int i=0;i < 65536;i++){
+	for(int i=0;i < (65536*2);i++){
 
 		if(i >= stdout->header.size)break;
 		if(!*dp_str)break;
-		fputc(*dp_str++,fp);
+		if(fputc(*dp_str++,fp)  == EOF )break;
+
+		//if(fputc('a',fp) == EOF )break;
 	}
 
 	//rewind (fp);

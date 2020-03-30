@@ -46,7 +46,7 @@
 
 
 #define STR_MENU_SIZE 4
-#define STR_TYPE_SYZE 3
+#define STR_TYPE_SYZE 4
 
 #define SPACE 12
 
@@ -61,8 +61,8 @@ const char *type[STR_TYPE_SYZE]={
     	"disk",
     	"part",
     	"rom",
+	"null",
 };
-
 
 SD *sdx = NULL;
 
@@ -72,22 +72,23 @@ static int read_list(SD *src);
 int main(int argc, char **argv)
 {
 	int i;
-	SD *sdx = (SD*) malloc(0x10000);
-	SD *p_src = sdx;
+	SD *root = (SD*) malloc(0x10000);
+	SD *p_src = root;
 
 	unsigned size = 0;
+	int _type = 3;
 
 	unsigned int str[2];
 	unsigned int str2[2];
 
-	memset(sdx,0,0x10000);
+	memset(root,0,0x10000);
 	memset(str,0,8);
 	memset(str2,0,8);
 
 	fputs("DISK (Sirius) version 0.0.1\n",stdout);
 
 
-	read_list(sdx);
+	read_list(root);
 
 
 	// list disk
@@ -104,14 +105,18 @@ int main(int argc, char **argv)
 
 		memcpy(str,p_src->id,4);
 
-		if(p_src->id[3] == 'x')
+		if((p_src->id[2] != '\0') && (p_src->id[3] == '\0'))
 		{
+			_type = 0;
+
 			fputc('\n',stdout);
 			printf("%s",str);
 
 			memcpy(str2,str,4);
 
 		} else {
+
+			_type = 1;
 
 			fputc('\n',stdout);
 			printf("|--%s",str);
@@ -125,10 +130,10 @@ int main(int argc, char **argv)
 		printf("%d MiB",size);
 
 		set_cursor_x(SPACE*2);
-		printf("%s",type[0]);
+		printf("%s",type[_type]);
 
 		set_cursor_x(SPACE*3);
-		if(p_src->id[3] == 'x') putchar('/');
+		if((p_src->id[2] != '\0') && (p_src->id[3] == '\0')) putchar('/');
 		else printf("/%s/",str2);
 
 		p_src++;
@@ -139,7 +144,7 @@ int main(int argc, char **argv)
 	fputs("\n____________________________________________",stdout);
 
 
-	free(sdx);	
+	free(root);	
 
 	return 0;
 }

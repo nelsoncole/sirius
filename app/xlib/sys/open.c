@@ -113,7 +113,7 @@ FILE *open(const char *path,int attr,const char *mode) {
 
 
 			t_path = pathneme(p_path,t_path);
-			memcpy(strsdx,p_path,4);
+			memcpy(strsdx,p_path,3);
 
 			if(t_path[0]) 
 			{
@@ -142,8 +142,8 @@ FILE *open(const char *path,int attr,const char *mode) {
 
 	} else {
 		// pwd + path
-		memcpy(strsdx,"sdax",4);
-		memcpy(strsdn,"sda0",4);
+		memcpy(strsdx,"sda",3);
+		memcpy(strsdn,"sda1",4);
 
 		filename = path;
 

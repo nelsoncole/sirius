@@ -8,7 +8,17 @@ int main() {
 
 
 
-	FILE *fd = fopen("/dev/sdax","r+b"); 
+	FILE *fd = fopen("/dev/sda","r+b");
+
+
+	
+
+
+	printf("Por 0x10000 %d Por 0 %d Por Numero qualquer %d",0x10000%0x10001,0%0x10000,0x10007%0x10000);
+
+
+	return 0;
+ 
 
 	int var = 0;
 
@@ -18,11 +28,14 @@ int main() {
 
 	} else {
 
-		fseek (fd,510, SEEK_SET);
-		var = (fgetc(fd)&0xff);
-		var |= (fgetc(fd)&0xff) << 8;
 
-		printf("Read word 511 \"/dev/sdax\" bootsig 0x%x",var);
+
+		fseek (fd,508, SEEK_SET);
+		if(fread(&var,1,4,fd) == 4 )
+		{
+			printf("Read Dword 508 em \"/dev/sda\"\nBootsig = 0x%x",var);
+
+		} else printf("fread() error");
 
 		fclose(fd);
 

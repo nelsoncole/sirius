@@ -280,8 +280,8 @@ UINTN main(BOOT_INFO *boot_info)
 
 	}
 	
-	SD *sdax = read_sdx("sdax");
-	SD *sda0 = read_sdn("sda0",sdax);
+	SD *sdax = read_sdx("sda");
+	SD *sda0 = read_sdn("sda1",sdax);
 	print("%s/",sdax);
 	print("%s:\nUID %x\nDevice Number %d\n",sda0,sda0->UID,sda0->devnum);
 	print("LBA Start %d\nLBA End %d\n",sda0->lba_start,sda0->lba_end);
@@ -317,7 +317,8 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 	// FIXME debug
-	ClearScreen();	
+	//ClearScreen(); 
+	//for(;;);	
 		
 
 

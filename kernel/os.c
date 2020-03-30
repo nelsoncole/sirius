@@ -122,7 +122,7 @@ int conect_sd(int dev)
 		sdx->id[0] = 's';
 		sdx->id[1] = 'd';
 		sdx->id[2] = 'a';
-		sdx->id[3] = 'x';
+		sdx->id[3] = '\0';
 
 		sdx->devnum = dev;
 		sdx->partnum = 12345;
@@ -131,7 +131,7 @@ int conect_sd(int dev)
 		sdx->lba_end = ata_sectors(sdx->devnum);
 		sdx->num_sectors = sdx->lba_end;
 		sdx->byte_of_sector = ata_bps(sdx->devnum);
-		sdx->pid	= 0;
+		sdx->pid	= 1;
 
 
 
@@ -157,7 +157,7 @@ int conect_sd(int dev)
 			sdx->id[0] = 's';
 			sdx->id[1] = 'd';
 			sdx->id[2] = 'a';
-			sdx->id[3] = 0x30 + i;
+			sdx->id[3] = 0x31 + i;
 
 			sdx->UID = mbr->unique_disk_id;
 			sdx->lba_start = mbr->part[sdx->partnum].lba_start;

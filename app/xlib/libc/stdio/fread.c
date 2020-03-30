@@ -4,5 +4,5 @@
 
 size_t fread (void *buffer,size_t num_bytes, size_t count, FILE *fp)
 {
-	return 0;
+	return read (buffer,num_bytes,count,fp);
 }

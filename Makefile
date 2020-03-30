@@ -1,7 +1,7 @@
 AS=nasm
 
 
-.PHONY: clearscreen stage0.bin create disk mount test
+.PHONY: clearscreen stage0.bin create disk mount push test
 
 #compiler boot
 stage0.bin: stage0/stage0.asm
@@ -43,3 +43,10 @@ test:
 
 clearscreen:
 	clear
+
+
+
+push:
+	git add ./
+	git commit -m "commit++"
+	git push -u origin master

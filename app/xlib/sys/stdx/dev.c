@@ -146,7 +146,7 @@ int mount_sd(int dev)
 		sdx->id[0] = 's';
 		sdx->id[1] = 'd';
 		sdx->id[2] = pid;
-		sdx->id[3] = 'x';
+		sdx->id[3] = '\0';
 
 		sdx->devnum = dev;
 		sdx->partnum = 12345;
@@ -169,7 +169,7 @@ int mount_sd(int dev)
 			sdx->id[0] = 's';
 			sdx->id[1] = 'd';
 			sdx->id[2] = pid;
-			sdx->id[3] = 0x30 + i;
+			sdx->id[3] = 0x31 + i;
 
 			sdx->devnum = dev;
 			sdx->partnum	= i;
