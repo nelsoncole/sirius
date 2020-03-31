@@ -62,9 +62,8 @@ int _getc (FILE *fp);
 int _fputs (const char *str,FILE *fp);
 char *_fgets (char *str,int length,FILE *fp);
 
-
-size_t read (void *buffer,size_t num_bytes, size_t count, FILE *fp);
-size_t write (const void *buffer,size_t num_bytes, size_t count, FILE *fp);
+size_t _read (void *buffer,size_t size, size_t count, FILE *fp);
+size_t _write (const void *buffer,size_t size, size_t count, FILE *fp);
 
 
 // 

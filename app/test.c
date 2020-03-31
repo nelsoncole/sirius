@@ -1,54 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main() {
 
-	//printf("FIXME: bug no gserver em gui_exit(), falha quando encerramos multiplas janelas, precisa de um spinlock \n");
+	char str[] = "This is Sirius Operating System.";
+
+	size_t len = sizeof(str) - 1;
 
 
+	FILE *fp = fopen("file.txt","w");
 
+	if(!fp) {
 
-	FILE *fd = fopen("/dev/sda","r+b");
-
-
-	
-
-
-	printf("Por 0x10000 %d Por 0 %d Por Numero qualquer %d",0x10000%0x10001,0%0x10000,0x10007%0x10000);
-
-
-	return 0;
- 
-
-	int var = 0;
-
-	if(!fd) {
-
-		printf("Open error\n");
+		printf("fopen Error\n");
 
 	} else {
 
-
-
-		fseek (fd,508, SEEK_SET);
-		if(fread(&var,1,4,fd) == 4 )
+		if(fwrite(str, 1, len, fp) == len )
 		{
-			printf("Read Dword 508 em \"/dev/sda\"\nBootsig = 0x%x",var);
+			fputs("successfull",stdout);
+			
+		} else printf("fwrite() error");
 
-		} else printf("fread() error");
 
-		fclose(fd);
+		fclose(fp);
 
 	}
 
-	
-
 	return 0;
 }
-
-
-
-
-
-
-

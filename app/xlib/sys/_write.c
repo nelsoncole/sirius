@@ -1,5 +1,5 @@
 /*
- * File Name: rmove.c
+ * File Name: _write.c
  *
  *
  * BSD 3-Clause License
@@ -39,28 +39,75 @@
 #define EOF (-1)
 
 
-size_t write (const void *buffer,size_t num_bytes, size_t count, FILE *fp)
+size_t _write (const void *buffer,size_t size, size_t count, FILE *fp)
 {
+	if(!fp) return (0);
+
 	size_t i;
-	int ch;
+	int c;
 	size_t rc = 0;
 
+	unsigned char *cache = (unsigned char*) (fp->header.buffer);
 	unsigned char *buf = (unsigned char*)buffer;
+	unsigned int offset = 0;
 
-	for(i=0;i < count*num_bytes;i++)
-	{
 
-		ch = _putc (*buf++, fp);
 
-		if(ch == EOF) break;
+	if ((fp->header.mode[0] == 's') && \
+	(fp->header.mode[1] == 't') && (fp->header.mode[2] == 'd')) 
+	{ 
 
-		rc++;
+		for(i=0;i < size*count;i++)
+		{
+			c = _putc (*buf++, fp);
+			if(c == EOF) return (rc/size);
+			rc++;
+		}
+
+		return (rc/size);
 
 	}
 
-	return (rc);
+	if ((fp->header.mode[0] != 'w') && \
+	(fp->header.mode[0] != 'a') && (fp->header.mode[1] != '+')) return (0);
+
+
+	for(i=0;i < size*count;i++)
+	{
+
+		c = *buf++;
+		if(fp->header.offset > fp->header.size) return (rc/size);
+
+		offset = fp->header.offset%0x10000;
+		if( ((offset == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10)) ) {
+
+			c = _putc (c,fp);
+			//feof(fp);
+			if(c == EOF) return (rc/size);
+
+		} else {
+			
+			if (!(fp->header.flag&0x80)) 
+			{
+				// FIXME AddFAT(), 
+				// isto devemos tratar na altura do flush(), 
+				// para melhor compatibilidade.
+				if(fp->header.size >= (fp->header.blocks*fp->header.bps*fp->header.count)) 
+				{	// new block // FAT
+					if(AddFAT(fp,(FAT_BPB *)fp->header.bpb,fp->block[fp->header.blocks-1])) {
+						return (rc/size);
+					}
+				}	
+			}
+
+			*(unsigned char*)(cache + offset) = c;
+			// Update offset
+			fp->header.offset += 1;
+			if(fp->header.offset > fp->header.size )fp->header.size += 1;
+		}
+		
+		rc++;
+	}
+
+	return (rc/size);
 }
-
-
-
-

@@ -1,5 +1,5 @@
 /*
- * File Name: read.c
+ * File Name: _read.c
  *
  *
  * BSD 3-Clause License
@@ -38,27 +38,62 @@
 
 #define EOF (-1)
 
-size_t read (void *buffer,size_t num_bytes, size_t count, FILE *fp)
+size_t _read (void *buffer,size_t size, size_t count, FILE *fp)
 {
+	if(!fp) return (0);
+
+
+
 	size_t i;
-	int ch;
+	int c;
 	size_t rc = 0;
 
+	unsigned char *cache = (unsigned char*) (fp->header.buffer);
 	unsigned char *buf = (unsigned char*)buffer;
+	unsigned int offset = 0;
 
-	for(i=0;i < count*num_bytes;i++)
-	{
-		ch = _getc (fp);
-		
-		if(ch == EOF) break;
 
-		*buf++ = ch;
 
-		rc++;
+	if ((fp->header.mode[0] == 's') && \
+	(fp->header.mode[1] == 't') && (fp->header.mode[2] == 'd')) 
+	{ 
+		for(i=0;i < size*count;i++)
+		{
+			c = _getc (fp);
+			if(c == EOF) return (rc/size);
+
+		       *buf++ = c;
+			rc++;
+		}
+
+		return (rc/size);
 
 	}
 
-	return (rc);
+
+
+	for(i=0;i < size*count;i++)
+	{
+		if(fp->header.offset >= fp->header.size) return (rc/size);
+
+		offset = fp->header.offset%0x10000;
+		if( ((offset == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10)) ) {
+
+			c = _getc (fp);
+			//feof(fp);
+			if(c == EOF) return (rc/size);
+		} else {
+
+			c = *(unsigned char*)(cache + offset);
+			// Update offset
+			fp->header.offset +=1;
+		}
+
+		*buf++ = c;
+		rc++;
+	}
+
+	return (rc/size);
 }
 
 

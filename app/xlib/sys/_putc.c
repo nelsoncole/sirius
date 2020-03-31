@@ -56,6 +56,8 @@ int _putc (int ch, FILE *fp)
 
 	// Stream de arquivo
 
+	if(fp->header.offset > fp->header.size ) return EOF;
+
 	offset = fp->header.offset/0x10000;
 	offset2 = fp->header.offset%0x10000;
 
@@ -119,8 +121,6 @@ int _putc (int ch, FILE *fp)
 
 		}
 
-
-		//printf("write\n");
 		// write character
 		*(unsigned char*)(buffer + offset2) = ch;
 
@@ -166,8 +166,6 @@ int _putc (int ch, FILE *fp)
 			// chamar flush()
 			// ler blocos e armazenar em cache
 			if(fp->header.flag&0x10) flush(fp);
-
-			memset(buffer,0,0x10000);
 
 			if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
 			|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler

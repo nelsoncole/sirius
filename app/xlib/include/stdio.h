@@ -44,10 +44,8 @@ extern char *fgets (char *str,int length,FILE *fp);
 extern int fputs (const char *str,FILE *fp);
 
 // outras
-extern size_t read (void *buffer,size_t num_bytes, size_t count, FILE *fp);
-extern size_t write (const void *buffer,size_t num_bytes, size_t count, FILE *fp);
-extern size_t fwrite (const void *buffer,size_t num_bytes, size_t count, FILE *fp);
-extern size_t fread (void *buffer,size_t num_bytes, size_t count, FILE *fp);
+extern size_t fread (void *buffer, size_t size, size_t count, FILE *fp);
+extern size_t fwrite (const void *buffer, size_t size, size_t count, FILE *fp);
 
 extern int remove (const char *path);
 extern void rewind(FILE *fp);
