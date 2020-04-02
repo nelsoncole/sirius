@@ -42,13 +42,13 @@ int exectve(int argc,char **argv)
 	int rc = 0;
 
 
-	if(argc < 2) { 
+	if(argc < 1) { 
 
 		return 0;
 
 	}
 
-	FILE *fp = open(argv[1],ATTR_ARCHIVE,"rb");
+	FILE *fp = open(argv[0],ATTR_ARCHIVE,"rb");
 
 	if(fp == NULL) { 
 
@@ -59,7 +59,7 @@ int exectve(int argc,char **argv)
 	// processo pai
 	//__asm__ __volatile__("int $0x72":"=a"(rc):"a"(8),"d"(argc),"c"(argv),"b"(0/*pwd*/),"D"(fp)); 
 	// processo filho
-	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(6),"d"(argc),"c"(argv),"b"(pwd),"D"(fp));
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(6),"d"(argc),"c"(argv),"b"(0/*pwd*/),"D"(fp));
 
 	close(fp);
 

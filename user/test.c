@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(int argc, char **argv) {
+
+
+	printf("argc %d %s",argc,argv[0]);
+	return 0;
 
 	char str[] = "This is Sirius Operating System.";
 

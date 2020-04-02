@@ -7,7 +7,7 @@
 #define EOF (-1)
 
 
-int _putc (int ch, FILE *fp) 
+int c_putc (int ch, FILE *fp) 
 {
 
 	if(!fp) return EOF;
@@ -41,6 +41,12 @@ int _putc (int ch, FILE *fp)
 			fp->header.offset2 = 0;
 			return EOF;
 
+		}
+
+
+		if(fp->header.attr == 4/*stderr*/) 
+		{ 
+			c_putc(ch,stdout);
 		}
 
 		// write character

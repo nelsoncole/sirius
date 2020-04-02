@@ -39,13 +39,13 @@
 int main(int argc,char **argv)
 {
 
-	GW_HAND *gw = CreateWindow(TEXT(" MsgBox "),0,300,300,260,120, 
+	GW_HAND *gw = CreateWindow(TEXT(" MsgBox "),0,100,100,260,120, 
 	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_WHITE) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	GW_HAND *glabel1;
 
-	if(argc > 2)
-	glabel1 = CreateObject(gw,argv[2]/*TEXT("This is a mensagem box!")*/,GW_HANDLE_LABEL,8,16,200,50, 
+	if(argc > 1)
+	glabel1 = CreateObject(gw,argv[1]/*TEXT("This is a mensagem box!")*/,GW_HANDLE_LABEL,8,16,200,50, 
 	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_WHITE)),GW_FLAG_INVISIBLE);
 
 	GW_HAND *gbutton1 = CreateObject(gw,TEXT("OK"),GW_HANDLE_BUTTON,100,40,60,28, 
@@ -53,7 +53,7 @@ int main(int argc,char **argv)
 
 
 	// enviar sms para label 1
-	if(argc > 2)
+	if(argc > 1)
 	Send(glabel1,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT);
 	// enviar sms para button 1
 	Send(gbutton1,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT);

@@ -461,8 +461,10 @@ int cmd_rename(int argc,char **argv)
 
 int cmd_run(int argc,char **argv)
 {		
-
-	unsigned int pid_ret = exectve(argc,argv);
+	char **argv_p = argv;
+	argv_p++;
+	
+	unsigned int pid_ret = exectve(argc-1,argv_p);
 
 	if(!pid_ret) {
 
@@ -473,6 +475,7 @@ int cmd_run(int argc,char **argv)
 
 	// wait pid
 	write_stx(X_MSG_WAIT_PID,pid_ret,0,stdxserver);
+
 
 	fputc('\n',stdout);
 

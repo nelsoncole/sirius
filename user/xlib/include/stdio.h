@@ -52,6 +52,8 @@ extern void rewind(FILE *fp);
 
 extern int fseek (FILE *fp, long num_bytes, int origin );
 
+long int ftell(FILE *fp);
+
 
 // E/S pelo console
 extern int putchar(int c);

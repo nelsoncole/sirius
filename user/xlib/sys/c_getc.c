@@ -4,7 +4,7 @@
 
 #define EOF (-1)
 
-int _getc (FILE *fp)
+int c_getc (FILE *fp)
 {
 
 	if(!fp) return EOF;
@@ -41,7 +41,7 @@ int _getc (FILE *fp)
 			ch = *(unsigned char*)(buffer + fp->header.offset2);
 
 			// display console	
-			if(ch != '\b')_putc(ch,stdout);
+			if(ch != '\b')c_putc(ch,stdout);
 			else {
 			
 		

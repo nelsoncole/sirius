@@ -4,7 +4,7 @@
 // Standard streams.
 extern FILE *stdout;
 
-char *_fgets (char *str,int length,FILE *fp)
+char *c_fgets (char *str,int length,FILE *fp)
 {
 	unsigned char* buffer = (unsigned char*) (fp->header.buffer);
 	int i, ch;
@@ -44,7 +44,7 @@ char *_fgets (char *str,int length,FILE *fp)
 
 				if(ch == '\n') {
 					// display console
-					_putc(ch,stdout);
+					c_putc(ch,stdout);
 
 					*p_str++ = ch;
 					break;
@@ -54,7 +54,7 @@ char *_fgets (char *str,int length,FILE *fp)
 					// display console
 					if(count > 0) {
 						*--p_str = '\b';
-						_putc(ch,stdout);
+						c_putc(ch,stdout);
 						--count;
 					}
 	
@@ -63,7 +63,7 @@ char *_fgets (char *str,int length,FILE *fp)
 
 					*p_str++ = ch;
 					// display console	
-					_putc(ch,stdout);
+					c_putc(ch,stdout);
 
 					fp->header.offset2++;
 					count++;
@@ -101,7 +101,7 @@ char *_fgets (char *str,int length,FILE *fp)
 	
 		for(i=0;i < length-1;i++){
 
-			ch = _getc (fp);
+			ch = c_getc (fp);
 			if (ch != '\n') *p_str++ = ch;
 			else {
 				*p_str++ = ch;

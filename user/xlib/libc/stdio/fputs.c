@@ -4,7 +4,7 @@
 
 int fputs (const char *str,FILE *fp)
 {
-	return _fputs (str,fp);
+	return c_fputs (str,fp);
 
 }
 

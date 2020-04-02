@@ -5,7 +5,7 @@
 
 int fgetc (FILE *fp)
 {	
-	return _getc (fp);
+	return c_getc (fp);
 
 }
 

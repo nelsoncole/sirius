@@ -1,5 +1,5 @@
 /*
- * File Name: _write.c
+ * File Name: _read.c
  *
  *
  * BSD 3-Clause License
@@ -38,10 +38,11 @@
 
 #define EOF (-1)
 
-
-size_t _write (const void *buffer,size_t size, size_t count, FILE *fp)
+size_t c_read (void *buffer,size_t size, size_t count, FILE *fp)
 {
 	if(!fp) return (0);
+
+
 
 	size_t i;
 	int c;
@@ -56,11 +57,12 @@ size_t _write (const void *buffer,size_t size, size_t count, FILE *fp)
 	if ((fp->header.mode[0] == 's') && \
 	(fp->header.mode[1] == 't') && (fp->header.mode[2] == 'd')) 
 	{ 
-
 		for(i=0;i < size*count;i++)
 		{
-			c = _putc (*buf++, fp);
+			c = c_getc (fp);
 			if(c == EOF) return (rc/size);
+
+		       *buf++ = c;
 			rc++;
 		}
 
@@ -68,46 +70,31 @@ size_t _write (const void *buffer,size_t size, size_t count, FILE *fp)
 
 	}
 
-	if ((fp->header.mode[0] != 'w') && \
-	(fp->header.mode[0] != 'a') && (fp->header.mode[1] != '+')) return (0);
 
 
 	for(i=0;i < size*count;i++)
 	{
-
-		c = *buf++;
-		if(fp->header.offset > fp->header.size) return (rc/size);
+		if(fp->header.offset >= fp->header.size) return (rc/size);
 
 		offset = fp->header.offset%0x10000;
 		if( ((offset == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10)) ) {
 
-			c = _putc (c,fp);
+			c = c_getc (fp);
 			//feof(fp);
 			if(c == EOF) return (rc/size);
-
 		} else {
-			
-			if (!(fp->header.flag&0x80)) 
-			{
-				// FIXME AddFAT(), 
-				// isto devemos tratar na altura do flush(), 
-				// para melhor compatibilidade.
-				if(fp->header.size >= (fp->header.blocks*fp->header.bps*fp->header.count)) 
-				{	// new block // FAT
-					if(AddFAT(fp,(FAT_BPB *)fp->header.bpb,fp->block[fp->header.blocks-1])) {
-						return (rc/size);
-					}
-				}	
-			}
 
-			*(unsigned char*)(cache + offset) = c;
+			c = *(unsigned char*)(cache + offset);
 			// Update offset
-			fp->header.offset += 1;
-			if(fp->header.offset > fp->header.size )fp->header.size += 1;
+			fp->header.offset +=1;
 		}
-		
+
+		*buf++ = c;
 		rc++;
 	}
 
 	return (rc/size);
 }
+
+
+

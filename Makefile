@@ -23,8 +23,8 @@ mount:
 	sudo mount part.img /mnt
 	sudo cp bin/stage0.bin /mnt/
 	sudo cp bin/stage1.bin /mnt/
-	sudo cp bin/logo.bmp /mnt/
 	sudo cp bin/kernel.bin /mnt/
+	sudo cp bmp/*.bmp /mnt/
 	#sudo cp bin/task.sys /mnt/
 	#sudo cp bin/gserver.sys /mnt/
 	#sudo cp bin/files.sys /mnt/
@@ -33,6 +33,8 @@ mount:
 	#sudo cp bin/shell.sys /mnt/
 	sudo cp bin/*.sys /mnt/
 	sudo cp bin/test.bin /mnt/
+	sudo cp bin/fasm.bin /mnt/
+	sudo cp main.asm /mnt/
 	sudo umount /mnt
 
 	./pcopy bin/stage0.bin part.img sirius.vhd

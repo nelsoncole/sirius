@@ -21,4 +21,8 @@ extern void i2hex(unsigned int val, char* dest, int len);
 
 
 
+char *getenv(const char *name);
+
+
+
 #endif

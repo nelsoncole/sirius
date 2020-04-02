@@ -4,5 +4,5 @@
 
 size_t fwrite (const void *buffer, size_t size, size_t count, FILE *fp)
 {
-	return _write (buffer,size,count,fp);
+	return c_write (buffer,size,count,fp);
 }

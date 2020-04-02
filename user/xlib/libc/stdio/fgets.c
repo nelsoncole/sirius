@@ -4,7 +4,7 @@
 
 char *fgets (char *str,int length,FILE *fp)
 {
-	return _fgets (str,length,fp);
+	return c_fgets (str,length,fp);
 
 }
 

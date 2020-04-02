@@ -56,14 +56,14 @@ int rmove (const char *path);
 
 
 
-int _putc (int ch, FILE *fp);
-int _getc (FILE *fp);
+int c_putc (int ch, FILE *fp);
+int c_getc (FILE *fp);
 
-int _fputs (const char *str,FILE *fp);
-char *_fgets (char *str,int length,FILE *fp);
+int c_fputs (const char *str,FILE *fp);
+char *c_fgets (char *str,int length,FILE *fp);
 
-size_t _read (void *buffer,size_t size, size_t count, FILE *fp);
-size_t _write (const void *buffer,size_t size, size_t count, FILE *fp);
+size_t c_read (void *buffer,size_t size, size_t count, FILE *fp);
+size_t c_write (const void *buffer,size_t size, size_t count, FILE *fp);
 
 
 // 

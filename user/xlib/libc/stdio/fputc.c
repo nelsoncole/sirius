@@ -4,5 +4,5 @@
 
 int fputc (int ch, FILE *fp) 
 {
-	return _putc (ch,fp);
+	return c_putc (ch,fp);
 }

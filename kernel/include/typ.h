@@ -112,6 +112,7 @@ typedef struct _HEADER {
 	UINT32	eflag;
 	UINT32  header;
 	UINT32	start;
+	UINT32	argv;
 	UINT32	stack;
 	UINT32	end;
 

@@ -55,6 +55,7 @@ header:
     	dd HEADER_FLAGS    
     	dd header
 	dd _start
+	dd argv
 	dd stack
     	dd _end
 
@@ -141,7 +142,9 @@ __setmem:
 	
 global stack
 section .bss
-	resb 1024*32 ;32 KiB
+argv:
+	resb 1024*64 ;64 KiB // argv
+	resb 1024*32 ;32 KiB // stack
 stack:
 
 

@@ -83,7 +83,12 @@ FILE *open (const char *filename,const char *mode)
 			stream->header.attr = 3;
 
 
-		}else 	stream->header.attr = 4;
+		}else if(mode[3] == 'r'){
+	
+			stream->header.attr = 4;
+
+
+		}else 	stream->header.attr = 5;
 
 		// 64 KiB
 		alloc_pages(0,16,(VIRTUAL_ADDRESS *)&stream->header.buffer);

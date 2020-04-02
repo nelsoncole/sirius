@@ -2,9 +2,11 @@ CFLAGS=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./include
 .PHONY: xlib clean move
 
 xlib:
+	gcc ${CFLAGS} -c libc/time/*.c
 	gcc ${CFLAGS} -c libc/stdio/*.c
 	gcc ${CFLAGS} -c libc/stdlib/*.c
 	gcc ${CFLAGS} -c libc/string/*.c
+	gcc ${CFLAGS} -c libc/unix/*.c
 	gcc ${CFLAGS} -c sys/*.c
 	gcc ${CFLAGS} -c gui/*.c
 	gcc ${CFLAGS} -c fs/*.c	

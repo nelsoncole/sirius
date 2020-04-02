@@ -178,20 +178,18 @@ int exectve(int argc,char **argv,char *pwd,FILE *fp)
 		p  	= (UINT32*)(header->start + 0x1F4);
 		*p++	= (unsigned int)pwd;
 		*p++	= argc;
-		char **_argv = (char**) malloc(0x1000);
+		char **_argv = (char**) (header->argv);
 		*p++	= (unsigned int) _argv;
-		long pool = (long) p++;
-	
-		for(i=0;i<argc;i++) 
+
+
+		for(i=0;i < 256-4;i++)
 		{
-			_argv[i] = (char*)  pool;
-
-			strcpy(_argv[i],argv[i]);
-
-			pool += strlen(argv[i]);
-
+			_argv[i] = (char*) (header->argv + (256*i) + 1024);
+			setmem(_argv[i],256,0);
 
 		}
+
+		for(i=0;i<argc;i++) strcpy(_argv[i],argv[i]);
 		 
 		
 
@@ -353,20 +351,18 @@ int exectve_child(int argc,char **argv,char *pwd,FILE *fp,THREAD *father_thread)
 		p  	= (UINT32*)(header->start + 0x1F4);
 		*p++	= (unsigned int)pwd;
 		*p++	= argc;
-		char **_argv = (char**) malloc(0x1000);
+		char **_argv = (char**) (header->argv);
 		*p++	= (unsigned int) _argv;
-		long pool = (long) p++;
-	
-		for(i=0;i<argc;i++) 
+
+
+		for(i=0;i < 256-4;i++)
 		{
-			_argv[i] = (char*)  pool;
-
-			strcpy(_argv[i],argv[i]);
-
-			pool += strlen(argv[i]);
-
+			_argv[i] = (char*) (header->argv + (256*i) + 1024);
+			setmem(_argv[i],256,0);
 
 		}
+
+		for(i=0;i<argc;i++) strcpy(_argv[i],argv[i]);
 		 
 
 		esp0 =(UINT32)(&stack_esp_0);/*(UINTN)malloc(0x2000);*/

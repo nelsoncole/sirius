@@ -37,8 +37,9 @@
 #include <io.h>
 #include <sys/sys.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-
+unsigned int stream[3];
 extern int main();
 void exit(int rc);
 
@@ -55,7 +56,6 @@ FILE *stdxserver = NULL;
 FILE *stdgserver = NULL;
 
 char *pwd = NULL;
-const char **__argv;
 
 int crt0(BOOT_INFO *boot_info)
 {
@@ -80,15 +80,22 @@ int crt0(BOOT_INFO *boot_info)
 
 	// pwd, argc end argv
 	int argc;
+	char **argv;
+
 
 	p  	= (UINT32*)0x100011F4;
 	pwd = (char*)*p++;
 	argc = *p++;
-	__argv = (const char**) *p++;
+	argv = (char**) *p++;
 
 
 
-	exit(main(argc,__argv));
+
+	stream[0] = (unsigned int) stdin;
+	stream[1] = (unsigned int) stdout;
+	stream[2] = (unsigned int) stderr;
+
+	exit(main(argc,argv));
 
 	for(;;);
 }
@@ -96,10 +103,6 @@ int crt0(BOOT_INFO *boot_info)
 
 void exit(int rc)
 {
-
-	
-	//free(pwd);
-
 	write_stx(X_MSG_INT,0,0,stdxserver);
 
 	__asm__ __volatile__("int $0x71"::);
