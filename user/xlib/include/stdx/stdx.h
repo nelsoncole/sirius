@@ -61,6 +61,7 @@ int cheksum_pid(unsigned int pid);
 
 // Devices
 int mount_sd(int dev);
+int update_mount_sd(int dev);
 SD *read_sdx(const char *s);
 SD *read_sdn(const char *s,SD *sdx);
 

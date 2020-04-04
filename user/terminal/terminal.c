@@ -91,11 +91,11 @@ int main()
 
 
 
-	GW_HAND *window = CreateWindow("# Terminal",0,mouse->x,mouse->y,500,460,/*0,100,20,900,650,*/
-	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
+	GW_HAND *window = CreateWindow("# Terminal",0,mouse->x,mouse->y,800,600,/*0,100,20,900,650,*/
+	GW_STYLE(FORE_GROUND(GW_DARKGRAY) | BACK_GROUND(GW_DARKGRAY) | BACK_GROUND_STYLE(GW_WHITE)),GW_FLAG_VISIBLE);
 
-	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,2,2,window->Area.Width -2,
-	window->Area.Height - 2,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_BLACK)),GW_FLAG_INVISIBLE);
+	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,4,2,window->Area.Width -4,
+	window->Area.Height - 2,GW_STYLE(FORE_GROUND(GW_LIGHTGREEN) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_INVISIBLE);
 
 
 	
@@ -103,7 +103,10 @@ int main()
 	// execute shell, criando um processo filho
 	int rc = 0;
 	char filename[] = "shell.sys";
-	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(7),"d"(filename),"c"(0x1));
+	//__asm__ __volatile__("int $0x72":"=a"(rc):"a"(7),"d"(filename),"c"(0x1));
+
+	FILE *fp = fopen(filename,"r");
+	if (fp != NULL) { __asm__ __volatile__("int $0x72":"=a"(rc):"a"(6),"d"(0),"c"(0),"b"(0),"D"(fp)); fclose(fp);}
 
 	if(!rc) {
 

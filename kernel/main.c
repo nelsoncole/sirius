@@ -79,11 +79,14 @@ VOID thread_main()
 		// execute console
 		if(key_msg_exec_console || terminal != 0) {
 			cli();
+
 			pid = do_exec("terminal.sys",1);
+
 			set_focus(pid);
 			key_msg_exec_console = 0;
 
 			terminal = 0;
+
 			sti();	
 
 		
@@ -317,7 +320,7 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 	// FIXME debug
-	//ClearScreen(); 
+	ClearScreen(); 
 	//for(;;);	
 		
 

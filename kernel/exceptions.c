@@ -96,26 +96,43 @@ CHAR8 *exception_mensagem[32]={
 
 VOID fault_exception(INTN  n)
 {
-	UINTN  	cr2,cr3,cr4;
+	unsigned int  	cr2,cr3,cr4;
 
+
+	char *str = (char*) exception_mensagem[n];
+
+
+	
 
 	if(n == 8 || n == 18)SetAttribute(GW_RED,GW_WHITE);
 	else SetAttribute(GW_YELLOW,GW_WHITE);
-		OutputString(exception_mensagem[n]);
-	if(n == 14){
+
+	//OutputString(exception_mensagem[n]);
+
+	//if(n == 14)
+	//{
 
 		__asm__ __volatile__("movl %%cr2,%k0":"=a"(cr2):);
 		__asm__ __volatile__("movl %%cr3,%k0":"=a"(cr3):);
 		__asm__ __volatile__("movl %%cr4,%k0":"=a"(cr4):);
-		print("CR2 = 0x%x\nCR3 = 0x%x\nCR4 = 0x%x\n",cr2,cr3,cr4);
 
-		}
+		//print("CR2 = 0x%x\nCR3 = 0x%x\nCR4 = 0x%x\n",cr2,cr3,cr4);
 
-	print("PID = %d\nEBP = 0x%x\nESP = 0x%x\n",getpid(), current_thread->ebp, current_thread->esp);
+	//}
+
+	/*print("PID = %d\nEBP = 0x%x\nESP = 0x%x\n",getpid(), current_thread->ebp, current_thread->esp);
 	print("CS = 0x%x\nDS = 0x%x\nES = 0x%x\n",current_thread->cs, current_thread->ds, current_thread->es);
-	print("FS = 0x%x\nGS = 0x%x\nSS = 0x%x\n",current_thread->fs, current_thread->gs, current_thread->ss);
+	print("FS = 0x%x\nGS = 0x%x\nSS = 0x%x\n",current_thread->fs, current_thread->gs, current_thread->ss);*/
 
-	for(;;);
+	dprintf("%spid = %d\n",str,getpid());
+	dprintf("cr2 = 0x%x, cr3 = 0x%x,cr4 = 0x%x\n",cr2,cr3,cr4);
+	dprintf("cs = 0x%x, ds = 0x%x, eip = 0x%x\n",current_thread->cs,current_thread->ds,current_thread->eip);
+	dprintf("ebp = 0x%x, esp = 0x%x, eflag = 0x%x\n",current_thread->ebp,current_thread->esp,current_thread->eflag);
+
+	/*print("Loop infinito");
+
+	for(;;);*/
+
 
 	if(!exit());
 	else for (;;);	

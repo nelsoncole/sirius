@@ -43,7 +43,7 @@
 #define MSG_SETCURSOR 2
 #define MSG_EXIT 0x80
 
-#define SHELL_CMD_NUM 17 + 3
+#define SHELL_CMD_NUM 17 + 4
 
 void (*call_loader)  (int argc,char **argv) = 0;// NULL;
 
@@ -57,6 +57,7 @@ int cmd_version(int argc,char **argv);
 int cmd_time(int argc,char **argv);
 int cmd_shutdown(int argc,char **argv);
 int cmd_run(int argc,char **argv);
+int cmd_run2(int argc,char **argv);
 int cmd_rename(int argc,char **argv);
 int cmd_reboot(int argc,char **argv);
 int cmd_new(int argc,char **argv);
@@ -136,6 +137,7 @@ COMMAND cmd_table[] = {
     	{"reboot",      cmd_reboot,         "Reboot system"                                 	},
     	{"rename",      cmd_rename,         "Rename file or directory"                      	},
 	{"run",		cmd_run,	    "Execute or run application"			},
+	{"run2",	cmd_run2,	    "Execute or run application"			},
     	{"shutdown",    cmd_shutdown,       "Shutdown your computer locally or remotely"    	},
    	{"time",        cmd_time,           "Time"                                          	},
     	{"version",     cmd_version,        "Shell version"                                 	},
@@ -404,7 +406,7 @@ int cmd_info(int argc,char **argv)
 	\n0x100011F4 - 0x100011F7   pwd             // size 4 bytes\
 	\n0x100011F8 - 0x100011FB   argc            // size 4 bytes\
 	\n0x100011FC - 0x100011FF   **argv          // size 4 bytes\
-	\n0x10001200 - 0x100012FF   **argv data     // size 256 bytes\n");
+	\n0x10001200 - 0x100012FF   reserved        // size 256 bytes\n");
 
         return 0;
 
@@ -478,6 +480,24 @@ int cmd_run(int argc,char **argv)
 
 
 	fputc('\n',stdout);
+
+	return 0;
+
+
+}
+
+int cmd_run2(int argc,char **argv)
+{		
+	char **argv_p = argv;
+	argv_p++;
+	
+	unsigned int pid_ret = exectve2(argc-1,argv_p);
+
+	if(!pid_ret) {
+
+		printf("Run2: \"%s\" error\n",argv[1]);
+		return -1;
+	}
 
 	return 0;
 

@@ -72,7 +72,7 @@ FILE *open(const char *path,int attr,const char *mode) {
 	const char *filename = NULL;
 
 	if(mode[0] == '\0') return NULL;
-	if(path[0] == '\0') return NULL;
+	if( (path[0] == '\0') || (!path)) return NULL;
 
 	unsigned int strsdx[2];
 	unsigned int strsdn[2];

@@ -440,8 +440,7 @@ __UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 	GW_HAND *Hand = _Hand;
 
 	char **buf = (char**) Buffer;
-	char *line;
-	
+	char *line;	
 
 
 	for(i = 0; i < Hand->Font.SizeY;i++ ) {
@@ -455,9 +454,10 @@ __UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 		c = 0;
 
 		while(line[c]) {
+			
+			if(line[c] == '\n') break;
 			BoxDraw(Hand,line[c++],Hand->Font.FgColor,Hand->Font.BgColor,Hand->Buffer);
-
-			if(c >= 256)break;
+			if(c >= Hand->Font.SizeX)break;
 
 		}
 
@@ -499,7 +499,7 @@ ____UpdateBoxDrawString(GW_HAND *_Hand,VOID *Buffer)
 		while(line[c]) {
 			BoxDraw(Hand,line[c++],Hand->Font.FgColor,Hand->Font.BgColor,Hand->Buffer);
 
-			if(c >= 256)break;
+			if(c >= Hand->Font.SizeX)break;
 
 		}
 

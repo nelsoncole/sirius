@@ -68,6 +68,7 @@ size_t c_write (const void *buffer,size_t size, size_t count, FILE *fp);
 
 // 
 int exectve(int argc,char **argv);
+int exectve2(int argc,char **argv);
 
 
 int set_cursor_x(int x);

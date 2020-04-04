@@ -33,68 +33,113 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
-#include <io.h>
+
+#include <io.h> 
+#include <sys/sys.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-FILE *fd;
+FILE *fp = NULL;
+
+char *mem = NULL;
+char *p_mem;
+char *line;
+long filesize = 0;
 
 int main(int argc, char **argv)
 {
 
-	GW_HAND *window = CreateWindow(TEXT("# Edit"),0,200,200,400,200,
-	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_WHITE) | BACK_GROUND_STYLE(GW_DARKGRAY)),GW_FLAG_VISIBLE);
+	GW_HAND *window = CreateWindow(TEXT("# Edit"),0,0,0,800,600,
+	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_DARKGRAY) | BACK_GROUND_STYLE(GW_WHITE)),GW_FLAG_VISIBLE);
+
+	
+
+	/*GW_HAND *area = CreateObject(window,TEXT(argv[1]),GW_HANDLE_BOX,24,0,window->Area.Width - 24,
+	window->Area.Height,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);*/
 
 
-	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,0,0,window->Area.Width,
-	window->Area.Height,GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_WHITE)),GW_FLAG_INVISIBLE);
+	/*GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,24,24,window->Area.Width - 24,
+	window->Area.Height - 24,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_INVISIBLE);*/
 
 
-	if ( argc != 3) {
-
-		//msgbox(error)
-		//exit(1);
-		for(;;)WindowFocus(window);
-
-	}
-
-
-	fd = fopen(argv[2],"r+");
-
-	if ( fd == NULL) {
-
-		//msgbox(error)
-		//exit(1);
-		for(;;)WindowFocus(window);
-
-
-	}
-
-
-
-	char **buf = (char**) malloc (0x1000); //4 KiB
-	long pool  = (long) malloc (0x10000); //64 KiB
+	mem = (char*) malloc (0x10000);
+	long pool = (long) malloc (0x10000);
+	char **lines = (char **) malloc (0x1000);
+	int i,x;
 
 	memset((char*)pool,0,0x10000);
-	memset(buf,0,0x1000);
-
-	buf[0] = (char*) pool;
-
-
-	char *line = buf[0];
-	fgets(line,0x1000,fd);
+	memset(lines,0,0x1000);
+	memset(mem,0,0x10000);
 
 
-	// enviar sms para box
-	Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT); 
+	for ( i=0 ; i < 47; i++ ) {
 
+		lines[i] = (char*) pool + (128*i);
+	}
+
+	if (argc > 1) { fp = fopen(argv[1],"r+");
+	
+	if( fp != NULL) 
+	{
+
+		fseek(fp,0,SEEK_END);
+		filesize = ftell(fp);
+		rewind(fp);
+
+		if(fread (mem,sizeof(char),filesize,fp)) 
+		{
+			p_mem = mem;
+
+			for(i=0 ; i < 256 ; i++) 
+			{
+				line = lines[i];
+
+				if(!*p_mem)break;
+				for( x=0; x < (64) ; x++ ) { 
+					
+					if(!*p_mem)break;
+					if( *p_mem == '\n' ) 
+					{ 
+						*line = '\0';
+						p_mem++;
+						break;
+					} else if (*p_mem == '\t') {
+						p_mem++;
+						*line++ = ' '; x++;
+						*line++ = ' '; x++;
+						*line++ = ' '; x++;
+						*line++ = ' '; x++;
+						*line++ = ' '; x++;
+						*line++ = ' '; x++;
+						*line++ = ' '; x++;							
+						*line++ = ' '; x++;
+
+					} else *line++ = *p_mem++;
+				}
+
+				
+
+			}
+
+		}
+
+
+		fclose(fp);
+
+		// enviar sms para box
+		//Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT);
+		//Send(box,(unsigned int)(lines),GW_SMG_NORMAL_BIT);
+		
+
+	} }
+
+
+	
 	// loop
 	while(TRUE) 
 	{
 
-		Send(box,(unsigned int)(buf),GW_SMG_NORMAL_BIT);
 		WindowFocus(window);
 
 		

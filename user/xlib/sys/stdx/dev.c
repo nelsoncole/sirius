@@ -36,6 +36,9 @@
 
 #include <sys/sys.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <stdio.h>
 
 static int checksum_sdx(int dev)
 {
@@ -55,7 +58,26 @@ static int checksum_sdx(int dev)
 	if(i >= 64) return 0;
 
 
-	return  -1;
+	return -1;
+}
+
+SD* loader_sdx(int dev)
+{
+
+	SD *sdx = (SD*) (stdsd->header.buffer);
+
+	int i;
+	for(i=0;i<64;i++)
+	{
+		if((sdx->devnum == dev) && (sdx->partnum == 12345)) {
+			return (sdx);
+		}
+
+		sdx = (SD*) (stdsd->header.buffer + (i*1024));
+	}
+
+
+	return NULL;
 }
 
 SD *request_sdx()
@@ -195,6 +217,89 @@ int mount_sd(int dev)
 
 	return rc;
 }
+
+int update_mount_sd(int dev)
+{
+	int i;
+	int rc = -1;
+	int pid = 0;
+	int bps = 0;
+
+	SD *sdx = loader_sdx(dev);
+
+	// cheksum
+	if(!sdx)
+	{
+		// unidade nao existe
+		return -1;
+
+	}
+
+	// LOADER MBR
+	MBR *mbr = (MBR*)malloc(0x1000);
+
+	if(block_read(dev,1,0,mbr) ) 
+	{ 
+		free(mbr);
+		return -1;
+	} 
+	else {
+
+
+		if(!sdx || sdx->partnum != 12345 ) { 
+	
+			free(mbr);
+			return -1;
+		} 
+
+
+		pid = 0x61 + sdx->pid - 1;
+		bps = sdx->byte_of_sector;
+		sdx++;
+
+		memset(sdx,0,31*32);
+
+
+
+		// montar particao MBR
+		for(i=0;i<4;i++) {
+
+			sdx = request_sdn((unsigned int)sdx);
+
+			if(!sdx) { 
+				continue;
+			} 
+			
+			sdx->id[0] = 's';
+			sdx->id[1] = 'd';
+			sdx->id[2] = pid;
+			sdx->id[3] = 0x31 + i;
+
+			sdx->devnum = dev;
+			sdx->partnum	= i;
+
+			if(!mbr->part[sdx->partnum].num_sectors) {
+				sdx->num_sectors = 0;
+				continue;
+			} 
+
+
+			sdx->UID = mbr->unique_disk_id;
+			sdx->lba_start = mbr->part[sdx->partnum].lba_start;
+			sdx->lba_end = mbr->part[sdx->partnum].lba_start + mbr->part[sdx->partnum].num_sectors;
+			sdx->num_sectors = mbr->part[sdx->partnum].num_sectors;
+			sdx->byte_of_sector = bps;
+
+			rc = 0;
+		}
+
+	}
+
+	free(mbr);
+
+	return rc;
+}
+
 
 SD *read_sdx(const char *s)
 {

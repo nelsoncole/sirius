@@ -24,12 +24,16 @@ TEST	:=test.o
 DISK	:=disk.o
 FASM	:=__fasm/fasm.o
 
-.PHONY: task.sys msgbox.sys gserver.sys xserver.sys files.sys terminal.sys shell.sys mouse.sys edit.sys test.bin disk.sys fasm.bin clean move
+C4 	:=c4.o
+
+.PHONY: task.sys msgbox.sys gserver.sys xserver.sys files.sys terminal.sys shell.sys mouse.sys edit.sys test.bin disk.sys fasm.bin c4.bin clean move
 
 fasm.bin: $(HEAD) $(FASM) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
-	
 
+c4.bin: $(HEAD) $(C4) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+	
 task.sys: $(HEAD) $(TASK) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
@@ -62,6 +66,11 @@ disk.sys: $(HEAD) $(DISK) $(XLIB)
 
 test.bin: $(HEAD) $(TEST) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
+
+
+#C4
+%.o:c4/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
 
 #LOCAL
 %.o:%.c

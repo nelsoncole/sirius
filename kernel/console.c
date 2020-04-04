@@ -223,10 +223,23 @@ void dp_init(){
 
 void dputs(char *str)
 {
-	if(dp_str >= (char*)0x00820000 )return;
-	char *p_str = str;
 
-	while(*p_str) *dp_str++ = *p_str++;
+	FILE *fd = current_thread->stdout;
+	char *p_str = str;
+	/*if(dp_str >= (char*)0x00820000 )return;
+
+	while(*p_str) *dp_str++ = *p_str++;*/
+
+	while(*p_str) {
+
+		asm ("outb %al,$0x80"); 
+		asm ("outb %al,$0x80");  
+		asm ("outb %al,$0x80");
+		asm ("outb %al,$0x80");
+		asm ("outb %al,$0x80");
+		asm ("outb %al,$0x80");
+		putc(*p_str++,fd); 
+	}
 	
 }
 

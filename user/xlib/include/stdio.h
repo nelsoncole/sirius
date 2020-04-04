@@ -13,6 +13,7 @@
 
 #include "ctype.h"
 #include "size_t.h"
+#include <stdarg.h>
 
 
 
@@ -52,13 +53,31 @@ extern void rewind(FILE *fp);
 
 extern int fseek (FILE *fp, long num_bytes, int origin );
 
-long int ftell(FILE *fp);
+extern long int ftell(FILE *fp);
 
 
 // E/S pelo console
 extern int putchar(int c);
 extern void puts(const char* str);
 extern int printf(const char *format,...);
+
+
+
+// FIXME sem suporte
+extern int snprintf(char * restrict s, size_t n,const char * restrict format, ...);
+extern int vsnprintf(char * restrict s, size_t n,const char * restrict format, va_list arg);
+extern int vsprintf(char * restrict s,const char * restrict format, va_list arg);
+
+extern int fprintf(FILE * restrict stream, const char * restrict format, ...);
+extern int sprintf(char * restrict s, const char * restrict format, ...);
+
+extern int vfprintf(FILE * restrict stream,const char * restrict format, va_list arg);
+extern int sscanf(const char * restrict s,const char * restrict format, ...);
+
+
+
+
+
 
 
 #endif

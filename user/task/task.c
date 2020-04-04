@@ -75,7 +75,7 @@ INTN main() {
 
 
 	GW_HAND *box_handle = CreateBox(task_handle,task_handle->Area.Width - 8*10,8,8*8,task_handle->Area.Height - 2,
-	GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);
+	GW_STYLE(FORE_GROUND(GW_LIGHTGREEN) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	
 

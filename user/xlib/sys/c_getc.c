@@ -82,9 +82,6 @@ int c_getc (FILE *fp)
 			|| (fp->header.mode[1] == '+') ) && (fp->header.flag&0x10) ) { flush(fp); }
 
 
-			memset(buffer,0,0x10000);
-
-
 			if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
 			|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
 			{

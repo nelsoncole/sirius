@@ -16,9 +16,25 @@ extern int strcmp (const char* s1, const char* s2);
 
 extern int strncmp (const char* s1,const char* s2,size_t count);
 
-extern void *memcpy(void *dest,void *src, size_t n);
+extern void *memcpy(void * restrict s1, const void * restrict s2, size_t n);
 
 extern char *strcat (char *dest, const char *src);
+
+extern int strcasecmp (const char *str1,const char *str2);
+
+extern int strncasecmp (const char *str1,const char *str2,size_t len);
+
+extern int memcmp(const void *s1, const void *s2, size_t n);
+
+extern char *strchr(const char *s, int c);
+char *strrchr(const char *s, int c);
+
+extern size_t strspn(const char *s1, const char *s2);
+extern size_t strcspn(const char *s1, const char *s2);
+
+
+// FIXME, nao funciona
+extern char *strtok(char * restrict s1,const char * restrict s2);
 
 
 

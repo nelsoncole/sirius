@@ -345,6 +345,10 @@ int putc (int ch, FILE *stream)
 	if(!total_blocks) return EOF;
 
 
+	if ((stream->header.mode[0] != 'w') \
+	&& (stream->header.mode[0] != 'a') && (stream->header.mode[1] != '+')) return EOF;
+
+
 	// Outros modos default lib C
 
 

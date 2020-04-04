@@ -1,11 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 int main(int argc, char **argv) {
 
 
-	printf("argc %d %s",argc,argv[0]);
+
+	printf("Hello, world!\n");
+
+	return (0);
+
+
+	/*char _str[] = "O soldado de verao, o patriota da luz do dia";
+	char *p;
+	p = strtok(_str," ");
+
+	printf("%s",p);
+
+
+	do {
+
+		p = strtok('\0', ", ");
+
+		if(p) printf("|%s",p);
+
+
+	}while(p);*/
+
+
+	printf("%s\n",strchr("isto e um teoste",'o'));
+	printf("%s\n",strrchr("isto e um teoste",'o'));
+
 	return 0;
 
 	char str[] = "This is Sirius Operating System.";

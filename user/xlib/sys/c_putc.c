@@ -85,7 +85,6 @@ int c_putc (int ch, FILE *fp)
 			// ler blocos e armazenar em cache
 			if(fp->header.flag&0x10) flush(fp);
 
-			memset(buffer,0,0x10000);
 
 			if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
 			|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
