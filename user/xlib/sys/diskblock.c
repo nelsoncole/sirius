@@ -48,19 +48,19 @@ int block_read(int media_id,int count,unsigned int offset /*LBA START*/,void *bu
 	int tmp_count = 0;
 
 
-	tmp_count = count/4;
+	tmp_count = count/8;
 
 	if(tmp_count) {
 
 		for(i=0;i < tmp_count; i++ ) {
 
-			new_addr = (i*512*4);
+			new_addr = (i*512*8);
 
 			__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0x10),"d"(media_id),
-			"c"(4/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr),"S"(_offset/*LBA0-31*/));
+			"c"(8/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr),"S"(_offset/*LBA0-31*/));
 
-			_offset += 4;
-			new_addr2 = new_addr + (1*512*4);
+			_offset += 8;
+			new_addr2 = new_addr + (512*8);
 
 			if(rc) return rc;
 
@@ -69,21 +69,14 @@ int block_read(int media_id,int count,unsigned int offset /*LBA START*/,void *bu
 
 
 
-	tmp_count = count%4;
+	tmp_count = count%8;
 
 	if(tmp_count) {
 
-		for(i=0;i < tmp_count; i++ ) {
+		__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0x10),"d"(media_id),
+		"c"(tmp_count/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr2),"S"(_offset/*LBA0-31*/));
 
-			new_addr2 += (i*512*1);
-			__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0x10),"d"(media_id),
-			"c"(1/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr2),"S"(_offset/*LBA0-31*/));
-
-			_offset += 1;
-
-			if(rc) return rc;
-
-		}
+			
 	}
 	
 	return rc; 
@@ -106,19 +99,19 @@ int block_write(int media_id,int count,unsigned int offset /*LBA START*/,void *b
 	int tmp_count = 0;
 
 
-	tmp_count = count/4;
+	tmp_count = count/8;
 
 	if(tmp_count) {
 
 		for(i=0;i < tmp_count; i++ ) {
 
-			new_addr = (i*512*4);
+			new_addr = (i*512*8);
 
 			__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0x11),"d"(media_id),
-			"c"(4/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr),"S"(_offset/*LBA0-31*/));
+			"c"(8/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr),"S"(_offset/*LBA0-31*/));
 
-			_offset += 4;
-			new_addr2 = new_addr + (1*512*4);
+			_offset += 8;
+			new_addr2 = new_addr + (512*8);
 
 			if(rc) return rc;
 
@@ -127,21 +120,14 @@ int block_write(int media_id,int count,unsigned int offset /*LBA START*/,void *b
 
 
 
-	tmp_count = count%4;
+	tmp_count = count%8;
 
 	if(tmp_count) {
 
-		for(i=0;i < tmp_count; i++ ) {
+		__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0x11),"d"(media_id),
+		"c"(tmp_count/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr2),"S"(_offset/*LBA0-31*/));
 
-			new_addr2 += (i*512*1);
-			__asm__ __volatile__("int $0x72":"=a"(rc):"a"(0x11),"d"(media_id),
-			"c"(1/*count*/),"b"(0/*LBA32-47*/),"D"(buffer+new_addr2),"S"(_offset/*LBA0-31*/));
-
-			_offset += 1;
-
-			if(rc) return rc;
-
-		}
+		
 	}
 	
 	return rc; 

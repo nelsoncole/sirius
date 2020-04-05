@@ -22,7 +22,7 @@ EDIT	:=edit.o
 TEST	:=test.o
 
 DISK	:=disk.o
-FASM	:=__fasm/fasm.o
+FASM	:=fasm/fasm.o
 
 C4 	:=c4.o
 
