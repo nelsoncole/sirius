@@ -41,10 +41,11 @@ extern ldiv_t ldiv(long numer, long denom);
 extern lldiv_t lldiv(long long numer,long long denom);
 
 
-extern int strtol (const char *nptr,char **endptr,int base);
+extern long strtol(const char *nptr,char **endptr, int base);
 extern int atoi (const char *nptr);
+extern long atol(const char *nptr);
 
-
+extern	unsigned long strtoul ( const char *nptr, char **endptr, int base);
 
 extern char *itoa (int val,char *str);
 extern void i2hex(unsigned int val, char* dest, int len);
@@ -54,7 +55,7 @@ extern char *getenv(const char *name);
 
 // FIXME, nao funcionam
 extern void qsort(void *base, size_t nmemb, size_t size,int (*compar)(const void *, const void *));
-extern	unsigned long int strtoul( const char * restrict nptr, char ** restrict endptr, int base);
+
 
 
 

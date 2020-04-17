@@ -38,6 +38,8 @@
 #ifndef __STRING_H__
 #define __STRING_H__
 
+void *memset(void *buffer,int val,unsigned count);
+
 UINTN strlen(CONST CHAR8 *s);
 VOID  *copymem(IN VOID *Destination,IN VOID *Source,IN UINTN Length);
 VOID *setmem(IN VOID *Buffer,IN UINTN Size,IN UINT8 Value);

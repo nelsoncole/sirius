@@ -1,13 +1,14 @@
 #include <stdio.h>
+#include <stdarg.h>
 
 
-int fprintf(FILE * restrict stream, const char * restrict format, ...)
+int fprintf(FILE *fp, const char *fmt, ...)
 {
-
-
-	printf("fprintf()\n");
-	for(;;);	
-	
-    	return (0);
+	int ret;
+  	va_list ap;
+  	va_start (ap, fmt);
+  	ret = vfprintf(fp, fmt, ap);
+  	va_end (ap);
+  	return ret;
 
 }

@@ -1,70 +1,96 @@
 #include <string.h>
-#include <stdio.h>
 
-char *us1;
+
+/*
+ **************************************
+ * strtok_r:
+ *     Usada em strtok.
+ *
+ * Credits: 
+ *     Apple. (Open Source)
+ *
+ *
+ * usado em c99 Gramado by Fred Nora 
+ */
+
+char *strtok_r ( char *s, const char *delim, char **last ){
+	
+    	char *spanp;
+    	int c, sc;
+    	char *tok;
+
+    	if ( s == NULL && (s = *last) == NULL )
+	{
+		
+	   	 return NULL;
+    	};
+
+    	// Skip (span) leading delimiters (s += strspn(s, delim), sort of).
+	
+cont:
+    
+	c = *s++;
+    
+	for ( spanp = (char *)delim; (sc = *spanp++) != 0; )
+    	{
+	    	if (c == sc)
+		{
+	        	goto cont;
+	    	}
+    	};
+
+	// No non-delimiter characters. 
+    	if ( c == 0 )		
+    	{
+	    	*last = NULL;
+	    	return NULL;
+    	};
+	
+    	tok = s -1;
+
+    	// Scan token (scan for delimiters: s += strcspn(s, delim), sort of).
+    	// Note that delim must have one NUL; we stop if we see that, too.
+	 
+    	for (;;)
+    	{
+	    	c = *s++;
+	    	spanp = (char *) delim;
+	    
+		do {
+	        	if ( (sc = *spanp++) == c )
+	        	{
+		        	if ( c == 0 )
+				{
+		            		s = NULL;
+					
+		        	}else {
+					
+		            		char *w = s -1;
+		            
+					*w = '\0';
+		        	};
+				
+		        	*last = s;
+				
+		        	return tok;
+	        	};
+			
+	    	} while( sc != 0 );
+        
+		//Nothing.
+		
+	};
+	
+    // NOTREACHED 
+};
+
+
+#undef        strtok
 
 char *strtok(char * restrict s1,const char * restrict s2)
 {
-
-
-	printf("strtok( defino no stdlib.h )\n");
-	for(;;);
-
-
-	static int first = 0;
-
-	if(!first) { 
-
-		us1 = (char *) s1;
-		first = 1;
-
-		if(*s1 == '\0') return (us1);
-
-
-	} else {
-
-		if(!*us1) return NULL;
-		
-	}
-
-	unsigned char *us2 = (unsigned char *) s2;
-
-	char *d = (char *) us1;
-	char *rc = d;
-
-	size_t len = strlen((char *)us2);
-	int i;
-	int fl = 1;
-
-	for( ;*d != '\0' ;d++) 
-	{
-		if ( *d == *us2 )
-		{
-			for(i=0;i<len;i++) 
-			{
-				if ( (*d == *us2++) && (fl) ){ 
-					*d++ = '\0';
-				}
-				else fl = 0;
-
-				 
-			}
-
-			break;
-
-
-		} 
-		
-
-	}
-
-	us1 = (char *)d;
-
-
-	printf("strtok()");
-	for(;;);
-
-
-	return (rc);
+	static char *last;
+	
+    	return strtok_r ( s1, s2, &last );
 
 }

@@ -91,11 +91,11 @@ int main()
 
 
 
-	GW_HAND *window = CreateWindow("# Terminal",0,mouse->x,mouse->y,800,600,/*0,100,20,900,650,*/
-	GW_STYLE(FORE_GROUND(GW_DARKGRAY) | BACK_GROUND(GW_DARKGRAY) | BACK_GROUND_STYLE(GW_WHITE)),GW_FLAG_VISIBLE);
+	GW_HAND *window = CreateWindow("# Terminal",0,mouse->x,mouse->y,900,720,/*0,100,20,900,650,*/
+	GW_STYLE(FORE_GROUND(GW_DARKGRAY) | BACK_GROUND(GW_DARKGRAY) | BACK_GROUND_STYLE(GW_LightCyan)),GW_FLAG_VISIBLE);
 
 	GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,4,2,window->Area.Width -4,
-	window->Area.Height - 2,GW_STYLE(FORE_GROUND(GW_LIGHTGREEN) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_INVISIBLE);
+	window->Area.Height - 2,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_INVISIBLE);
 
 
 	
@@ -290,6 +290,6 @@ int main()
 		
 	}
 
-	//exit(0);
+	exit(0);
 	return 0;
 }

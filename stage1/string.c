@@ -35,6 +35,15 @@
  */
 #include <io.h>
 
+
+void *memset(void *buffer,int val,unsigned count)
+{
+	unsigned char *tmp = (unsigned char *) buffer;
+
+    	for(; count != 0; count--) *tmp++ = val;
+	return buffer;
+}
+
 UINTN strlen(CONST CHAR8 *s)
 {
 	CHAR8 *tmp = (CHAR8*)s;

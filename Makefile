@@ -34,9 +34,14 @@ mount:
 	sudo cp bin/*.sys /mnt/
 	sudo cp bin/test.bin /mnt/
 	sudo cp bin/fasm.bin /mnt/
+	sudo cp bin/nasm.bin /mnt/
+	sudo cp bmp/ubuntu.ttf /mnt/
+	sudo cp bmp/w.jpg /mnt/
+	sudo cp bmp/a.ppm /mnt/
+	sudo cp bmp/b.ppm /mnt/
+	sudo cp bin/nanojpeg.bin /mnt/
 	sudo cp bin/c4.bin /mnt/
 	sudo cp main.asm /mnt/
-	sudo cp main.c /mnt/
 	sudo umount /mnt
 
 	./pcopy bin/stage0.bin part.img sirius.vhd

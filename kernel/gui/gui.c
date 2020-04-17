@@ -60,7 +60,7 @@ VOID PutPixel(UINTN X, UINTN Y, UINTN Color)
 VOID PutPixelBuff(UINTN X, UINTN Y, UINTN Color,VOID *Buffer)
 {
 	
-	UINT32 *buf = (UINT32*)Buffer;
+	UINT32 *buf = (UINT32*)G->FrameBuffer;//Buffer;
 
 	if((X >= G->HorizontalResolution) || (Y >= G->VerticalResolution) ) return;	
 
@@ -71,6 +71,7 @@ VOID PutPixelBuff(UINTN X, UINTN Y, UINTN Color,VOID *Buffer)
 // PixelClock default
 VOID refreshrate() 
 {
+	return;
 	__copymem(G->FrameBuffer,G->BankBuffer,G->HorizontalResolution * (G->VerticalResolution) *(G->Bpp/8));
 	
 }
@@ -78,7 +79,7 @@ VOID refreshrate()
 
 VOID clearscreen() 
 {
-	__setmem(G->BankBuffer,0,G->HorizontalResolution * (G->VerticalResolution) * (G->Bpp/8));
+	__setmem(G->FrameBuffer/*G->BankBuffer*/,0,G->HorizontalResolution * (G->VerticalResolution) * (G->Bpp/8));
 	
 }
 

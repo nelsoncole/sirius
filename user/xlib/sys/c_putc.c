@@ -86,8 +86,8 @@ int c_putc (int ch, FILE *fp)
 			if(fp->header.flag&0x10) flush(fp);
 
 
-			if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
-			|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
+			if( /*(fp->header.size > ((0x10000*offset)+0x10000) ) \
+			|| */( (fp->header.offset < fp->header.size) /*&& (!(fp->header.flag&0x10)) */) ) // FIXME ler
 			{
 
 				offset = fp->header.offset/0x10000;
@@ -145,7 +145,8 @@ int c_putc (int ch, FILE *fp)
 	if ((fp->header.mode[0] == 'w') \
 	|| (fp->header.mode[0] == 'a') || (fp->header.mode[1] == '+')) {
 
-		if(((fp->header.mode[1] != 'b') || (fp->header.mode[2] != 'b')) && (ch == 0)) return ch;
+		// FIXME stream de texto
+		//if(((fp->header.mode[1] != 'b') || (fp->header.mode[2] != 'b')) && (ch == 0)) return ch;
 
 
 		if(!fp->header.blocks) { 
@@ -167,13 +168,14 @@ int c_putc (int ch, FILE *fp)
 		if(((offset2 == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10))) 
 		{	//FIXME cache cheio
 
+
 			fp->header.flag &=~0x20;
 			// chamar flush()
 			// ler blocos e armazenar em cache
 			if(fp->header.flag&0x10) flush(fp);
 
-			if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
-			|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
+			if( /*(fp->header.size > ((0x10000*offset)+0x10000) ) \
+			|| */( (fp->header.offset < fp->header.size) /*&& (!(fp->header.flag&0x10)) */) ) // FIXME ler
 			{
 				offset = fp->header.offset/0x10000;
 
@@ -204,7 +206,6 @@ int c_putc (int ch, FILE *fp)
 
 			}
 
-
 			// bit 0x10 primeira eitura
 			// bit 0x20 permissao para leitura
 			fp->header.flag |= 0x30;
@@ -212,9 +213,10 @@ int c_putc (int ch, FILE *fp)
 		}
 		
 		// write character
-		*(unsigned char*)(buffer + offset2) = ch;
+		*(unsigned char*)(buffer + offset2) = ch &0xff;
 		// Update offset
 		fp->header.offset += 1;
+
 		if(fp->header.offset > fp->header.size )fp->header.size += 1;
 
 

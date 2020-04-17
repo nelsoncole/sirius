@@ -70,12 +70,12 @@ INTN main() {
 	
 	CHAR8 *_st, string_clock[8] = "00:00:00";
 
-	GW_HAND *task_handle = CreateTask(0,0,1024,32, 
-	GW_STYLE(FORE_GROUND(GW_GRAY) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);
+	GW_HAND *task_handle = CreateTask(0,0,G->HorizontalResolution,32, 
+	GW_STYLE(FORE_GROUND(GW_GRAY) | BACK_GROUND(GW_WHITE)),GW_FLAG_VISIBLE);
 
 
 	GW_HAND *box_handle = CreateBox(task_handle,task_handle->Area.Width - 8*10,8,8*8,task_handle->Area.Height - 2,
-	GW_STYLE(FORE_GROUND(GW_LIGHTGREEN) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);
+	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);
 
 	
 

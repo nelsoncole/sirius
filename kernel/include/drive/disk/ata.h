@@ -33,11 +33,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-
 #ifndef __ATA_H__
 #define __ATA_H__
 
+
+#include "ahci.h"
 
 // base address 
 uint32_t ATA_BAR0;    // Primary Command Block Base Address
@@ -146,8 +146,15 @@ uint32_t ATA_BAR5;    // AHCI Base Address / SATA Index Data Pair Base Address
 #define ATA_SECONDARY   0x01
 
 // ATA type
-#define ATA_DEVICE_TYPE     0x00
-#define ATAPI_DEVICE_TYPE   0x01
+#define ATA_DEVICE_NULL 	0
+	// IDE
+#define ATA_DEVICE_TYPE 	1
+#define ATAPI_DEVICE_TYPE   	2
+	// AHCI
+#define SATA_DEVICE_TYPE 	3
+#define SATAPI_DEVICE_TYPE 	4
+#define SEMB_DEVICE_TYPE 	5
+#define PM_DEVICE_TYPE 		6
 
 #define ATADEV_UNKNOWN	0x00
 #define ATADEV_PATA	0x01
@@ -171,37 +178,52 @@ uint32_t ATA_BAR5;    // AHCI Base Address / SATA Index Data Pair Base Address
 
 typedef struct _ATA
 {
+	// device type IDE or AHCI
+	unsigned int 	device;
+
+	// numero total de portas
+	unsigned int 	ptotal;
+
+	// flag
+	unsigned int 	flag;
+
+	unsigned int 	sectors;
+
     	// bytes per sector
-   	UINT32	bps;
+   	unsigned int	bps;
 
 	// mode of transfere (0 = DMA or 1 = PIO)
-    	UINT32	mode;
+    	unsigned int	mode;
 
 	// LBA28 or LBA48
-    	UINT32	lba_type;
+    	unsigned int	lba_type;
 
 	// dev_num 0 = Primary master
 	// dev_num 1 = Primary slava
 	// dev_num 2 = Secondary master
 	// dev_num 3 = Secondary slave
-    	UINT32	dev_num;
+    	unsigned int	dev_num;
 
 	// dev_type 0 = ATA, 1 = ATAPI
-    	UINT32	dev_type;
+	// dev_type 2 = SATA 3 = SATAPI
+    	unsigned int	dev_type;
 
 	// channel 0 = Primary
 	// channel 0 = Secondary
-    	UINT32	channel;
+    	unsigned int	channel;
  
-    	UINT32	cmd_block_base_addr;
-    	UINT32	ctrl_block_base_addr;
-    	UINT32	bus_master_base_addr;
+    	unsigned int	cmd_block_base_addr;
+    	unsigned int	ctrl_block_base_addr;
+    	unsigned int	bus_master_base_addr;
 
 	// IRQn 14 or 15 
-	UINT32	irqn;
+	unsigned int	irqn;
 
-	UINT32	sectors;    
-
+	// SATA 
+	// Number of port
+	unsigned int 	np;
+	// Number of port multiplier
+    	unsigned int 	npm;   
 
 }__attribute__ ((packed)) ATA;
 
@@ -210,6 +232,7 @@ UINTN ata_initialize();
 
 unsigned int ata_sectors(int devnum);
 unsigned int ata_bps(int devnum);
+int ata_ptotal();
 
 UINTN ata_read_sector(	IN UINTN p,
 			IN UINTN count,
@@ -219,6 +242,5 @@ UINTN ata_write_sector(	IN UINTN p,
 			IN UINTN count,
 			IN UINT64 addr,
 			OUT VOID *buffer);
-
 
 #endif

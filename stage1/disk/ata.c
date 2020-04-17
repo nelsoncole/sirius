@@ -36,9 +36,11 @@
 
 #include <io.h>
 
-ATA ata[4];
+ATA ata[32];
 PCI_COFIG_SPACE *ata_pci = NULL;
 UINTN ata_record_dev,ata_record_channel;
+
+extern void ahci_initialize (unsigned int mmio /*ABAR*/);
 
 VOID ata_wait(UINTN p)
 {
@@ -158,62 +160,53 @@ static UINTN ata_pci_configuration_space(UINTN bus,UINTN dev,UINTN fun)
     	ata_pci->subclss   	= data  >> 16 &0xff;
     	ata_pci->rid 		= data &0xff;
 
+	if(ata_pci->clss == 1 && ata_pci->subclss == 1) {
+		ata->device = ATA_IDE_CONTROLLER;
 
+	} else if(ata_pci->clss == 1 && ata_pci->subclss == 4) {
+		ata->device = ATA_RAID_CONTROLLER;
+		print("panic: RAID Controller\n");
+		for(;;);
 
-	data  = read_pci_config_addr(bus,dev,fun,8);
-        if(data &0x8000) {    
-        // Bus Master Enable
-        data  = read_pci_config_addr(bus,dev,fun,4);
-        write_pci_config_addr(bus,dev,fun,4,data | 0x4);
+	} else if(ata_pci->clss == 1 && ata_pci->subclss == 6) {
 
-        } 
+		ata->device = ATA_AHCI_CONTROLLER;
+	} else {
+        	print("IDE Controller not found!\n");
+        	print("RAID Controller not found!\n");
+        	print("AHCI Controller not found!\n");
+        	for(;;);
+	}
+
 
 
 	    // Habilitar interrupcao (INTx#)
         data  = read_pci_config_addr(bus,dev,fun,4);
         write_pci_config_addr(bus,dev,fun,4,data & ~0x400);
 
-
-	data  = read_pci_config_addr(bus,dev,fun,8);
-        if(data &0x8000) {    
-        	// Bus Master Enable
-        	data  = read_pci_config_addr(bus,dev,fun,4);
-        	write_pci_config_addr(bus,dev,fun,4,data | 0x4);
-
-        } 
-
-
 	if(ata_pci->clss == 1 && ata_pci->subclss == 6){ 
 		// AHCI
-        	// Compatibilidade e nativo, primary
-        	data  = read_pci_config_addr(bus,dev,fun,8);
-        	if(data &0x200) write_pci_config_addr(bus,dev,fun,8,data &~ 0x100);
-        	else {
 
-			// MAP.MV
-			data = read_pci_config_addr(bus,dev,fun,0x90);	
-			write_pci_config_addr(bus,dev,fun,0x90,data &~ 0xC3);
+		data  = read_pci_config_addr(bus,dev,fun,8);
+        	if(data &0x8000) {    
+        		// Bus Master Enable
+        		data  = read_pci_config_addr(bus,dev,fun,4);
+        		write_pci_config_addr(bus,dev,fun,4,data | 0x4);
 
-			data  = read_pci_config_addr(bus,dev,fun,8);
-			write_pci_config_addr(bus,dev,fun,8,data  | 0x100);
+        	} 
+        	
+		/* MAP—Address Map Register (SATA)
+        	7:6
+        	00b = IDE mode
+        	01b = AHCI mode
+        	10b = RAID mode
+        	11b = Reserved */
 
-
-		}         
-
-        	// Compatibilidade e nativo, secundary
-        	data  = read_pci_config_addr(bus,dev,fun,8);
-        	if(data &0x800) write_pci_config_addr(bus,dev,fun,8,data &~ 0x400);        
-        	else { 
-
-			// MAP.MV
-			data = read_pci_config_addr(bus,dev,fun,0x90);	
-			write_pci_config_addr(bus,dev,fun,0x90,data &~ 0xC3);
-
-
-			data  = read_pci_config_addr(bus,dev,fun,8);
-			write_pci_config_addr(bus,dev,fun,8,data | 0x400);        
-
-		}
+        	// AHCI mode
+        	/*data  = read_pci_config_addr(bus,dev,fun,0x90);
+        	data &= ~0x80;
+        	data |=  0x40; 
+        	write_pci_config_addr(bus,dev,fun,0x90,data);*/	
 	}
 
 	if(ata_pci->clss == 1 && ata_pci->subclss == 1){ 
@@ -221,6 +214,16 @@ static UINTN ata_pci_configuration_space(UINTN bus,UINTN dev,UINTN fun)
        		// IDE Decode Enable
        		data  = read_pci_config_addr(bus,dev,fun,0x40);
        		write_pci_config_addr(bus,dev,fun,0x40,data | 0x80008000);
+
+		data  = read_pci_config_addr(bus,dev,fun,8);
+        	if(data &0x8000) {    
+        		// Bus Master Enable
+        		data  = read_pci_config_addr(bus,dev,fun,4);
+        		write_pci_config_addr(bus,dev,fun,4,data | 0x4);
+
+        	} 
+
+
 
 
 
@@ -438,10 +441,6 @@ UINTN ata_read_sector(	IN UINTN p,
 			OUT VOID *buffer)
 { 
 
-
-
-
-
 	switch(ata[p].dev_type) {
 
 		case ATADEV_UNKNOWN:
@@ -492,15 +491,19 @@ UINTN ata_read_sector(	IN UINTN p,
 
 }
 
+
 UINTN ata_initialize()
 {
+
+	memset(ata,0,sizeof(ATA)*32);
+
 	UINTN p;
 	UINT16 *buffer = (UINT16*)alloc(1);
 	ata_pci = (PCI_COFIG_SPACE *)alloc(1);
     	UINT32 data = pci_scan_bcc(PCI_CALSS_MASS_STORAGE);
 
     	if(data  == -1) {
-    		print("ATA/ATAPI Controller not found!\n");
+    		print("PIC: Massa Storage Controller not found!\n");
     		for(;;);
     	}
 
@@ -513,9 +516,9 @@ UINTN ata_initialize()
     	}
 
 
-    	// Initialize base address
-    	// IDE legacy
-    	ATA_BAR0 = (ata_pci->bar0 & ~7) + ATA_IDE_BAR0 * ( !ata_pci->bar0);
+
+	// Initialize base address // IDE legacy
+	ATA_BAR0 = (ata_pci->bar0 & ~7) + ATA_IDE_BAR0 * ( !ata_pci->bar0);
     	ATA_BAR1 = (ata_pci->bar1 & ~3) + ATA_IDE_BAR1 * ( !ata_pci->bar1);       
     	ATA_BAR2 = (ata_pci->bar2 & ~7) + ATA_IDE_BAR2 * ( !ata_pci->bar2);
     	ATA_BAR3 = (ata_pci->bar3 & ~3) + ATA_IDE_BAR3 * ( !ata_pci->bar3);
@@ -523,19 +526,33 @@ UINTN ata_initialize()
     	ATA_BAR5 = (ata_pci->bar5 & ~0xf) + ATA_IDE_BAR5 * ( !ata_pci->bar5);
 
 
-	// Install  bus, ports IDE
-    	ata_bus_install(0,14/*IDE_IRQ14*/,0,ATA_PRIMARY,ATA_BAR0,ATA_BAR1,ATA_BAR4 + 0);
-    	ata_bus_install(1,14/*IDE_IRQ14*/,1,ATA_PRIMARY,ATA_BAR0,ATA_BAR1,ATA_BAR4 + 0);
-    	ata_bus_install(2,15/*IDE_IRQ15*/,0,ATA_SECONDARY,ATA_BAR2,ATA_BAR3,ATA_BAR4 + 8);
-    	ata_bus_install(3,15/*IDE_IRQ15*/,1,ATA_SECONDARY,ATA_BAR2,ATA_BAR3,ATA_BAR4 + 8);
 
+	switch(ata->device) {
+    		
+    		case ATA_IDE_CONTROLLER:
+			// Install  bus, ports IDE
+    			ata_bus_install(0,14/*IDE_IRQ14*/,0,ATA_PRIMARY,ATA_BAR0,ATA_BAR1,ATA_BAR4 + 0);
+    			ata_bus_install(1,14/*IDE_IRQ14*/,1,ATA_PRIMARY,ATA_BAR0,ATA_BAR1,ATA_BAR4 + 0);
+    			ata_bus_install(2,15/*IDE_IRQ15*/,0,ATA_SECONDARY,ATA_BAR2,ATA_BAR3,ATA_BAR4 + 8);
+    			ata_bus_install(3,15/*IDE_IRQ15*/,1,ATA_SECONDARY,ATA_BAR2,ATA_BAR3,ATA_BAR4 + 8);
 
+			for(p = 0; p < 4; p++)
+			ata_identify_device(p,buffer);
 	
-	for(p = 0; p < 4; p++)
-	ata_identify_device(p,buffer);
+			ata_record_dev = ata_record_channel = -1;
+		break;
+		case ATA_AHCI_CONTROLLER:
 
+    			// FIXME Aqui, vamos mapear o BAR5
+    			ahci_initialize(ATA_BAR5);
 
-	ata_record_dev = ata_record_channel = -1;
+		break;
+
+		default:
+			print("IDE or AHCI controller not found");
+			for(;;);
+		break;
+	}
 
     	
 

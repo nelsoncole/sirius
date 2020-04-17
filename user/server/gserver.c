@@ -34,17 +34,18 @@
  *
  */
 #include <io.h>
-#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 extern GUI *G;
 
-INTN main(INTN argc,CHAR8 *argv[])
+int main(INTN argc,CHAR8 *argv[])
 {
-	UINT32 *p = (UINT32*)0x1000111C;
-	UINT32 *GwFocus = (UINT32 *)(*p++);
+	unsigned int *p = (unsigned int*)0x1000111C;
+	unsigned int *GwFocus = (unsigned int *)(*p++);
 	MOUSE *mouse = (MOUSE*)(*p++);
 
-	UINTN __flag__ = 0;
+	int __flag__ = 0;
 
 	GW_HAND *obj = NULL;
 	GW_HAND *window	= NULL;
@@ -54,12 +55,14 @@ INTN main(INTN argc,CHAR8 *argv[])
 	if(window) obj = window->tail;
 	else obj = NULL;
 
+	//for(;;);
 
 	while(TRUE) {
 
 		app_clearscreen();
 		
-		//BitMAP(	(UINTN*)0xA00000,250,100,G->BankBuffer);
+		// FIXME a memoria deve ser de ring3
+		// BitMAP(	(UINTN*)0xA00000,250,100,G->BankBuffer);
 	
 		// UPDATE
 		while(window) {
@@ -106,7 +109,7 @@ INTN main(INTN argc,CHAR8 *argv[])
 
 		if(mouse->handle)update_window_mouse((GW_HAND *)mouse->handle);
 
-		DrawMouse(mouse->x,mouse->y,ColorTable[GW_GREEN], G->BankBuffer,cursor18x18);
+		DrawMouse(mouse->x,mouse->y,0xDCDCDC/*ColorTable[GW_GREEN]*/, G->BankBuffer,cursor18x18);
 
 		app_refreshrate();
 

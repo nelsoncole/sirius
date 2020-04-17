@@ -117,6 +117,7 @@
 #include "gui/gui.h"
 #include "pci.h"
 #include "disk/ata.h"
+#include "disk/ahci.h"
 #include "mbr.h"
 #include "fs/vfs.h"
 #include "fs/fat.h"
@@ -157,7 +158,7 @@ print(CONST CHAR8 *format,...);
 
 //DISK
 VOID initialize_gui();
-UINTN read_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer);
+int read_sector(int dev,unsigned count,unsigned long long addr,void *buffer);
 
 //Media
 UINTN Read(IN VFS *vfs,OUT VOID *buffer);

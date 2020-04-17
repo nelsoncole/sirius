@@ -267,22 +267,99 @@ int cmd_cls(int argc,char **argv)
 int cmd_copy(int argc,char **argv)
 {
 
-	if(argc < 2)return 0;
+	FILE *src;
+	FILE *dest;
 
-	char *str = (char*)malloc(0x1000);
+	size_t len,count;
+	int i;
+	char name[256];
+	strcpy(name,argv[2]);
 
-	FILE *fd = fopen(argv[1],"r");
 
-	if(fd != NULL) {
-		fgets(str,0x1000,fd);
-		
-		puts(str);
-		putchar('\n');
+	if(argc < 3) {
+		printf("error: file or directory not found, argc = %d \n",argc);
+		return 0;
+	}
 
-		close(fd);
+	unsigned char *buf = (unsigned char*)malloc(0x1000);
+
+	src = fopen(argv[1],"rb");
+
+	if(src == NULL) {
+		printf("error: file or directory not found\n");
+		free(buf);
+		return (0); 
 
 	}
 
+
+	strcat(name,argv[1]);
+
+	dest = fopen(name,"w+b");
+
+	if(dest == NULL) {
+		printf("error: falha ao copiar arquivo em %s\n",name);
+		free(buf);
+		fclose(src);
+		return (0); 
+
+	}
+
+	
+	fseek(src,0,SEEK_END);
+	len = ftell(src);
+	rewind(src);
+
+	count = len /0x1000;
+
+	for(i=0;i < count ; i++ ) {
+
+		if( ( fread(buf,1,0x1000,src) ) != 0x1000) {
+			printf("error");
+			fclose(dest);
+			fclose(src);
+			free(buf);
+			return 0;	
+		}
+
+
+		if(( fwrite(buf,1,0x1000,dest) ) != 0x1000) {
+			printf("error");
+			fclose(dest);
+			fclose(src);
+			free(buf);
+			return 0;	
+		}
+	}
+
+
+	count = len %0x1000;
+
+	if(count != 0) {
+
+		if( ( fread(buf,1,count,src) ) != count) {
+			printf("error");
+			fclose(dest);
+			fclose(src);
+			free(buf);
+			return 0;	
+		}
+
+
+		if(( fwrite(buf,1,count,dest) ) != count) {
+			printf("error");
+			fclose(dest);
+			fclose(src);
+			free(buf);
+			return 0;	
+		}
+
+	}	
+
+	
+	fclose(dest);
+	fclose(src);
+	free(buf);
     	return 0;
 }
 
@@ -308,11 +385,13 @@ int cmd_dir(int argc,char **argv)
 	FILE *fd = open(".",ATTR_DIRECTORY,"r");
 
 	if(fd != NULL) {
-		for(int i=0;i< fd->header.blocks;i++) printf("%d - %s\n",i,(char*)(fd->header.buffer + (64*i)));
+		for(int i=0;i< fd->header.blocks;i++) printf("%s\n",(char*)(fd->header.buffer + (64*i)));
 		close(fd);
 
 	}
 
+
+	putchar('\n');
 	
 
     	return  0;
@@ -414,7 +493,6 @@ int cmd_info(int argc,char **argv)
 
 int cmd_mov(int argc,char **argv)
 {
-
     	return 0;
 }
 

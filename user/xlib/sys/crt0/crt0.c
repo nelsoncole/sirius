@@ -35,9 +35,11 @@
  */
  
 #include <io.h>
+#include <mm.h>
 #include <sys/sys.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 unsigned int stream[3];
 extern int main();
@@ -55,19 +57,23 @@ FILE *stdsd = NULL;
 FILE *stdxserver = NULL;
 FILE *stdgserver = NULL;
 
+MOUSE *mouse = NULL;
+
 char *pwd = NULL;
 
 int crt0(BOOT_INFO *boot_info)
 {
 	unsigned int *device = NULL;
 
-	UINT32 *p = NULL;
+	unsigned int *p = NULL;
 
 	// GUI	
 	G = (GUI *)&boot_info->Graphic;
 
+
+
 	// pid e focus
-	p = (UINT32*)0x1000110C;
+	p = (unsigned int*)0x1000110C;
 
 	p++; // Detail Hardware
 	device = (unsigned int*)(*p++); // device
@@ -76,6 +82,10 @@ int crt0(BOOT_INFO *boot_info)
 	stdgserver = (FILE*)(device[2]);
 	__pid = *p++;
 	__focus = (FOCUS*)(*p++);
+
+
+	p = (unsigned int*)0x10001120;
+	mouse = (MOUSE*)(*p);
 
 
 	// pwd, argc end argv
@@ -94,6 +104,9 @@ int crt0(BOOT_INFO *boot_info)
 	stream[0] = (unsigned int) stdin;
 	stream[1] = (unsigned int) stdout;
 	stream[2] = (unsigned int) stderr;
+
+
+	memset(_mm_r,0,sizeof(_mm_t)*8192);
 
 	exit(main(argc,argv));
 

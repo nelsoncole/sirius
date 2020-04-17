@@ -40,9 +40,11 @@
  
 #define W_TASK_BARRA_SIZE 32
 
-// Type
+
 #define W_BARRA_TITUL_SIZE 	32
-#define W_BORDER_SIZE 		6
+#define W_BORDER_SIZE 		2
+
+// Type
 #define GW_HANDLE_EDIT 		1
 #define GW_HANDLE_BUTTON	2
 #define GW_HANDLE_LABEL 	3
@@ -93,6 +95,12 @@
 #define GW_LIGHTMAGENTA 0x0D
 #define GW_YELLOW 0x0E
 #define GW_WHITE 0x0F
+/*Tons e gama de Pastel Light Colors*/
+#define GW_Azure 16
+#define GW_LightCyan 17
+
+#define GW_SeaGreen 18
+#define GW_LightGreen 19
 
 
 

@@ -108,3 +108,12 @@ UINTN strncmp (CHAR8* Destination,CONST CHAR8* Source,UINTN count)
 	return (count);
 }
 
+
+void *memset(void *buffer,int val,unsigned count)
+{
+	unsigned char *tmp = (unsigned char *) buffer;
+
+    	for(; count != 0; count--) *tmp++ = val;
+	return buffer;
+}
+

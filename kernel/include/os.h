@@ -217,6 +217,8 @@ UINTN strncmp (CHAR8* Destination,CONST CHAR8* Source,UINTN count);
 extern VOID __copymem(VOID *dest, VOID *src, UINTN Length);
 extern VOID __setmem(VOID *dest, UINT32 val, UINTN Length);
 
+void *memset(void *buffer,int val,unsigned count);
+
 
 
 // console
@@ -233,8 +235,8 @@ print(CONST CHAR8 *format,...);
 
 
 //disk
-UINTN read_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer);
-UINTN write_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer);
+int read_sector(int dev,unsigned count,unsigned long long addr,void *buffer);
+int write_sector(int dev,unsigned count,unsigned long long addr,void *buffer);
 
 //Media
 UINTN Read(IN VFS *vfs,OUT VOID *buffer);

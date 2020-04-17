@@ -37,6 +37,7 @@
 #include <sys/sys.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define NULL ((void *)0)
 
@@ -133,7 +134,8 @@ FILE *open(const char *path,int attr,const char *mode) {
 
 		} else {
 				// Local desconhecido
-	
+
+				fputs("Debug: /dev/...",stdout);
 				free(p_path);
 				return (NULL);
 

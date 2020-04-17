@@ -35,7 +35,7 @@
  */
 #include <os.h>
 
-#define SYSCALL_NUM 18
+#define SYSCALL_NUM 24
 
 extern VOID interrupter(INTN n,UINT32 offset,UINT16 sel,UINT8 dpl );
 extern void int114(); // system call
@@ -145,6 +145,44 @@ unsigned int syscall_bps(int devnum)
 
 }
 
+int syscall_ata_ptotal()
+{
+	return ata_ptotal();
+}
+
+unsigned int syscall_inpb(int p)
+{
+	return inpb(p);
+
+}
+
+unsigned int syscall_inpw(int p)
+{
+	return inpw(p);
+
+}
+
+unsigned int syscall_inpl(int p)
+{
+	return inpl(p);
+
+}
+
+void syscall_outpb(int p,unsigned int val)
+{
+	outpb(p,val);
+}
+
+void syscall_outpw(int p,unsigned int val)
+{
+	outpw(p,val);
+}
+
+void syscall_outpl(int p,unsigned int val)
+{
+	outpl(p,val);
+}
+
 extern int terminal;
 void syscall_unknown(void){
 
@@ -161,7 +199,9 @@ VOID *syscall_table[SYSCALL_NUM]={
 	&sys_malloc,       	// eax, 2    	sys_malloc, edx = size
 	&sys_free,       	// eax, 3    	sys_free, edx = buf
 	&sys_reboot,       	// eax, 4    	sys_reboot
-	&syscall_unknown,	// eax, 5	reserved
+	// ata
+	&syscall_ata_ptotal,	// eax, 5	syscall_ata_ptotal
+	// thread
 	&syscall_exectve_child, // eax, 6	syscall_exectve_child, edx = argc, ecx = argv, ebx = pwd, edi = FILE
 	&sys_do_exec_child,	// eax, 7	sys_do_exec_child, edx = filename, ecx = prv
 	&syscall_exectve,	// eax, 8	syscall_exectve, edx = argc, ecx = argv, ebx = pwd, edi = FILE
@@ -170,10 +210,19 @@ VOID *syscall_table[SYSCALL_NUM]={
 	&syscall_unlockthread,	// eax, 11	syscall_unlockthread edx = pid
 	&syscall_taskswitch_pid,// eax, 12	syscall_taskswitch_pid, edx = pid
 	&syscall_cheksum_pid,	// eax, 13	syscall_cheksum_pid, edx = pid
-	&syscall_sectors,	// eax, 14	syscall_sectors, edx = devnum
+	// ata
+	&syscall_sectors,	// eax, 14	syscall_sectors, edx = devnum 
 	&syscall_bps,		// eax, 15	syscall_bps, edx = devnum
 	&syscall_read_sector,	// eax, 0x10	read_sector, edx = MediaID, ecx = count, ebx = LBA32-47, edi = buffer, esi = LBA0-31
 	&syscall_write_sector,	// eax, 0x11	write_sector, edx = MediaID, ecx = count, ebx = LBA32-47, edi = buffer, esi = LBA0-31
+	// io
+	&syscall_inpb,		// eax, 0x12	syscall_inpb, edx = port
+	&syscall_inpw,		// eax, 0x13	syscall_inpw, edx = port
+	&syscall_inpl,		// eax, 0x14	syscall_inpl, edx = port
+	&syscall_outpb,		// eax, 0x15	syscall_outpb, edx = port, ecx = val
+	&syscall_outpw,		// eax, 0x16	syscall_outpw, edx = port, ecx = val
+	&syscall_outpl,		// eax, 0x17	syscall_outpl, edx = port, ecx = val
+
 };
 
 static VOID invalidsyscall(UINT32 num)

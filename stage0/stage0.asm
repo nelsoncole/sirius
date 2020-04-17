@@ -188,8 +188,8 @@ STAGE1:
 	
 	XCHG 	CX, AX
 	MOV 	EAX, ESI
-	MOV 	BX, 0x8000
-	XOR 	DI, DI
+	MOV	DI, 0x800
+	XOR 	BX, BX
 	CALL ReadSectors
 
 

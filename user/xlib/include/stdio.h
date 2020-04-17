@@ -56,6 +56,18 @@ extern int fseek (FILE *fp, long num_bytes, int origin );
 extern long int ftell(FILE *fp);
 
 
+extern int vfprintf(FILE * fp,const char * fmt, va_list ap);
+extern int fprintf(FILE *fp, const char *fmt, ...);
+
+
+// E/S de string
+extern int vsprintf(char * str,const char * fmt, va_list ap);
+extern int sprintf(char * str, const char * fmt, ...);
+
+extern int snprintf(char *s, size_t n,const char * fmt, ...);
+extern int vsnprintf(char *s, size_t n,const char *fmt, va_list ap);
+
+
 // E/S pelo console
 extern int putchar(int c);
 extern void puts(const char* str);
@@ -64,19 +76,7 @@ extern int printf(const char *format,...);
 
 
 // FIXME sem suporte
-extern int snprintf(char * restrict s, size_t n,const char * restrict format, ...);
-extern int vsnprintf(char * restrict s, size_t n,const char * restrict format, va_list arg);
-extern int vsprintf(char * restrict s,const char * restrict format, va_list arg);
-
-extern int fprintf(FILE * restrict stream, const char * restrict format, ...);
-extern int sprintf(char * restrict s, const char * restrict format, ...);
-
-extern int vfprintf(FILE * restrict stream,const char * restrict format, va_list arg);
 extern int sscanf(const char * restrict s,const char * restrict format, ...);
-
-
-
-
 
 
 

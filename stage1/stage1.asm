@@ -52,6 +52,10 @@ _start:
 	EXTERN 	UID
 
 
+
+	
+
+
 START:
 	CLI	
     	MOV AX, CS

@@ -6,16 +6,16 @@
 
 static char sn_buf[BUFFER_SIZE];
 
-int vsnprintf(char * restrict s, size_t n,const char * restrict format, va_list arg)
+int vsnprintf(char *s, size_t n,const char *fmt, va_list ap)
 {
 	int rv;
 	int bytes;
 
-	if(n > BUFFER_SIZE ); // return error
+	if(n > BUFFER_SIZE ) return 0;
 
-	rv = vsprintf(sn_buf, format, arg);
+	rv = vsprintf(sn_buf, fmt, ap);
 
-	if(rv >= BUFFER_SIZE ); // "snprintf buffer overflow"
+	if(rv >= BUFFER_SIZE ) return BUFFER_SIZE; // "snprintf buffer overflow"
 
 
 	bytes = rv;

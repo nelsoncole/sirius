@@ -1,6 +1,40 @@
+/*
+ * File Name: ata.h
+ *
+ *
+ * BSD 3-Clause License
+ * 
+ * Copyright (c) 2019, nelsoncole
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
 #ifndef __ATA_H__
 #define __ATA_H__
-
 
 // base address 
 uint32_t ATA_BAR0;    // Primary Command Block Base Address
@@ -109,8 +143,15 @@ uint32_t ATA_BAR5;    // AHCI Base Address / SATA Index Data Pair Base Address
 #define ATA_SECONDARY   0x01
 
 // ATA type
-#define ATA_DEVICE_TYPE     0x00
-#define ATAPI_DEVICE_TYPE   0x01
+#define ATA_DEVICE_NULL 	0
+	// IDE
+#define ATA_DEVICE_TYPE 	1
+#define ATAPI_DEVICE_TYPE   	2
+	// AHCI
+#define SATA_DEVICE_TYPE 	3
+#define SATAPI_DEVICE_TYPE 	4
+#define SEMB_DEVICE_TYPE 	5
+#define PM_DEVICE_TYPE 		6
 
 #define ATADEV_UNKNOWN	0x00
 #define ATADEV_PATA	0x01
@@ -134,35 +175,53 @@ uint32_t ATA_BAR5;    // AHCI Base Address / SATA Index Data Pair Base Address
 
 typedef struct _ATA
 {
+	// device type IDE or AHCI
+	unsigned int 	device;
+
+	// numero total de portas
+	unsigned int 	ptotal;
+
+	// flag
+	unsigned int 	flag;
+
+
+	unsigned int 	sectors;
+
     	// bytes per sector
-   	UINT32	bps;
+   	unsigned int	bps;
 
 	// mode of transfere (0 = DMA or 1 = PIO)
-    	UINT32	mode;
+    	unsigned int	mode;
 
 	// LBA28 or LBA48
-    	UINT32	lba_type;
+    	unsigned int	lba_type;
 
 	// dev_num 0 = Primary master
 	// dev_num 1 = Primary slava
 	// dev_num 2 = Secondary master
 	// dev_num 3 = Secondary slave
-    	UINT32	dev_num;
+    	unsigned int	dev_num;
 
 	// dev_type 0 = ATA, 1 = ATAPI
-    	UINT32	dev_type;
+	// dev_type 2 = SATA 3 = SATAPI
+    	unsigned int	dev_type;
 
 	// channel 0 = Primary
 	// channel 0 = Secondary
-    	UINT32	channel;
+    	unsigned int	channel;
  
-    	UINT32	cmd_block_base_addr;
-    	UINT32	ctrl_block_base_addr;
-    	UINT32	bus_master_base_addr;
+    	unsigned int	cmd_block_base_addr;
+    	unsigned int	ctrl_block_base_addr;
+    	unsigned int	bus_master_base_addr;
 
 	// IRQn 14 or 15 
-	UINT32	irqn;    
+	unsigned int	irqn;
 
+	// SATA 
+	// Number of port
+	unsigned int 	np;
+	// Number of port multiplier
+    	unsigned int 	npm;   
 
 }__attribute__ ((packed)) ATA;
 

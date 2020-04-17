@@ -36,6 +36,8 @@
 
 #include <io.h>
 
+extern int gpu();
+
 extern UINT8 bootdevice_num;
 extern VOID *FAT;
 
@@ -86,6 +88,7 @@ VOID main()
 
 	// clear screen
 	ClearScreen();
+
 	
 	print("Sirius Operating System (SLoader v2.0)\
 	\nGUI Info:\
@@ -112,13 +115,15 @@ VOID main()
 	g->BankBuffer,
 	Window);
 
+	/*gpu();
+	for(;;);*/
 
 
     	idt_install();
 	ata_initialize();
     	//timer_install(1);
     	//keyboard_install();
-	
+
 
 	// Configure HDN
 	UINT32 *tmp;

@@ -37,28 +37,54 @@
 #include <os.h>
 
 extern ATA ata[4];
-UINTN read_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer)
+int read_sector(int dev,unsigned count,unsigned long long addr,void *buffer)
 {
-	UINTN i;
-	UINT8 *buf = buffer;
+	int i;
+	unsigned char *buf = buffer;
 
-	for(i = 0; i <count;i++) {
-		if(ata_read_sector(p,1,addr + i,buf + (ata[p].bps * i)) )
-			return -1;
+	switch(ata->device) {
+
+		case ATA_IDE_CONTROLLER:
+			for(i = 0; i <count;i++) {
+				if(ata_read_sector(dev,1,addr + i,buf + (ata[dev].bps * i)) )
+				return (-1);
+			}
+		break;
+		case ATA_AHCI_CONTROLLER:
+			
+			if( sata_read_sector(dev,addr, count, buf) ) return (-1);	
+		break;
+
+		default:
+			return(-1);
+		break;
 	}
 
 
-	return 0;
+	return (0);
 }
 
-UINTN write_sector(UINTN p,UINTN count,UINT64 addr,VOID *buffer)
+int write_sector(int dev,unsigned count,unsigned long long addr,void *buffer)
 {
-	UINTN i;
-	UINT8 *buf = buffer;
+	int i;
+	unsigned char *buf = buffer;
 
-	for(i = 0; i <count;i++) {
-		if(ata_write_sector(p,1,addr + i,buf + (ata[p].bps * i)) )
-			return -1;
+	switch(ata->device) {
+
+		case ATA_IDE_CONTROLLER:
+			for(i = 0; i <count;i++) {
+				if(ata_write_sector(dev,1,addr + i,buf + (ata[dev].bps * i)) )
+					return -1;
+			}
+		break;
+		case ATA_AHCI_CONTROLLER:
+
+			if( sata_write_sector(dev,addr, count, buf) ) return (-1);	
+		break;
+
+		default:
+			return(-1);
+		break;
 	}
 
 

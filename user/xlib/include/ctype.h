@@ -1,21 +1,12 @@
 #ifndef __CTYPE_H__
 #define __CTYPE_H__
 
-/*int isalnum(int c);
-int isalpha(int c);
-int isblank(int c);
-int iscntrl(int c);
-int isdigit(int c);
-int isgraph(int c);
-int islower(int c);
-int isprint(int c);
-int ispunct(int c);
-int isspace(int c);
-int isupper(int c);
-int isxdigit(int c);*/
-int tolower(int c);
-int toupper(int c);
 
+/*
+ **************************************
+ * Credits: 
+ *     Linux
+ */
 
 #define _U	0x01	/* upper */
 #define _L	0x02	/* lower */
@@ -26,26 +17,35 @@ int toupper(int c);
 #define _X	0x40	/* hex digit */
 #define _SP	0x80	/* hard space (0x20) */
 
-extern unsigned char _ctype[];
-extern char _ctmp;
+#define __ismask(x) (_ctype[(int)(unsigned char)(x)])
 
-#define isalnum(c) ((_ctype+1)[c]&(_U|_L|_D))
-#define isalpha(c) ((_ctype+1)[c]&(_U|_L))
-#define iscntrl(c) ((_ctype+1)[c]&(_C))
-#define isdigit(c) ((_ctype+1)[c]&(_D))
-#define isgraph(c) ((_ctype+1)[c]&(_P|_U|_L|_D))
-#define islower(c) ((_ctype+1)[c]&(_L))
-#define isprint(c) ((_ctype+1)[c]&(_P|_U|_L|_D|_SP))
-#define ispunct(c) ((_ctype+1)[c]&(_P))
-#define isspace(c) ((_ctype+1)[c]&(_S))
-#define isupper(c) ((_ctype+1)[c]&(_U))
-#define isxdigit(c) ((_ctype+1)[c]&(_D|_X))
+extern const unsigned char _ctype[];
 
-#define isascii(c) (((unsigned) c)<=0x7f)
-#define toascii(c) (((unsigned) c)&0x7f)
+#define isalnum(c) ((__ismask(c)&(_U|_L|_D)) != 0)
+#define isalpha(c) ((__ismask(c)&(_U|_L)) != 0)
+#define iscntrl(c) ((__ismask(c)&(_C)) != 0)
+#define isdigit(c) ((__ismask(c)&(_D)) != 0)
+#define isgraph(c) ((__ismask(c)&(_P|_U|_L|_D)) != 0)
+#define islower(c) ((__ismask(c)&(_L)) != 0)
+#define isprint(c) ((__ismask(c)&(_P|_U|_L|_D|_SP)) != 0)
+#define ispunct(c) ((__ismask(c)&(_P)) != 0)
+#define isspace(c) ((__ismask(c)&(_S)) != 0)
+#define isupper(c) ((__ismask(c)&(_U)) != 0)
+#define isxdigit(c) ((__ismask(c)&(_D|_X)) != 0)
 
-/*#define tolower(c) (_ctmp=c,isupper(_ctmp)?_ctmp+('a'+'A'):_ctmp)
-#define toupper(c) (_ctmp=c,islower(_ctmp)?_ctmp+('A'-'a'):_ctmp)*/
+// linux
+#define isascii(c) (((unsigned char)(c))<=0x7f)
+#define toascii(c) (((unsigned char)(c))&0x7f)
+
+
+/*
+
+int isblank(int c);
+*/
+
+
+int tolower(int c);
+int toupper(int c);
 
 
 

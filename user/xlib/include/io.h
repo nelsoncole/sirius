@@ -38,6 +38,28 @@
 #define __IO_H__
 
 
+//IO R/W BYTE
+#define inpb(p)({\
+	unsigned char val;\
+	__asm__ __volatile__("int $0x72":"=a"(val):"a"(0x12),"d"(p));val; })
+
+#define outpb(p,val)__asm__ __volatile__("int $0x72"::"a"(0x15),"d"(p),"c"(val))
+
+
+//IO R/W WORD
+#define inpw(p)({\
+	unsigned short val;__asm__ __volatile__("int $0x72":"=a"(val):"a"(0x13),"d"(p));val; })
+
+#define outpw(p,val) __asm__ __volatile__ ("int $0x72"::"a"(0x16),"d"(p),"c"(val))
+
+//IO R/W DWORD
+#define inpl(p)({\
+	unsigned int val;\
+	__asm__ __volatile__("int $0x72":"=a"(val):"a"(0x14),"d"(p));val; })
+
+#define outpl(p,val) __asm__ __volatile__ ("int $0x72"::"a"(0x17),"d"(p),"c"(val))
+
+
 #ifndef IN 	// Prototype argument decoration for EFI parameters to indicate their direction
     #define IN 	// IN - argument is passed into the function
     #define OUT	// OUT - argument (pointer) is returned from the function
@@ -78,15 +100,19 @@
 #define	KEY_ENTER 	(0x1C1C)
 
 
+extern MOUSE *mouse;
+
 // header
 extern FOCUS	       	*__focus;
 extern UINT32		__pid;
 extern UINTN 		spin_lock;
 
 extern GUI *G;
-extern UINT32 ColorTable[16];
+extern unsigned int ColorTable[];
 extern UINT16 font8x16[256*16];
 extern UINT16 cursor18x18[18];
+
+
 
 
 // String
@@ -106,6 +132,8 @@ UINTN BitMAP(	VOID *Data,
 		UINTN X,
 		UINTN Y,
 		VOID *BankBuffer);
+
+
 
 
 

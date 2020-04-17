@@ -82,8 +82,8 @@ int c_getc (FILE *fp)
 			|| (fp->header.mode[1] == '+') ) && (fp->header.flag&0x10) ) { flush(fp); }
 
 
-			if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
-			|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
+			if(/* (fp->header.size > ((0x10000*offset)+0x10000) ) \
+			|| */( (fp->header.offset <= fp->header.size) /*&& (!(fp->header.flag&0x10))*/ ) ) // FIXME ler
 			{
 				offset = fp->header.offset/0x10000;
 
@@ -130,6 +130,8 @@ int c_getc (FILE *fp)
 	if(((offset2 == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10))) 
 	{	//FIXME cache cheio
 
+
+
 		fp->header.flag &=~0x20;
 
 		// chamar flush()
@@ -137,10 +139,11 @@ int c_getc (FILE *fp)
 		if ( ( (fp->header.mode[0] == 'w') || (fp->header.mode[0] == 'a') \
 		|| (fp->header.mode[1] == '+') ) && (fp->header.flag&0x10) ) flush(fp);
 
-
-		if( (fp->header.size > ((0x10000*offset)+0x10000) ) \
-		|| ( (fp->header.size != 0) && (!(fp->header.flag&0x10))) ) // ler
+	
+		if(/* (fp->header.size > ((0x10000*offset)+0x10000) ) \
+		|| */( (fp->header.offset <= fp->header.size) /*&& (!(fp->header.flag&0x10))*/ ) ) // FIXME ler
 		{
+
 			offset = fp->header.offset/0x10000;
 
 			if( ( (fp->header.size >= (0x10000*offset)) && (offset != 0) ) || \
@@ -167,6 +170,8 @@ int c_getc (FILE *fp)
 			}
 
 		}
+
+
 
 		// bit 0x10 primeira eitura
 		// bit 0x20 permissao para leitura

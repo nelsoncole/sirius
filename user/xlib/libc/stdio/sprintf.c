@@ -1,13 +1,16 @@
 #include <stdio.h>
 
 
-int sprintf(char * restrict s, const char * restrict format, ...)
+int sprintf(char * str, const char * fmt, ...)
 {
+	int ret;
+  	va_list ap;
+  	va_start (ap, fmt);
+  	ret = vsprintf(str, fmt, ap);
+  	va_end (ap);
 
-
-	printf("sprintf()\n");
-	for(;;);	
+	*(unsigned char*)(str + ret) = '\0';	/* terminate the string */
 	
-    	return (0);
+  	return ret;
 
 }

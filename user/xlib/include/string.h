@@ -32,8 +32,6 @@ char *strrchr(const char *s, int c);
 extern size_t strspn(const char *s1, const char *s2);
 extern size_t strcspn(const char *s1, const char *s2);
 
-
-// FIXME, nao funciona
 extern char *strtok(char * restrict s1,const char * restrict s2);
 
 

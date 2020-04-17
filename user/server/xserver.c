@@ -126,8 +126,12 @@ int main(int argc,const char **argv)
 	unsigned int pid = 0;
 	int i;
 
-	// 1 - All mount devices disks // IDE
-	for(i=0;i < 4;i++)
+	// 1 - All mount devices disks // PATA/ SATA e USB2.0
+	int rc = 0;
+
+	__asm__ __volatile__("int $0x72":"=a"(rc):"a"(5));
+
+	for(i=0;i < rc;i++)
 	{
 		mount_sd(i);
 	}

@@ -430,5 +430,8 @@ VOID *malloc(UINTN size)
 
 VOID free(VOID *buffer)
 {
+	if(!buffer) return;
 	free_pages(buffer);
+
+	//*(unsigned int*)(buffer) = 0;
 } 

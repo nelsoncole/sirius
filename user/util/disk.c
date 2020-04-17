@@ -51,6 +51,13 @@
 
 #define SPACE 12
 
+const char *unidade[4]={
+    	"B",
+	"KiB",
+    	"MiB",
+    	"GiB",
+};
+
 const char *menu[STR_MENU_SIZE]={
     	"Name",
 	"Flag",
@@ -102,9 +109,10 @@ unsigned char *data;
 
 static int cmd_l (SD *root);
 static void cmd_m();
-static int cmd_s();
-static int cmd_n(int flag);
+static int cmd_s(SD *info);
+static int cmd_n(int flag,SD *info);
 static int cmd_w(int flag);
+static int cmd_o(int flag,SD *info);
 
 int main(int argc, char **argv)
 {
@@ -118,10 +126,9 @@ int main(int argc, char **argv)
 	memset(buf,0,0x1000);
 
 	dev = NULL;
+	SD *info = NULL;
 
 	fputs("MBR disk (Sirius) version 0.0.1\n",stdout);
-
-	//read_list(root);
 
 	for ( ; ; ) {
 
@@ -148,12 +155,16 @@ int main(int argc, char **argv)
 					cmd_l (root);
 				break;
 			case DK_SELECT: fputs("Select device (MountPoint + Name): ",stdout);
-					flag = cmd_s();
+					flag = cmd_s((SD *)&info);
 					
 				break;
-			case DK_NEW: 	flag = cmd_n(flag);
+			case DK_NEW: 	flag = cmd_n(flag,info);
 				break;
 			case DK_WRITE:	flag = cmd_w(flag);
+					info = NULL;
+				break;
+			case DK_CREATE: flag = cmd_o(flag,info);
+					info = NULL;
 				break;
 
 			default:
@@ -226,9 +237,39 @@ static int cmd_l (SD *root)  {
 
 
 
-		size = (p_src->num_sectors*p_src->byte_of_sector/1024/1024);
+		int n;
+		size = p_src->num_sectors;
+
+		//ldiv_t l;
+
+		for(n=0;n<4;n++) {
+
+			if(size > 1024) size = size / 1024;
+
+			else {
+
+				size = size * p_src->byte_of_sector;
+
+				if(n < 3 && size >= 1024) {
+
+					size = size / 1024;
+					
+					//l = ldiv(size,1024);
+			
+					n++;
+				}
+
+				break;
+
+
+			}	
+
+		}
+
 		set_cursor_x(SPACE*2);
-		printf("%d MiB",size);
+
+		//printf("%d,%d %s",l.quot,l.rem,unidade[n]);
+		printf("%d %s",size,unidade[n]);
 
 		set_cursor_x(SPACE*3);
 		printf("%s",type[_type]);
@@ -264,15 +305,22 @@ static void cmd_m()
 }
 
 
-static int cmd_n(int flag)
+static int cmd_n(int flag,SD *info)
 {
 
 	flag &=~0x80;
 
 	MBR *tble = (MBR *) data;
-	SD *info = (SD*) (stdsd->header.buffer);
-	int n;
+	memset(tble,0,0x1000);
+	
+	if(!info) { 
+		fputs("\nAdd new partition error",stdout);
+		return (flag);
+	}
 
+
+	int n;
+	
 
 	if(flag != 1 || dev == NULL) { 
 		fputs("\nAdd new partition error",stdout);
@@ -280,7 +328,7 @@ static int cmd_n(int flag)
 	}
 
 
-	memset(tble,0,0x1000);
+	
 	rewind(dev);
 	if (fread(tble,1,512,dev) != 512) {
 		fputs("\nAdd new partition error, read sector",stdout);
@@ -354,6 +402,7 @@ static int cmd_n(int flag)
 
 		if( (tble->part[n].lba_start != tble->part[n+1].lba_start) ) {
 
+			// FIXME
 			start = (tble->part[n-1].lba_start + tble->part[n-1].num_sectors);
 
 		}else { printf("\nerror 2"); return (flag); }
@@ -361,15 +410,34 @@ static int cmd_n(int flag)
 	}else { printf("\nerror 3"); return (flag); }
 
 
+	tble->bootsig = 0xaa55;
+	
 	tble->part[n].dev_attr = 0x80;
+	tble->part[n].part_type = 0x0e; // W95 FAT16 (LBA)
 	tble->part[n].lba_start = start;
-	tble->part[n].num_sectors = 65536;
 
-	fputs("Size (number in MiB): ",stdout);
+repet:	fputs("Size (Number in MiB): ",stdout);
+
 	fgets (s,256,stdin);
+
+	unsigned long size = strtoul (s,NULL, 10);
+
+	size = (size*1024*1024) /info->byte_of_sector;
+
+	if(n == 0) size -= 8;
+
+	if( size > (info->num_sectors /* - particoes existentes*/) ) {
+
+		printf("A cima do Limite xxMiB\n");
+		goto repet;
+	}
+
+	tble->part[n].num_sectors = size;
+
 
 	printf("New Part[%d] LBA Start %d, Sectors %d",n+1,
 	tble->part[n].lba_start,tble->part[n].num_sectors);
+
 
 
 	flag |= 0x80;
@@ -415,8 +483,11 @@ static int cmd_w(int flag)
 // return 1, um disco foi seleccionado
 // return 2, uma particao foi seleccionada
 // return 0, nenhum 
-static int cmd_s()
+static int cmd_s(SD *info)
 {
+
+	*(unsigned int*)(info) = (0);
+
 
 	if(dev) {
 
@@ -449,6 +520,10 @@ static int cmd_s()
 	if(dev != NULL) {
 
 		printf("Device \"%s\" active\n",id);
+
+		char *p_s = s;
+		*(unsigned int*)(info) = (unsigned int)read_sdx(++p_s);
+
 		return (rc);
 
 	}
@@ -456,6 +531,42 @@ static int cmd_s()
 	printf("Error: \"%s\" device not found\n",s);
 	return (0);
 	
+}
+
+
+static int cmd_o(int flag,SD *info) 
+{
+
+	fputs("create a new empty MBR partition table",stdout);
+
+	MBR *tble = (MBR *) data;
+	
+	if(!info) { 
+		fputs("\nnew empty MBR partition error",stdout);
+		return (0);
+	}
+
+	
+
+	memset(tble->part,0,16*4);
+
+	tble->bootsig = 0xaa55;
+
+
+	rewind(dev);
+	if (fwrite(tble,1,512,dev) != 512) {
+		fputs("Error write sector",stdout);
+		return (0);
+		
+	}
+
+
+	fclose(dev);
+
+	dev = NULL;
+	
+	return (0);
+
 }
 
 

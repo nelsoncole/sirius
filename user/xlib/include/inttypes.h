@@ -243,9 +243,10 @@
 #define	SCNxMAX			"jx"		/* uintmax_t */
 #define	SCNxPTR			"lx"		/* uintptr_t */
 
+typedef unsigned int intmax_t;
 typedef struct {
-//	intmax_t quot;		/* quotient */
-//	intmax_t rem;		/* remainder */
+	intmax_t quot;		/* quotient */
+	intmax_t rem;		/* remainder */
 } imaxdiv_t;
 
 /*__BEGIN_DECLS

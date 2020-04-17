@@ -216,7 +216,7 @@ UINTN main(BOOT_INFO *boot_info)
 	// Keyboard
 	ioapic_umasked(1);
 	// Mouse
-	ioapic_umasked(12);
+	//ioapic_umasked(12);
 
 	// RTC 
 	ioapic_umasked(8);
@@ -234,14 +234,14 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 
-	print("Install PS/2\n"); 	ps2_install();
+	/*print("Install PS/2\n"); 	ps2_install();
 	print("Instal Keyboard\n");	keyboard_install();
-	print("Install Mouse\n");	mouse_install();
+	print("Install Mouse\n");	mouse_install();*/
 
 	print("Install RTC\n");		rtc_install();
 
 
-	print("Initialize IDE Controller:\n");
+	print("Initialize Massa Storage Controller\n");
 	ata_initialize();
 
 
@@ -317,10 +317,25 @@ UINTN main(BOOT_INFO *boot_info)
 	}
 
 
+	/*char *buffer = malloc(0x1000);
+	memset(buffer,0x15,0x1000);
+
+	int rc1 = write_sector(0,8,0,buffer);
+
+	buffer = malloc(0x1000);
+	memset(buffer,0,0x1000);
+
+	int rc2 = read_sector(0,8,0,buffer);
+
+
+	print("rc1 %d rc2 %d\n 0x%x",rc1,rc2,*(unsigned int *)buffer);
+
+	for(;;);*/
 
 
 	// FIXME debug
-	ClearScreen(); 
+	//clearscreen();
+	//ClearScreen(); 
 	//for(;;);	
 		
 
@@ -329,9 +344,9 @@ UINTN main(BOOT_INFO *boot_info)
 	do_exec("task.sys",1);
 	do_exec("xserver.sys",1);
 	do_exec("gserver.sys",0x81);
-	do_exec("mouse.sys",1);
+	do_exec("desktop.sys",1);
 
-	//do_exec("files.sys",1);
+	//do_exec("font.sys",1);
 
 	apic_timer_umasked();
 
@@ -343,17 +358,18 @@ UINTN main(BOOT_INFO *boot_info)
 	refreshrate(); */ //refresh_screen();
 
 
-	sti(); //Enable eflag interrupt
-
 	// wait
 	/*UINTN i = 700000000;
-	while(i--);*/
+	while(i--);*/ 
+
+	sti(); //Enable eflag interrupt
 
 
 	global_controll_task_switch = 0;
 	key_msg_exec_console = 0;
 
 	debug("Done!\n");
+
 
 
 	while(TRUE)/* Thread 0*/ {

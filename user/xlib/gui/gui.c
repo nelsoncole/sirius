@@ -47,10 +47,6 @@ GW_HAND	*Box = NULL;
 
 CHAR8 *font = NULL;
 
-UINT32 ColorTable[16] = {0x000000,0x0000FF,0x008000,0x00ffff,0xFF0000,0xAA00AA,\
-0xAA5500,0x808080,0x555555,0x5555FF,0x55FF55,0x55FFFF,0xFF5555,0xFF55FF,0xFFFF00,0xFFFFFF};
-
-
 
 VOID PutPixel(UINTN X, UINTN Y, UINTN Color)
 {
@@ -95,7 +91,7 @@ VOID app_refreshrate()
 
 VOID app_clearscreen() 
 {
-	__setmem(G->BankBuffer,0,(G->HorizontalResolution * G->VerticalResolution\
+	__setmem(G->BankBuffer,0x00000000,(G->HorizontalResolution * G->VerticalResolution\
 	* (G->Bpp/8)));
 }
 
@@ -654,7 +650,7 @@ GW_HAND *CreateTask(	UINTN X,
 	
 
 	// area
-	DrawArea (GwHand->Area.X + 1,GwHand->Area.Y + 1,GwHand->Area.Width -1,GwHand->Area.Height -1, \
+	DrawArea (GwHand->Area.X,GwHand->Area.Y,GwHand->Area.Width,GwHand->Area.Height, \
 				ColorTable[GwHand->Style >> 8 &0xff],GwHand->Buffer);
 
 
@@ -684,8 +680,8 @@ UINTN UpdateTask(GW_HAND *_GwHand)
 	
 
 	// area
-	DrawArea (GwHand->Area.X + 1,GwHand->Area.Y + 1,GwHand->Area.Width -1,GwHand->Area.Height -1, \
-				ColorTable[GwHand->Style >> 8 &0xf],GwHand->Buffer);
+	DrawArea (GwHand->Area.X,GwHand->Area.Y,GwHand->Area.Width,GwHand->Area.Height, \
+				ColorTable[GwHand->Style >> 8 &0xff],GwHand->Buffer);
 
 
 	// Barra de titule

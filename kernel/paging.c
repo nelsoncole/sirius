@@ -115,5 +115,5 @@ VOID page_install(VOID)
 	page_enable();
 
 	// Espera o MMU, completar a primeira traducao 
-	wait_ns(90000000);
+	wait_ns(10000);
 }
