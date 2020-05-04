@@ -60,6 +60,7 @@ FILE *stdgserver = NULL;
 MOUSE *mouse = NULL;
 
 char *pwd = NULL;
+GUI *G = NULL;
 
 int crt0(BOOT_INFO *boot_info)
 {
@@ -104,9 +105,8 @@ int crt0(BOOT_INFO *boot_info)
 	stream[0] = (unsigned int) stdin;
 	stream[1] = (unsigned int) stdout;
 	stream[2] = (unsigned int) stderr;
-
-
-	memset(_mm_r,0,sizeof(_mm_t)*8192);
+ 
+	memset(_mm_r,0,sizeof(_mm_t)*_MM_R_SIZE);
 
 	exit(main(argc,argv));
 
@@ -117,6 +117,8 @@ int crt0(BOOT_INFO *boot_info)
 void exit(int rc)
 {
 	write_stx(X_MSG_INT,0,0,stdxserver);
+
+	free(_mm_r);
 
 	__asm__ __volatile__("int $0x71"::);
 

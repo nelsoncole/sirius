@@ -60,6 +60,38 @@ VOID pci_write_config_dword(UINTN bus,UINTN dev,UINTN fun,UINTN offset,UINTN dat
     	outportl(PCI_PORT_DATA,data);
 }
 
+
+unsigned int pci_scan_class(int class)
+{
+    	unsigned int data = -1;
+
+    	unsigned int bus, dev, fun;
+
+	unsigned int r = 0;
+    
+    	for(bus = 0;bus < MAX_BUS; bus++) {
+        	for(dev = 0; dev < MAX_DEV; dev++){
+            		for(fun = 0; fun < MAX_FUN; fun++){
+
+                		outportl(PCI_PORT_ADDR,CONFIG_ADDR(bus,dev,fun, 0x8));
+                		data =inportl(PCI_PORT_DATA);
+
+                		if((data >> 24 &0xff) == class){
+
+					r = fun | dev << 16 | bus << 24;
+                    			return r;
+            
+                		}
+            		}
+     
+        	}
+     
+    	}
+
+    return (-1);
+
+}
+
 // Esta funçao deve retornar o numero de barramento, o dispositivo e a funçao
 // do dispositivo conectado ao barramento PCI, de acordo a classe.
 UINT32 pci_scan_bcc(UINTN bcc)

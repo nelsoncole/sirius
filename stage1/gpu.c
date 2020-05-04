@@ -1,5 +1,38 @@
 #include <io.h>
 
+/*  BLT Engine Status (40000h 4FFFFh) (Software Debug) */
+#define BR00                  0x40000
+#define BR01                  0x40004
+#define BR02                  0x40008
+#define BR03                  0x4000C
+#define BR04                  0x40010
+#define BR05                  0x40014
+#define BR06                  0x40018
+#define BR07                  0x4001C
+#define BR08                  0x40020
+#define BR09                  0x40024
+#define BR10                  0x40028
+#define BR11                  0x4002C
+#define BR12                  0x40030
+#define BR13                  0x40034
+#define BR14                  0x40038
+#define BR15                  0x4003C
+#define BR16                  0x40040
+#define BR17                  0x40044
+#define BR18                  0x40048
+#define BR19                  0x4004C
+
+#define BR20                  0x40050
+#define BR21                  0x40054
+#define BR22                  0x40058
+#define BR23                  0x4005C
+#define BR24                  0x40060
+#define BR25                  0x40064
+
+#define SSLADD                0x40074
+#define DSLH                  0x40078
+#define DSLRADD               0x4007C
+
 
 
 // Display Clock Control Registers (06000h–06FFFh)
@@ -349,25 +382,12 @@ int gpu()
 	// Setup the display timings of your desired mode
 	DISPLAY_PIPELINE *pipeline = (DISPLAY_PIPELINE*)(GTTMMADR + 0x60000);
 
-	/*pipeline->htotal.active = 1366 -1;
-	pipeline->htotal.total = 1366*4;
+	pipeline->htotal.active = 1366 -1;
+	//pipeline->htotal.total = 0;
 	pipeline->vtotal.active = 768 - 1;
-	//pipeline->vtotal.total = 0;*/
+	//pipeline->vtotal.total = 0;
 	pipeline->pi_peasrc.h_image_size = pipeline->htotal.active;
 	pipeline->pi_peasrc.v_image_size = pipeline->vtotal.active;
-
-
-	/*pipeline->hblank.start = pipeline->htotal.active;
-	pipeline->hblank.end = 1366*2 - 1;*/
-	/*pipeline->vblank.start = pipeline->vtotal.active;
-	pipeline->vblank.end = 768 + 0 - 1;*/
-
-
-	/*pipeline->hsynic.start = 1366 + 0 - 1;
-	pipeline->hsynic.end = pipeline->hsynic.start + 1366 + 0 - 1;*/
-	/*pipeline->vsynic.start = 768 + 0 - 1;
-	pipeline->vsynic.end = pipeline->vsynic.start + 768 + 0 - 1;*/
-
 
 	
 
@@ -401,32 +421,21 @@ int gpu()
 
 	print("DPLL_CTL_A %x\n",*(unsigned int*)(GTTMMADR + 0xC6014));
 
-	print("TRANS_HTOTAL_A %x\n",*(unsigned int*)(GTTMMADR + 0xE0000));
-	print("TRANS_HBLANK_A %x\n",*(unsigned int*)(GTTMMADR + 0xE0004));
-	print("TRANS_HSYNC_A %x\n",*(unsigned int*)(GTTMMADR + 0xE0008));
-	print("TRANS_VTOTAL_A %x\n",*(unsigned int*)(GTTMMADR + 0xE000C));
-	print("TRANS_VBLANK_A %x\n",*(unsigned int*)(GTTMMADR + 0xE0010));
-	print("TRANS_VSYNC_A %x\n",*(unsigned int*)(GTTMMADR + 0xE0014));
+	print("BR00 %x %x\n",*(unsigned int*)(GTTMMADR + 0x10000),*(unsigned int*)(GTTMMADR + 0x20000));
+	print("BR01 %x %x\n",*(unsigned int*)(GTTMMADR + 0x10004),*(unsigned int*)(GTTMMADR + 0x20004));
+	print("BR02 %x %x\n",*(unsigned int*)(GTTMMADR + 0x10008),*(unsigned int*)(GTTMMADR + 0x20008));
+	print("BR03 %x %x\n",*(unsigned int*)(GTTMMADR + 0x1000c),*(unsigned int*)(GTTMMADR + 0x2000c));
+	print("BR04 %x %x\n",*(unsigned int*)(GTTMMADR + 0x10010),*(unsigned int*)(GTTMMADR + 0x20010));
+	print("BR05 %x %x\n",*(unsigned int*)(GTTMMADR + 0x10004),*(unsigned int*)(GTTMMADR + 0x20004));
 	
 	
-	
-
-
-	/*unsigned int *x = (unsigned int *)GTTMMADR2;
-	
-
-	x[0] = 0x47008006;
-	x[1] = 0x43000020;
-	x[24] = 0x00200020;
-	x[25] = 0x00200020;
-	x[5] = -1;
-	x[6] = 0x80808080;*/
-
-
-	
-	//for(int i=0;i <= 1366;i++){*(unsigned int*)(GTTMMADR2 + (i*4)) = 0x7e49eb85; }
 
 	print("done");
+
+	*(unsigned int*)(GTTMMADR + BR00) = 0xf4000000;
+	*(unsigned int*)(GTTMMADR + BR22) = 400 | 200 << 16;
+		
+
 
 	return (0);
 }

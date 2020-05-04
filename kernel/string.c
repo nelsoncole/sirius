@@ -109,6 +109,21 @@ UINTN strncmp (CHAR8* Destination,CONST CHAR8* Source,UINTN count)
 }
 
 
+void  *memcpy(void *dest,const void *src,unsigned len)
+{	
+
+	int i;
+	unsigned char *p_dest = (unsigned char *)dest;
+	unsigned char *p_src  = (unsigned char *)src;
+	
+
+	for(i =0; i<len;i++)*p_dest++ = *p_src++;
+		
+
+	return dest;
+}
+
+
 void *memset(void *buffer,int val,unsigned count)
 {
 	unsigned char *tmp = (unsigned char *) buffer;

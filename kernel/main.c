@@ -54,8 +54,10 @@ GraphicInitialize(GUI *Graphic)
 	
 	return 0;
 }
- 
 
+extern void e1000_irq_wait();
+extern int e1000_send_arp ( unsigned char source_ip[4], unsigned char target_ip[4], unsigned char target_mac[6] );
+extern int e1000();
 int terminal = 0;
 VOID thread_main()
 {
@@ -64,24 +66,33 @@ VOID thread_main()
 
 
 	debug("Initialize thread main\n");
-	
+
+	/*e1000_irq_wait();
+
+	unsigned char source_ip[4] = {127,0,0,1}; // 192.168.33.1
+	unsigned char target_ip[4] = {127,0,0,1}; // UNITEL
+	unsigned char target_mac[6] = {0xff,0xff,0xff,0xff,0xff,0xff};
+
+
+	cli();
+	e1000_send_arp (source_ip, target_ip, target_mac);
+	sti();*/
 
 
 	while(TRUE) {
 
-		// foco
+		// foco F1
 		if(key_msg_focos) {
 		 	cli();
 		 	msg_set_focus();
 			sti();	
 		}
 
-		// execute console
+		// execute console F2
 		if(key_msg_exec_console || terminal != 0) {
 			cli();
 
-			pid = do_exec("terminal.sys",1);
-
+			pid = do_exec("trm.bin",1);
 			set_focus(pid);
 			key_msg_exec_console = 0;
 
@@ -96,15 +107,11 @@ VOID thread_main()
 
 }
 
-
-extern void dp_init();
-UINTN main(BOOT_INFO *boot_info)
+extern unsigned int g_mm_mp;
+int main(BOOT_INFO *boot_info)
 {	
-
-	dp_init();
-
 	//UINTN pid;
-	UINTN local_apic_virtual_addr;
+	unsigned int local_apic_virtual_addr;
 
 	UID = boot_info->UID;
 	DEV = boot_info->DEV;
@@ -121,32 +128,40 @@ UINTN main(BOOT_INFO *boot_info)
 
 	
 	page_install();
-
-
 	ram_initialize();
-
-
 	alloc_pages_initialize();
 
-
-
+	// intialize global
+	g_mm_mp = 0;
 	
 	// Mapear o  Linear Frame Buffer e alocar memoria virtal para o Bank Buffer
-	mem_map((PHYSICAL_ADDRESS)G->FrameBuffer,\
-	(VIRTUAL_ADDRESS *)&G->FrameBuffer,1024/*4MiB*/,0x13+0x4);
-
+	//mem_map((PHYSICAL_ADDRESS)G->FrameBuffer,
+	//(VIRTUAL_ADDRESS *)&G->FrameBuffer,1024/*4MiB*/,0x13+0x4);
+	
+	mm_mp( (unsigned int) G->FrameBuffer, (unsigned int *) &G->FrameBuffer,1024/*4MiB*/,0x13 | 0x4);
 
 	alloc_pages(0,1024/*4 MiB*/,(VIRTUAL_ADDRESS *)&G->BankBuffer);
 
-	alloc_pages(0,64/*256 KiB*/,(VIRTUAL_ADDRESS *)&G->TaskBuffer);
+	alloc_pages(0,1024/*4 MiB*/,(VIRTUAL_ADDRESS *)&G->WindowScreen);
 
 	unsigned int phys = 0;
-	alloc_pages(0,2,(VIRTUAL_ADDRESS *)&phys);
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	memset((void*)phys,0,0x1000);
+	G->l.l = (unsigned int ) phys;
 
-	G->List = phys;
-	GW_HAND *_G = (GW_HAND*) G->List;
-	_G->next = 0;
-	_G->tail = 0;
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	memset((void*)phys,0,0x1000);
+	G->l.l2 = (unsigned int ) phys;	
+
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	memset((void*)phys,0,0x1000);
+
+	G->l.pid = (unsigned int *) phys;
+	G->l.spin_lock = (unsigned int *) phys + 0x20;
+	G->l.spin_lock[0] = 1;
+	G->l.spin_lock[1] = 0;
+	G->l.spin_lock[2] = 0;
+	G->l.spin_lock[3] = 0;
 
 	font = (CHAR8 *)(font8x16);
 
@@ -188,12 +203,10 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 	//FIXME
-	BitMAP(	(UINTN*)0xA00000,200,200,G->BankBuffer); 
+	BitMAP(	(UINTN*)0xA00000,300,100,G->BankBuffer); 
 	refreshrate();
 	
 	print("Initialize Kernel: Sirius v2.0...\n");
-
-		
 
 	print("Install GDTR\n");	gdt_install();
 	print("Install TSS\n");		tss_install();
@@ -201,48 +214,57 @@ UINTN main(BOOT_INFO *boot_info)
 
 
 
+
+	//for(;;);
+
 	// Mapear o Local APIC BASE
-	mem_map((PHYSICAL_ADDRESS)0xFEC00000/*IA32_LOCAL_APIC_BASE_ADDR*/,\
-	(VIRTUAL_ADDRESS *)&local_apic_virtual_addr,1024/*4MiB*/,0x13);
+	//mem_map((PHYSICAL_ADDRESS)0xFEC00000/*IA32_LOCAL_APIC_BASE_ADDR*/,
+	//(VIRTUAL_ADDRESS *)&local_apic_virtual_addr,1024/*4MiB*/,0x13);
+
+	mm_mp( (unsigned int) IA32_LOCAL_APIC_BASE_ADDR, (unsigned int *) &local_apic_virtual_addr,1024/*4 MiB*/,0x13);
 	
-	apic_initialize(IA32_LOCAL_APIC_BASE_ADDR/*local_apic_virtual_addr*/);
+	apic_initialize(local_apic_virtual_addr);
 	print("Install APIC Timer\n");	apic_timer();
 
 	print("I/O APIC initialize ");
 	ioapic_initialize();
-
-		
 
 	// Keyboard
 	ioapic_umasked(1);
 	// Mouse
 	//ioapic_umasked(12);
 
-	// RTC 
-	ioapic_umasked(8);
 
+	//ioapic_umasked(8);
+
+	for(int i=3;i<24;i++)ioapic_umasked(i);
 
 
 	// data initialize
-	GwFocus = (UINT32*) malloc(0x1000);
-	mouse	= (MOUSE*) malloc(0x1000);
-	rtc	= (UINT32*) malloc(0x1000);
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	GwFocus = (UINT32*) phys;
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	mouse	= (MOUSE*) phys;
+	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
+	rtc	= (UINT8*) phys;
 
 	setmem(GwFocus,0x1000,0);
 	setmem(mouse,0x1000,0);
 	setmem(rtc,0x1000,0);
 
-
-
-	/*print("Install PS/2\n"); 	ps2_install();
 	print("Instal Keyboard\n");	keyboard_install();
-	print("Install Mouse\n");	mouse_install();*/
+	print("Install Mouse\n");	mouse_install();
+
 
 	print("Install RTC\n");		rtc_install();
+	// RTC 
 
 
 	print("Initialize Massa Storage Controller\n");
 	ata_initialize();
+
+
+	//e1000(); // internet
 
 
 	
@@ -255,11 +277,7 @@ UINTN main(BOOT_INFO *boot_info)
 	create_thread(&thread_main,kernel_page_directory,0,0,0,0,(UINT32)malloc(0x2000),0,2);
 
 	print("testing application on system\n");
-
-	/*
-	nic_install();
-
-	while(1);*/
+	
 
 
 	// TODO inicializacao do device
@@ -317,60 +335,47 @@ UINTN main(BOOT_INFO *boot_info)
 	}
 
 
-	/*char *buffer = malloc(0x1000);
-	memset(buffer,0x15,0x1000);
-
-	int rc1 = write_sector(0,8,0,buffer);
-
-	buffer = malloc(0x1000);
-	memset(buffer,0,0x1000);
-
-	int rc2 = read_sector(0,8,0,buffer);
-
-
-	print("rc1 %d rc2 %d\n 0x%x",rc1,rc2,*(unsigned int *)buffer);
-
-	for(;;);*/
-
-
 	// FIXME debug
 	//clearscreen();
 	//ClearScreen(); 
 	//for(;;);	
-		
-
 
 	// USER
-	do_exec("task.sys",1);
-	do_exec("xserver.sys",1);
-	do_exec("gserver.sys",0x81);
-	do_exec("desktop.sys",1);
+	do_exec("xserver.bin",1);
+	do_exec("gserver.bin",0x81);
+	do_exec("desktop.bin",1);
 
-	//do_exec("font.sys",1);
+	do_exec("taskbar.bin",1);
+	//do_exec("trm.bin",1);
+	//do_exec("test.bin",1);
 
 	apic_timer_umasked();
 
 
+	FILE *f = open ("logo.bmp","rx");
+	if(f == NULL) { 
+		print("open \"logo.bmp\" error\n");
+	} else {
+
+		if(read(G->WindowScreen,1,f->header.size,f) != f->header.size);
+		close(f);
+	}
 	
 
 	/*clearscreen();
-	BitMAP(	(UINTN*)0xA00000,260,50,G->BankBuffer);
+	BitMAP(	(UINTN*)G->WindowScreen,220,100,G->BankBuffer);
 	refreshrate(); */ //refresh_screen();
 
 
-	// wait
-	/*UINTN i = 700000000;
-	while(i--);*/ 
 
+	
 	sti(); //Enable eflag interrupt
 
 
 	global_controll_task_switch = 0;
 	key_msg_exec_console = 0;
 
-	debug("Done!\n");
-
-
+	//debug("Done!\n");
 
 	while(TRUE)/* Thread 0*/ {
 

@@ -115,8 +115,8 @@ VOID main()
 	g->BankBuffer,
 	Window);
 
-	/*gpu();
-	for(;;);*/
+	//gpu();
+	//for(;;);
 
 
     	idt_install();

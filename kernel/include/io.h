@@ -38,47 +38,49 @@
 
 //IO R/W BYTE
 #define inportb(p)({\
-	uint8_t val;\
-	__asm__ __volatile__("in %w1,%b0":"=a"(val):"d"(p));val; })
+	unsigned char val;\
+	__asm__ __volatile__("in %w1,%b0":"=a"(val):"d"(p));val&0xff; })
 
 #define outportb(p,val)__asm__ __volatile__("out %b0,%w1"::"a"(val),"d"(p))
 
 #define inpb(p)({\
-	uint8_t val;\
-	__asm__ __volatile__("in %w1,%b0":"=a"(val):"d"(p));val; })
+	unsigned char val;\
+	__asm__ __volatile__("in %w1,%b0":"=a"(val):"d"(p));val&0xff; })
 
 #define outpb(p,val)__asm__ __volatile__("out %b0,%w1"::"a"(val),"d"(p))
 
 
 //IO R/W WORD
 #define inportw(p)({\
-	uint16_t val;__asm__ __volatile__("inw %w1,%w0":"=a"(val):"d"(p));val; })
+	unsigned short val;\
+	__asm__ __volatile__("inw %w1,%w0":"=a"(val):"d"(p));val; })
 
 #define outportw(p,val) __asm__ __volatile__ ("outw %w0,%w1"::"a"(val),"d"(p))
 
 #define inpw(p)({\
-	uint16_t val;__asm__ __volatile__("inw %w1,%w0":"=a"(val):"d"(p));val; })
+	unsigned short val;\
+	__asm__ __volatile__("inw %w1,%w0":"=a"(val):"d"(p));val; })
 
 #define outpw(p,val) __asm__ __volatile__ ("outw %w0,%w1"::"a"(val),"d"(p))
 
 
 //IO R/W DWORD
 #define inportl(p)({\
-	uint32_t val;\
+	unsigned int val;\
 	__asm__ __volatile__("inl %w1,%k0":"=a"(val):"d"(p));val; })
 
 #define outportl(p,val) __asm__ __volatile__ ("outl %k0,%w1"::"a"(val),"d"(p))
 
 //IO R/W DWORD
 #define inportd(p)({\
-	uint32_t val;\
+	unsigned int val;\
 	__asm__ __volatile__("inl %w1,%k0":"=a"(val):"d"(p));val; })
 
 #define outportd(p,val) __asm__ __volatile__ ("outl %k0,%w1"::"a"(val),"d"(p))
 
 
 #define inpl(p)({\
-	uint32_t val;\
+	unsigned int val;\
 	__asm__ __volatile__("inl %w1,%k0":"=a"(val):"d"(p));val; })
 
 #define outpl(p,val) __asm__ __volatile__ ("outl %k0,%w1"::"a"(val),"d"(p))

@@ -52,6 +52,7 @@ STDX *read_stx(FILE *fd);
 
 
 // syscall
+void set_focus_kbdc(unsigned int pid);
 int getpid();
 void taskswitch();
 void taskswitch_pid(unsigned int pid);

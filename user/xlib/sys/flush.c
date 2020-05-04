@@ -10,6 +10,8 @@ int flush(FILE *fp) {
 
 	if(!fp) return EOF;
 
+	if(fp->header.mode[0] != 'w' && fp->header.mode[1] != '+' && fp->header.mode[0] != 'a') return EOF;
+
 	unsigned char* buffer = (unsigned char*) (fp->header.buffer);
 	unsigned dev_n = fp->header.dev;
 	unsigned count = fp->header.count;

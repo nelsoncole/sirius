@@ -1,30 +1,25 @@
 #include <string.h>
 
+#define BITOP(A, B, OP) \
+((A)[(size_t)(B)/(8*sizeof *(A))] OP (size_t)1<<((size_t)(B)%(8*sizeof *(A))))
+
 size_t strspn(const char *s1, const char *s2)
 {
-	size_t d = 0;
 
-	const unsigned char *us1 = (const unsigned char *) s1;
-	const unsigned char *us2 = (const unsigned char *) s2;
+	const char * a = s1;
+	size_t byteset[32/sizeof(size_t)] = { 0 };
 
-	for ( ;*us1 != 0 ;us1++) 
-	{
-
-		us2 = (const unsigned char *) s2;
-		for ( ;*us2 != 0 ;us2++) 
-		{
-
-			if(*us1 == *us2 ) break;	
-				
-		}
-
-		if(!*us2) return d;
-
-		d++;
+	if (!s2[0]) {
+		return 0;
+	}
+	if (!s2[1]) {
+		for (; *s1 == *s2; s1++);
+		return s1-a;
 	}
 
-	return d;
+	for (; *s2 && BITOP(byteset, *(unsigned char *)s2, |=); s2++);
+	for (; *s1 && BITOP(byteset, *(unsigned char *)s1, &); s1++);
 
-
+	return s1-a;
 
 }

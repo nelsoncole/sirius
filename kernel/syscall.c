@@ -55,13 +55,11 @@ static VOID sys_free(VOID *buf)
     	free(buf);
 }
 
+
+extern void CPU_reset(void);
 static VOID sys_reboot()
 {
-
-	cli();
-    	kbdc_wait(0);
-	outportb(0x64,0xFE);
-	kbdc_wait(0);
+    	CPU_reset();
 }
 
 
@@ -183,6 +181,12 @@ void syscall_outpl(int p,unsigned int val)
 	outpl(p,val);
 }
 
+
+void syscall_set_focus_kbdc(unsigned int pid)
+{
+	set_focus(pid);
+}
+
 extern int terminal;
 void syscall_unknown(void){
 
@@ -195,7 +199,7 @@ void syscall_unknown(void){
 
 VOID *syscall_table[SYSCALL_NUM]={
     	&syscall_unknown,	// eax, 0	null
-    	&syscall_unknown,       // eax, 1    	reserved
+    	&syscall_set_focus_kbdc,// eax, 1    	syscall_set_focus_kbdc, edx = pid
 	&sys_malloc,       	// eax, 2    	sys_malloc, edx = size
 	&sys_free,       	// eax, 3    	sys_free, edx = buf
 	&sys_reboot,       	// eax, 4    	sys_reboot

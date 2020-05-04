@@ -34,95 +34,116 @@
  *
  */
 #include <io.h>
+#include <gx.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 extern GUI *G;
 
-int main(INTN argc,CHAR8 *argv[])
+void update_obj (gx_hand_t *w) { 
+
+	gx_hand_t *t = w->tail;
+	while(t) {
+		switch (t->type) {
+
+			case GX_TYPE_TITLE:
+				update_title(w,t);
+			break;
+
+			case GX_TYPE_BOX:
+				update_box(w,t);
+			break;
+			case GX_TYPE_LABEL:
+				update_label(w,t);
+			break;
+		}
+			
+		t = t->tail;
+	}
+
+}
+
+
+void update () 
 {
-	unsigned int *p = (unsigned int*)0x1000111C;
-	unsigned int *GwFocus = (unsigned int *)(*p++);
-	MOUSE *mouse = (MOUSE*)(*p++);
+	int r;
+	gx_hand_t *l = (gx_hand_t *) G->l.l;
+	gx_hand_t *l2 = (gx_hand_t *) G->l.l2;
+	gx_hand_t *w = l->next;
+	gx_hand_t *w2 = l2->next;
 
-	int __flag__ = 0;
+	if(G->l.spin_lock[1]) return;
 
-	GW_HAND *obj = NULL;
-	GW_HAND *window	= NULL;
-	GW_HAND *list = (GW_HAND*)(G->List);
+	G->l.spin_lock[1] = 1;
 
-	window	= list->next;
-	if(window) obj = window->tail;
-	else obj = NULL;
+	while (w) {
 
-	//for(;;);
+		r = update_window(w);
+		if(r) {
+			w = w->next;
+			continue;
+		}
+
+		update_obj (w);
+
+		w = w->next;
+	}
+
+	// l2
+	while (w2) {
+
+		r = update_window(w2);
+		if(r) {
+			w2 = w2->next;
+			continue;
+		}
+		update_obj (w2);
+
+		w2 = w2->next;
+	}
+
+	G->l.spin_lock[1] = 0;
+}
+
+int main(int argc, char **argv)
+{
+	MOUSE *mouse = (MOUSE*)(*(unsigned int*)(0x10001120));
+
+	gx_hand_t *l = (gx_hand_t *) G->l.l;
+	memset(l, 0, sizeof(gx_hand_t));
+	gx_hand_t *l2 = (gx_hand_t *) G->l.l2;
+	memset(l2, 0, sizeof(gx_hand_t));
+	
+	// Global init 
+	// pronto
+	G->l.spin_lock[0] = 0;
+
+	int x = 0,y =0;
 
 	while(TRUE) {
 
-		app_clearscreen();
-		
+		gx_clearscreen(G->BankBuffer);
+		//clear cursor
+		DrawMouse(x,y,0, G->BankBuffer,cursor18x18);
 		// FIXME a memoria deve ser de ring3
-		// BitMAP(	(UINTN*)0xA00000,250,100,G->BankBuffer);
-	
-		// UPDATE
-		while(window) {
+		BitMAP(	G->WindowScreen,220,100,G->BankBuffer);
 
-			if(*GwFocus == (UINT32)window) {
-				
-				window = window->next;
-				if(window) obj = window->tail;
-				__flag__ = 1;
-				continue;
-			}
+		while(G->l.spin_lock[1]);
 
-			UpdateWindow(window);
-			while(obj) {
-				UpdateObject(window,obj);
-				obj = obj->tail;
-			}
-
-
-			
-			window = window->next;
-			if(window) obj = window->tail;
-			else obj = NULL;	
-
-		}
-
-		// Focus
-		if(__flag__ == 1) {
-			__flag__ = 0;
-			window	= (GW_HAND *)(*GwFocus);
-			if(window) obj 	= window->tail;
-
-			UpdateWindow(window);
-
-			while(obj) 
-			{
-				UpdateObject(window,obj);
-				obj = obj->tail;
-
-			}
-
-		}
+		update ();
 	
 
 		if(mouse->handle)update_window_mouse((GW_HAND *)mouse->handle);
+		x = mouse->x;
+		y = mouse->y;
+		DrawMouse(x,y,0xDCDCDC/*ColorTable[GW_GREEN]*/, G->BankBuffer,gx_cursor18x18);
 
-		DrawMouse(mouse->x,mouse->y,0xDCDCDC/*ColorTable[GW_GREEN]*/, G->BankBuffer,cursor18x18);
+		//app_refreshrate();
 
-		app_refreshrate();
-
-
-		//rewind
-		//window = list;
-		window	= list->next;
-		if(window) obj = window->tail;
-		else obj = NULL;
-		
+		gx_refreshscreen( G->FrameBuffer, G->BankBuffer );
 
 	}
-
 
 	return 0;
 }

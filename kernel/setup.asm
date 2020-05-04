@@ -56,9 +56,22 @@ start:
 L1:
 	hlt
 	jmp L1;
-	
+global CPU_reset
 global gdt_flush
 global idt_flush
+
+CPU_reset:
+	;Wait for a empty Input Buffer
+wait1:
+ 	in   al, 0x64
+ 	test al, 00000010b
+ 	jne  wait1
+ 
+ 	;Send 0xFE to the keyboard controller.
+ 	mov  al, 0xFE
+ 	out  0x64, al
+
+	ret
 
 gdt_flush:
     	push ebp

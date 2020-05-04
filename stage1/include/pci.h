@@ -36,9 +36,9 @@
 #ifndef __PCI_H__
 #define __PCI_H__
 
-#define MAX_BUS 2  // 256
-#define MAX_DEV 32 // 32
-#define MAX_FUN 8  // 8
+#define MAX_BUS 256
+#define MAX_DEV 32
+#define MAX_FUN 8
 #define PCI_PORT_ADDR 0xCF8
 #define PCI_PORT_DATA 0xCFC
 
@@ -88,6 +88,8 @@ UINT32 pci_scan_bcc_scc(UINTN bcc,UINTN scc);
 
 UINT32 pci_scan_vendor(UINT16 vendor);
 UINT32 pci_check_vendor(UINTN bus,UINTN dev,UINTN fun,UINT16 vendor);
+
+unsigned int pci_scan_class(int class);
 
 
 

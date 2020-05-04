@@ -114,10 +114,20 @@ static VOID atoi(INTN value, CHAR8* valuestring) {
 }
 
 static VOID i2hex(UINTN val, CHAR8* dest, INTN len)
-{
-	CHAR8* cp;
-	char x;
-	UINTN n;
+{	
+
+	char* cp;
+	int i, x;
+	unsigned n;
+	
+	if(val == 0) {
+		cp = &dest[0];
+		*cp++ = '0';
+		*cp = '\0';
+		return;
+	}
+	
+
 	n = val;
 	cp = &dest[len];
 	while (cp > dest)
@@ -126,7 +136,26 @@ static VOID i2hex(UINTN val, CHAR8* dest, INTN len)
 		n >>= 4;
 		*--cp = x + ((x > (HEX_LEN+1)) ? 'A' - 10 : '0');
 	}
-    dest[len]='\0';
+    
+	dest[len]='\0';
+
+
+	cp = &dest[0];
+	for(i=0; i < len;i++) {
+	
+		if(*cp == '0') {
+			cp++;
+		}
+		else {
+			strcpy(dest,cp);
+			 break;
+		}
+			
+	}
+
+	n = strlen(cp) -1;
+	memset(dest + n,0,n);
+
 }
 
 
@@ -208,36 +237,21 @@ print(CONST CHAR8 *format,...)
 }
 
 
-
-
-
-
-// FIXME 
-char *dp_str = (char*)0x00800000;
-
-void dp_init(){
-
-	setmem(dp_str,0x20000,0);
-
-}
-
 void dputs(char *str)
 {
 
 	FILE *fd = current_thread->stdout;
 	char *p_str = str;
-	/*if(dp_str >= (char*)0x00820000 )return;
-
-	while(*p_str) *dp_str++ = *p_str++;*/
 
 	while(*p_str) {
-
-		asm ("outb %al,$0x80"); 
-		asm ("outb %al,$0x80");  
-		asm ("outb %al,$0x80");
-		asm ("outb %al,$0x80");
-		asm ("outb %al,$0x80");
-		asm ("outb %al,$0x80");
+		__asm__ __volatile__ ("inb $0x80,%al");
+		__asm__ __volatile__ ("inb $0x80,%al");
+		__asm__ __volatile__ ("inb $0x80,%al");
+		__asm__ __volatile__ ("inb $0x80,%al");
+		__asm__ __volatile__ ("inb $0x80,%al");
+		__asm__ __volatile__ ("inb $0x80,%al");
+		__asm__ __volatile__ ("inb $0x80,%al");
+		__asm__ __volatile__ ("inb $0x80,%al"); 
 		putc(*p_str++,fd); 
 	}
 	

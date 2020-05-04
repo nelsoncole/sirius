@@ -103,6 +103,13 @@ typedef struct _GUI_AREA {
 
 }__attribute__((packed)) GUI_AREA;
 
+struct gui_l {
+	unsigned int l;
+	unsigned int l2;
+	unsigned int *pid;
+	unsigned int *spin_lock;
+}__attribute__((packed));
+
 typedef struct _GUI
 {
 	// Default
@@ -116,16 +123,13 @@ typedef struct _GUI
 	UINTN 	FrameBufferSize;
 	VOID	*FrameBuffer;
 	VOID	*BankBuffer;
-	VOID	*TaskBuffer;
 	VOID	*WindowScreen;
 	VOID	*WindowBackground; 
 	
 	// Extra
 	GUI_AREA Area;
-
-	UINT32	List;
 	
-	
+	struct gui_l l;
 	
 
 }__attribute__ ((packed)) GUI;

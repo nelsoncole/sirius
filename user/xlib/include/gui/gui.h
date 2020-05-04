@@ -115,6 +115,13 @@ typedef struct _GUI_AREA {
 
 }__attribute__((packed)) GUI_AREA;
 
+struct gui_l {
+	unsigned int l;
+	unsigned int l2;
+	unsigned int *pid; // focus
+	unsigned int *spin_lock;
+}__attribute__((packed));
+
 typedef struct _GUI
 {
 	// Default
@@ -128,18 +135,14 @@ typedef struct _GUI
 	UINTN 	FrameBufferSize;
 	VOID	*FrameBuffer;
 	VOID	*BankBuffer;
-	VOID	*TaskBuffer;
 	VOID	*WindowScreen;
 	VOID	*WindowBackground; 
 	
 	// Extra
 	GUI_AREA Area;
 
-	UINT32	List;
+	struct gui_l l;
 	
-	
-	
-
 }__attribute__ ((packed)) GUI;
 
 ///
@@ -207,12 +210,8 @@ typedef struct _GW_HAND {
 
 VOID PutPixel(UINTN X, UINTN Y, UINTN Color);
 VOID PutPixelBuff(UINTN X, UINTN Y, UINTN Color,VOID *Buffer);
-VOID RefreshRate();
-VOID APP_RefreshRate();
-VOID TASK_RefreshRate();
-VOID TASK_Clearscreen();
 
-
+void app_color_clearscreen(long rgb);
 VOID app_clearscreen();
 VOID app_refreshrate();
 
@@ -321,60 +320,11 @@ outputstring(IN CHAR8 *string);
 
 UINTN 
 cls();
-/*
-
-	Task
-*/				
-
-GW_HAND *CreateTask(	UINTN X,
-			UINTN Y,
-			UINTN Width,
-			UINTN Height, 
-			UINTN Style,
-			UINTN Flag);
-UINTN UpdateTask(GW_HAND *_GwHand);
-
-/*
-	Window
-
-	
-*/
-GW_HAND *CreateWindow(	CONST CHAR8 *Title,
-						VOID *Menu,
-						UINTN X,
-						UINTN Y,
-						UINTN Width,
-						UINTN Height, 
-						UINTN Style,
-						UINTN Flag);
-
-GW_HAND *CreateObject(	GW_HAND *_GwHand, CONST CHAR8 *Title,
-						UINTN Type,
-						UINTN X,
-						UINTN Y,
-						UINTN Width,
-						UINTN Height, 
-						UINTN Style,
-						UINTN Flag);
-
-UINTN UpdateWindow(GW_HAND *_GwHand);
-UINTN UpdateObject(	GW_HAND *GwHand,GW_HAND *_Hand);
 						
 UINTN Send(GW_HAND *_Hand,UINTN Msg1, UINTN Msg2);
 GW_HAND *Receive();
 UINTN GwSetFocus(GW_HAND *Hand);
 UINTN ObjectSetFocus(GW_HAND *Hand);
-
-
-
-VOID DrawMouse(	UINTN X,
-		UINTN Y,	
-		UINTN FgColor, 
-		VOID *Buffer,
-		VOID *MouseBuffer);
-
-UINTN WindowFocus(GW_HAND *window);
-UINTN gui_exit(GW_HAND *Hand);
 
 
 

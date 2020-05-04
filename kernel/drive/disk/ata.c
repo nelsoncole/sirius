@@ -631,8 +631,9 @@ UINTN ata_initialize()
     			// FIXME Aqui, vamos mapear o BAR5
 
 			// Mapear o ABAR
-			mem_map((PHYSICAL_ADDRESS)ATA_BAR5,\
-			(VIRTUAL_ADDRESS *)&abar,1024/*4MiB*/,0x13);
+			//mem_map((PHYSICAL_ADDRESS)ATA_BAR5,
+			//(VIRTUAL_ADDRESS *)&abar,1024/*4MiB*/,0x13);
+			mm_mp( (unsigned int) ATA_BAR5, (unsigned int *) &abar,1024/*4MiB*/,0x13);
 
 			print("ABAR 0x%x\n",abar);
 

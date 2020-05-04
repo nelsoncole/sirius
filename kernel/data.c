@@ -66,7 +66,7 @@ CHAT *ready_queue_host_chat, *host_chat;
 // Ponteiros para user mode
 UINT32 *GwFocus = NULL;
 MOUSE *mouse 	= NULL;
-UINT32 *rtc	= NULL;
+UINT8 *rtc	= NULL;
 
 
 unsigned int *device = NULL;

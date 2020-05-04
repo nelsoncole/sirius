@@ -131,7 +131,7 @@ extern 	UINT32 		DEV;
 // Ponteiros para o USER mode 
 extern UINT32 		*GwFocus;
 extern MOUSE 		*mouse;
-extern UINT32 		*rtc;
+extern UINT8 		*rtc;
 
 // console
 extern CHAR8 *__buffer__;
@@ -174,9 +174,13 @@ UINTN mem_map(	IN PHYSICAL_ADDRESS phy_addr,
 		OUT VIRTUAL_ADDRESS *virt_addr,
 		IN UINTN size,
 		IN UINTN flag);
+int mm_mp( unsigned int phy_addr, unsigned int *virt_addr,unsigned size, int flag);
 
 VOID *malloc(UINTN size);
 VOID free(VOID *buffer);
+
+void  *memcpy(void *dest,const void *src,unsigned len);
+void *malloc_virtual_to_physical(unsigned size,void *ptr);
 
 // System
 VOID initialize_gui();

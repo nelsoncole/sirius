@@ -11,8 +11,8 @@ typedef unsigned short uint16_t ;
 typedef int int32_t ;
 typedef unsigned int uint32_t ;
 
-typedef long long int int64_t ;
-typedef unsigned long long int uint64_t ;
+typedef long int int64_t;
+typedef unsigned long int uint64_t;
 
 /*
 
@@ -57,7 +57,11 @@ UINTMA
 
 */
 
-
+typedef unsigned int intmax_t;
+typedef struct {
+	intmax_t quot;		/* quotient */
+	intmax_t rem;		/* remainder */
+} imaxdiv_t;
 
 
 

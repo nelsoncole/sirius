@@ -362,7 +362,7 @@ static int sata_identify(HBA_PORT_T *port, int satanum)
         	dev_type = SATA_DEVICE_TYPE;
         	bps  = 512;
 
-        	ahci_ata_indentify(port,ATA_CMD_IDENTIFY_DEVICE,0,&sata_idtfy);
+        	ahci_ata_indentify(port,ATA_CMD_IDENTIFY_DEVICE,0,sata_idtfy);
 
 
 		ata[satanum].dev_type	= dev_type ;// (sata_idtfy[0]&0x8000)? 0xffff:SATA_DEVICE_TYPE;
@@ -372,7 +372,6 @@ static int sata_identify(HBA_PORT_T *port, int satanum)
 		// Total number of sectors = LBA28 60-61, LBA48 100-103
 		ata[satanum].sectors	= sata_idtfy[60] &0xffff;
 		ata[satanum].sectors	+= sata_idtfy[61] << 16 &0xffffffff;
-
 
     	} else if(port->sig == SATA_SIG_ATAPI) {
         	dev_type = SATAPI_DEVICE_TYPE;
@@ -437,7 +436,7 @@ static int sata_port_initialize(HBA_MEM_T *mmio)
 	// salve
 	ata->ptotal = total_np;
 
-	print("Serial ATA, total np %d pi 0%x mmio->ghc = 0x%x\n",total_np,pi,mmio->ghc);
+	print("Serial ATA, total np %d pi 0x%x mmio->ghc = 0x%x\n",total_np,pi,mmio->ghc);
 	
 	
     	for(i =0;i < total_np;i++)

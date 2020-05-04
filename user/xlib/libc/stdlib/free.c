@@ -2,20 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*
-typedef struct _mm_ {
-	long mm;
-	long id;
-	long act;	
-	long len; 
-
-}__attribute__((packed)) _mm_t;*/
-
 void _free_r(void *ptr,_mm_t *mm)
 {
 	_mm_t *_mm = mm;
 	int i;
-	for(i=0;i<8192;i++) {
+	for(i=0;i<_MM_R_SIZE;i++) {
 
 		if ( _mm->mm == (long)ptr ) 
 		{

@@ -112,7 +112,7 @@ typedef struct _FILE
 	FILE_HEADER header;
 
 	// LBA block start
-	unsigned int block[1/*1024-128*/];
+	unsigned int block[1024];
 
 }__attribute__ ((packed)) FILE;
 

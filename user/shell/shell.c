@@ -47,6 +47,10 @@
 
 void (*call_loader)  (int argc,char **argv) = 0;// NULL;
 
+
+char *free_argv = 0;
+char *free_cmd_name = 0;
+
 typedef struct _COMMAND {
   char *name;
   void *fun;
@@ -70,7 +74,7 @@ int cmd_dir(int argc,char **argv);
 int cmd_del(int argc,char **argv);
 int cmd_date(int argc,char **argv);
 int cmd_copy(int argc,char **argv);
-int cmd_cls(int argc,char **argv);
+int cmd_clrs(int argc,char **argv);
 int cmd_cd(int argc,char **argv);
 
 
@@ -123,7 +127,7 @@ int cmd_salve(int argc,char **argv) {
 COMMAND cmd_table[] = {
     	{"?",           cmd_help,           "This help"                                     	},
     	{"cd",          cmd_cd,             "Change current directory"                      	},
-    	{"cls",         cmd_cls,            "Clear screen"                                  	},
+    	{"clrs",        cmd_clrs,           "Clear screen"                                  	},
     	{"copy",        cmd_copy,           "Copy file or directory"                        	},
     	{"date",        cmd_date,           "Date"                                          	},
     	{"del",         cmd_del,            "Delete file or directory"                      	},
@@ -136,18 +140,20 @@ COMMAND cmd_table[] = {
     	{"new",         cmd_new,            "New file or directory"                         	},
     	{"reboot",      cmd_reboot,         "Reboot system"                                 	},
     	{"rename",      cmd_rename,         "Rename file or directory"                      	},
-	{"run",		cmd_run,	    "Execute or run application"			},
-	{"run2",	cmd_run2,	    "Execute or run application"			},
     	{"shutdown",    cmd_shutdown,       "Shutdown your computer locally or remotely"    	},
    	{"time",        cmd_time,           "Time"                                          	},
     	{"version",     cmd_version,        "Shell version"                                 	},
 	{"salve",	cmd_salve,	    "Salve string no arquivo de nome[x]"		},
+	{"r",		cmd_run,	    "Execute or run application"			},
+	{"r2",		cmd_run2,	    "Execute or run application"			},
 };
 
 
 char **argv_malloc(size_t size) {
 
-	char **argv = (char**) malloc(0x2000);
+	char **argv = (char**) malloc(size*256);
+
+	free_argv = (char*)argv;
 
 	int i;
 	for(i= 0 ;i < 32;i++) argv[i] =(char*) (((size_t)argv) + (128* i) + 128 );
@@ -213,13 +219,15 @@ int main()
 	int i;
 	char *cmd_name = (char*) malloc(0x1000);
 
+	free_cmd_name = cmd_name; 
+
 	char **argv = argv_malloc(32);
 	int argc;
 	
 	for(;;) {
 		memset(cmd_name,0,0x1000);
 		//fputs( "__________________\n",stdout);
-		printf("[ sirius@nelson ]# ");
+		printf("[nelson-cole]$ ");
 
 		fgets (cmd_name,0x1000,stdin);
 
@@ -256,7 +264,7 @@ int cmd_cd(int argc,char **argv)
     	return 0;
 }
 
-int cmd_cls(int argc,char **argv)
+int cmd_clrs(int argc,char **argv)
 {
 
 	write_stx(MSG_CLEARSCREEN,0,0,stdx);
@@ -433,18 +441,24 @@ int cmd_echo(int argc,char **argv)
 
 int cmd_exit(int argc,char **argv)
 {
+
+	free(free_argv);
+	free(free_cmd_name);
+
 	write_stx(MSG_EXIT,0,0,stdx);
 
     	return 0;
 }
 int cmd_help(int argc,char **argv)
 {
-        int i;
+        int i,j;
        	puts("Commands:\n");
-        for(i=0;i< SHELL_CMD_NUM;i++){
+        for(i=0;i< SHELL_CMD_NUM - 3;i++){
         	puts(cmd_table[i].name);
         	//set_cursor
-		write_stx(MSG_SETCURSOR,15,0,stdx);
+		//write_stx(MSG_SETCURSOR,15,0,stdx);
+
+		for(j=strlen(cmd_table[i].name);j < 18; j++) putchar(' ');
 
         	puts(cmd_table[i].help);
 		putchar('\n');
@@ -606,6 +620,6 @@ int cmd_time(int argc,char **argv)
 
 int cmd_version(int argc,char **argv)
 {
-    	puts("Sirius Operating System v2.00\n");
+    	puts("Sirius Operating System v2.0.0\n");
     	return 0;
 }

@@ -333,16 +333,22 @@ UINTN create_thread_child(THREAD	*thread,
 	thread->tail = new_thread;
     
      
-    	// Adicionar novo elemento, no final da lista
+    	// Adicionar novo elemento, antes do processo pai
     	// tmp aponta para inicio da lista
     	THREAD *tmp = thread_ready_queue;
-    	while (tmp->next)
-    	tmp = tmp->next;
-    
-    	tmp->next = new_thread;
+	while (tmp->next) {
+	 	if(tmp->next == thread) {
 
+			tmp->next =  new_thread;
+			new_thread->next = thread;
 
-   	return (new_thread->pid);
+			return (new_thread->pid);
+		}
+
+		tmp = tmp->next;
+	}
+
+	return (0);
 }
 
 

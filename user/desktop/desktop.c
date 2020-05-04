@@ -35,10 +35,15 @@
  */
  
 #include <io.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <gx.h>
+#include <sys/sys.h>
+
 #define TRUE 1
+FILE *f = 0;
 
 
 const char *str_mouse_menu[10] = {
@@ -66,6 +71,7 @@ int main()
 	int i;
 
 	long x,y, open = 0, count =0;
+	unsigned int pid;
 
 
 	GW_HAND *window = create_window_mouse(mouse->x,mouse->y,160,170,
@@ -94,10 +100,6 @@ int main()
 
 
 	while (TRUE) {
-
-
-		
-
 
 		if(mouse->b&0x2) 
 		{
@@ -148,16 +150,31 @@ int main()
 				if(count++ >= 0/*um clique*/) {
 
 					// send
-					if(window->Msg2 == 2)
-					__asm__ __volatile__("int $0x72"::"a"(0));
+					if(window->Msg2 == 2) {
 
+						// execute trm.bin
+						int rc = 0;
+						f = fopen("trm.bin","r");
+						if (f != 0) { 
+							__asm__ __volatile__("int $0x72":"=a"(rc):"a"(8),
+							"d"(0),"c"(0),"b"(0),"D"(f)); 
+							fclose(f);
+						}
+
+						if(!rc) /*error*/; 
+					}
+		
 					window->Flag = GW_FLAG_INVISIBLE;
 					open = 0;				
 				}
-			}
+			}else {
+				if((mouse->x + mouse->y + mouse->b)) { 
+					pid = gx_mouse_set_focus(x,y); // TODO: 
+					if(pid) set_focus_kbdc(pid);
+				}
+			}	
 
 		}
-
 
 
 	}

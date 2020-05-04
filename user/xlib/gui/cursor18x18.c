@@ -1,7 +1,7 @@
 
 
 #include <io.h>
-UINT16 cursor18x18[18] = {
+unsigned short cursor18x18[18] = {
 
 	0b000000000000000000,
 	0b000000000000000000,

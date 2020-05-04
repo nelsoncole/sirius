@@ -4,33 +4,37 @@
 #include <ctype.h>
 #include <io.h>
 
+#include <gx.h>
+#include <stdint.h>
+
+
+FILE *f;
+
 int main(int argc, char **argv) {
 
+	/*if(argc < 4) return (-1);
+	
+	char *u = malloc(0x400000); // $MIB
+
+	memset(u,0,0x400000);
+
+	
+	long x = atol (argv[1]);
+	long y = atol (argv[2]);
+	long rgb = strtoul (argv[3], 0,16);
+
+	//gx_putpixel(400, 400,rgb, G->BankBuffer);
+	gx_rect(x, y, 200, 100, rgb, G->BankBuffer);
+	
+	
+
+	gx_refreshscreen(G->FrameBuffer,G->BankBuffer);
 
 
-	char *p1 = malloc(4);
-	char *p2 = malloc(4);
-	char *p3 = malloc(4);
-	char *p4 = malloc(4);
+	free(u);
+	return 0;*/
 
-	free(p1);
-	free(p2);
-	free(p3);
-	free(p4);
-
-	char *p5 = malloc(4);
-
-
-	printf("p1 0%x\n",p1);
-	printf("p2 0%x\n",p2);
-	printf("p3 0%x\n",p3);
-	printf("p4 0%x\n",p4);
-	printf("p5 0%x\n",p5);
-
-	free(p5);
-
-	return 0;
-
+	if(argc < 2) return 5;
 
 	char *wallpaper = (char *) malloc(0x400000); // 4 MiB
 	int size;
@@ -40,7 +44,7 @@ int main(int argc, char **argv) {
 	char *_wallpaper = wallpaper;
 	char *p;
 
-	FILE *f = fopen("b.ppm","r");
+	f = fopen(argv[1],"r");
 	if(f == NULL) printf("error: fopen\n");
 	else {
 
@@ -67,6 +71,7 @@ int main(int argc, char **argv) {
 			printf("width %d height %d sig %d\n",width, height,sig);
 
 		
+			app_color_clearscreen((-1));
 			char a[4];
 			char rgb[4];
 
@@ -77,11 +82,11 @@ int main(int argc, char **argv) {
 
 					*(unsigned int*)a =  (*(unsigned int*)((_wallpaper) + (3*off++))) &0xffffff;
 
-					rgb[0] = a[0];
+					rgb[0] = a[2];
 					rgb[1] = a[1];
-					rgb[2] = a[2];
+					rgb[2] = a[0];
 					rgb[3] = 0xff;
-					PutPixelBuff(x+200,y+100,*(unsigned int*)rgb,G->BankBuffer);
+					PutPixelBuff(x,y,*(unsigned int*)rgb,G->BankBuffer);
 
 				}
 			}

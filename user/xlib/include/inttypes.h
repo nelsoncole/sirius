@@ -243,12 +243,6 @@
 #define	SCNxMAX			"jx"		/* uintmax_t */
 #define	SCNxPTR			"lx"		/* uintptr_t */
 
-typedef unsigned int intmax_t;
-typedef struct {
-	intmax_t quot;		/* quotient */
-	intmax_t rem;		/* remainder */
-} imaxdiv_t;
-
 /*__BEGIN_DECLS
 intmax_t	imaxabs(intmax_t);
 imaxdiv_t	imaxdiv(intmax_t, intmax_t);
@@ -259,5 +253,44 @@ intmax_t	wcstoimax(const __wchar_t * __restrict,
 uintmax_t	wcstoumax(const __wchar_t * __restrict,
 		    __wchar_t ** __restrict, int);
 __END_DECLS*/
+
+
+// usado em nasm
+
+
+#define INT64_C(x)		x 
+#define UINT64_C(x)		x 
+#define INT64_C(x)		x 
+#define UINT64_C(x)		x 
+
+#define INT32_C(x)		x
+#define UINT32_C(x)		x 
+#define INT32_C(x)		x 
+#define UINT32_C(x)		x 
+
+
+#define INT16_C(x)		x
+#define UINT16_C(x)		x 
+#define INT16_C(x)		x
+#define UINT16_C(x)		x 
+
+#define INT8_C(x)		x
+#define UINT8_C(x)		x 
+
+#define INT8_MIN	INT8_C(-128)
+#define INT8_MAX	INT8_C(127)
+#define UINT8_MAX	UINT8_C(255)
+
+#define INT16_MIN	INT16_C(-32768)
+#define INT16_MAX	INT16_C(32767)
+#define UINT16_MAX	UINT16_C(65535)
+
+#define INT32_MIN	INT32_C(-2147483648)
+#define INT32_MAX	INT32_C(2147483647)
+#define UINT32_MAX	UINT32_C(4294967295)
+
+#define INT64_MIN	INT64_C(-9223372036854775808)
+#define INT64_MAX	INT64_C(9223372036854775807)
+#define UINT64_MAX	UINT64_C(18446744073709551615)
 
 #endif /* _INTTYPES_H_ */

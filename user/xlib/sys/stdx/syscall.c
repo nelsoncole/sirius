@@ -36,6 +36,11 @@
 
 #include <sys/sys.h>
 
+void set_focus_kbdc(unsigned int pid)
+{
+	__asm__ __volatile__("int $0x72"::"a"(1),"d"(pid));
+
+}
 
 int getpid() 
 {

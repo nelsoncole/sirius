@@ -51,12 +51,11 @@ CONST CHAR8 *id_mouse_strings[]={
 
 
 
-// TODO: Em minha configuração do mouse, levo apeito o sinal das variáveis...
-signed char buffer_mouse[3];
-UINT8     buttons;
-signed int  mouse_x;
-signed int  mouse_y;
-
+unsigned char 	buttons;
+int  		mouse_x;
+int  		mouse_y;
+int 		count_mouse;
+int 		first_time;
 
 
 // Algumas variáveis de controle
@@ -76,7 +75,6 @@ VOID mouse_write(UINT8 write){
 	outportb(0x64,0xD4);
 	kbdc_wait(1);
 	outportb(0x60,write);
-    	kbdc_wait(0);
 
 }
 
@@ -85,16 +83,13 @@ VOID mouse_write(UINT8 write){
 UINT8 mouse_read(){
 
     
-	kbdc_wait(1);
-	outportb(0x64,0xD3);
 	kbdc_wait(0);
 	return inportb(0x60);
-
 }
 
 
 // Esta rotina faz o Auto-teste 0xaa êxito, 0xfc erro
-static UINTN MOUSE_BAT_TEST(){
+UINTN MOUSE_BAT_TEST(){
     
     	UINT8 val;
 
@@ -119,95 +114,119 @@ static UINTN MOUSE_BAT_TEST(){
 
 
 // Instalação do mouse
-UINTN mouse_install(){
-
-
-	
-
-	int i = 1000000000;
-
-    	print("// reseta o mouse\n");
-	mouse_write(KBDC_RESET);
-
-
-    	print("// Espera o dados descer (ACK)\n");
-    	while( mouse_read() != KBDC_ACK) { i--; if(!i)return 1;}
-
-
-    	print("// Basic Assurance Test (BAT)\n");
-    	if(MOUSE_BAT_TEST() != 0) {
-
-    		// Aqui! Precisaremos de fazer alguma coisa, em casos de erro
-    		print("\n Mouse error!\n");
-
-    	}
-
-    	print("// Use mouse default\n");
-	mouse_write(MOUSE_DEFAULT);
-
-   	print("//Espera o dados descer (ACK)\n");
-	i = 1000000000;
-    	while( mouse_read() != KBDC_ACK){ i--; if(!i)return 1;}
-
-	
-
-
-    	print("// habilita o mouse\n");
-	mouse_write(ENABLE_MOUSE);
-
-	
-    	print("//Espera o dados descer (ACK)\n");
-	i = 1000000000;
-	while( mouse_read() != KBDC_ACK){ i--; if(!i)return 1;}
-
-
-    	print("// espera nossa controladora terminar\n");
-    	kbdc_wait(1);
-
-    	// habilita o IRQ12
-	//irq_enable(12);
-
+void mouse_install(){
+	unsigned char tmp;
 
 	largura_da_tela = G->HorizontalResolution;
 	altura_da_tela	= G->VerticalResolution;
 
+	mouse_x = 0;
+	mouse_y = 0;
+	buttons = 0;
+	count_mouse= 0;
+	first_time = 1;
+
+	
+	//Defina a leitura do byte actual de configuração do controlador PS/2
+	kbdc_wait(1);
+  	outportb(0x64, 0x20);
+
+	// Enable the interrupts
+	// Second PS/2
+	kbdc_wait(0);
+	tmp = inportb(0x60);
+
+	tmp |= 2;
+
+	// defina, a escrita  de byte de configuração do controlador PS/2
+	kbdc_wait(1);
+	outportb(0x64, 0x60);
+
+	kbdc_wait(1);
+  	outportb(0x60, tmp);
+
+	// activar a segunda porta PS/2
+	kbdc_wait(1);
+	outportb(0x64,0xA8);
+
+	kbdc_wait(1); //espera
+
+
+	// mouse_write(KBDC_RESET);
+	// mouse_read();  // ACK
+
+	// Tell the mouse to use default settings
+	mouse_write(MOUSE_DEFAULT);
+	mouse_read();  // ACK
+
+	// Enable the mouse
+	mouse_write(ENABLE_MOUSE);
+	mouse_read();  // ACK
+
+	// IRQ set handler
+	// Enable IRQ Interrupt
+
+
 
 	//mouse = (MOUSE *) malloc(sizeof(MOUSE));
-
-	return 0;
 
 }
 
 
 // Este é o manipulador do IRQ12
-VOID mouse_handler(VOID) {
-
-static int first_time = 1;
-static int count_mouse=0;
-
-
+void mouse_handler(void) {
     	// DICA DO TIO FRED
     	// Ao que parce ignorar a leitura do primeiro byte
     	// coloca nossos dados na ordem status, x, y
-    	if (first_time != 0) {
-        	first_time = 0;
-        	//inportb(0x60);
-    	}else {
 
-		buffer_mouse[count_mouse++]=inportb(0x60);
-	
-    		if(count_mouse==3) {
-    			buttons = buffer_mouse[0];	
-			mouse_refresh();
-			count_mouse=0;
-	    	}
+	if (first_time != 0) {
+        	first_time = 0;
+        	inportb(0x60);
+		return;
+    	}
+
+	static unsigned char status;
+	status = inportb(0x64);
+    	if ((status & 0x01) && (status & 0x20)) {
+
+		switch(count_mouse++) {
+			case 0:
+				buttons = inportb(0x60);
+			break;
+			case 1:
+				if(buttons & 0x10) // negative
+					mouse_x = (int) inportb(0x60) | 0xFFFFFF00;
+				else
+					mouse_x = (int) inportb(0x60);
+			break;
+			case 2:
+				if(buttons & 0x20) // negative
+					mouse_y = (int) inportb(0x60) | 0xFFFFFF00;
+				else
+					mouse_y = (int) inportb(0x60);
+				
+				if( (buttons & 0x80) || (buttons & 0x40) == 0 ) { 
+					// x/y overflow ?
+
+					mouse_refresh();	
+         
+        			}
+
+
+				count_mouse = 0;
+
+			break;
+			default:
+				count_mouse = 0;
+			break;
+		}
 
     	}		
 
 }
 
 // Actualizador do ponto de acomulação do mouse
-static VOID mouse_refresh(){
+static void mouse_refresh(){
 
 /*                                      Mouse default (0xF6)
  *
@@ -222,25 +241,16 @@ static VOID mouse_refresh(){
  *
  */    
 
-     	// Em nossa configuração, não precisamos nos preocupar com o SIGNAL, 
-     	// ele é tratado nos cálculos, tendo enconta o sinal da variável (signed)
-     	// O nosso mouse_y crescerá para baixo...
-     	mouse_x =(buttons &0x40)? mouse_y  : mouse_x + buffer_mouse[1];
-     	mouse_y =(buttons &0x80)? mouse_y  : mouse_y - buffer_mouse[2];
+	mouse->x += mouse_x;// coordenada X
+	mouse->y -= mouse_y; // Coordenada Y
+	mouse->z += 0;
+	mouse->b = buttons;
 
-     	if(mouse_x < 0) mouse_x =0;
-     	else if(mouse_x >largura_da_tela) mouse_x = largura_da_tela;
-     	if(mouse_y < 0) mouse_y =0;
-     	else if(mouse_y >altura_da_tela ) mouse_y = altura_da_tela;
-
-     	//mouse_position = mouse_x + (largura_da_tela  * mouse_y);
-
-
-
-	mouse->x 		= mouse_x;// coordenada X
-	mouse->y 		= mouse_y; // Coordenada Y
-	mouse->z		= 0;
-	mouse->b		= buttons;
+	
+	if(mouse->x < 0) mouse->x = 0;
+     	else if(mouse->x > largura_da_tela) mouse->x = largura_da_tela;
+     	if(mouse->y < 0) mouse->y = 0;
+     	else if(mouse->y >altura_da_tela ) mouse->y = altura_da_tela;
 
 	/*
     	ClearScreen();	
@@ -248,3 +258,5 @@ static VOID mouse_refresh(){
     
 
 }
+
+

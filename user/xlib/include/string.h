@@ -34,6 +34,11 @@ extern size_t strcspn(const char *s1, const char *s2);
 
 extern char *strtok(char * restrict s1,const char * restrict s2);
 
+// FIXME sem suport
+
+extern char *strpbrk(const char *s1, const char *s2);
+extern char *strsep(char **stringp, const char *delim);
+
 
 
 #endif

@@ -77,6 +77,7 @@ extern int printf(const char *format,...);
 
 // FIXME sem suporte
 extern int sscanf(const char * restrict s,const char * restrict format, ...);
+extern void perror(const char *s);
 
 
 

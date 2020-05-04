@@ -194,7 +194,8 @@ int exectve(int argc,char **argv,char *pwd,FILE *fp)
 		
 
 
-		esp0 =(UINT32)(&stack_esp_0);/*(UINTN)malloc(0x2000);*/
+		esp0 =(UINTN)malloc(0x2000);
+
 		pid = create_thread((void*)(header->start),pd,0,(header->start + 0x20)/*Boot info*/,0,0,header->stack,\
 			esp0/*ESP0*/,1 /*prv*/);
 
@@ -365,7 +366,8 @@ int exectve_child(int argc,char **argv,char *pwd,FILE *fp,THREAD *father_thread)
 		for(i=0;i<argc;i++) strcpy(_argv[i],argv[i]);
 		 
 
-		esp0 =(UINT32)(&stack_esp_0);/*(UINTN)malloc(0x2000);*/
+		esp0 =(UINTN)malloc(0x2000);
+
 		pid = create_thread_child(father_thread,(void*)(header->start),pd,0,(header->start + 0x20)/*Boot info*/,0,0,header->stack,\
 			esp0/*ESP0*/,1/*prv*/);
 

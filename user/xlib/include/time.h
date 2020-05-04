@@ -5,10 +5,10 @@
 
 #define NULL ((void *)0)
 
-#define CLOCKS_PER_SEC 0
+#define CLOCKS_PER_SEC 100 // número de tiques do sistema por segundo
 
-typedef signed 	time_t;
-typedef int	clock_t;
+typedef long 	time_t;
+typedef long	clock_t;
 
 struct tm {
 	int tm_sec;         /* seconds,  range 0 to 59          */
@@ -30,8 +30,7 @@ extern char *asctime(const struct tm *timeptr);
 extern char *ctime(const time_t *timer);
 extern struct tm *gmtime(const time_t *timer);
 extern struct tm *localtime(const time_t *timer);
-extern size_t strftime(char * restrict s, size_t maxsize,
-const char * restrict format, const struct tm * restrict timeptr);
+extern size_t strftime(char *s, size_t maxsize,const char *format, const struct tm *timeptr);
 
 
 #endif

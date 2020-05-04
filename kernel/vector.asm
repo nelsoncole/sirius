@@ -398,11 +398,10 @@ irq_jmp:
 	mov es,ax
 	mov fs,ax
 	mov gs,ax
-
-	call irq_function
-	
 	pop eax
-	
+	push eax
+	call irq_function
+	pop eax	
     	pop ss
 	pop gs
 	pop fs

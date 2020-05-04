@@ -140,16 +140,16 @@ typedef struct _VFS
 	VFS_FILE_HEADER header;
 
 	// LBA block start
-	UINT32	block[1024-128];
+	UINT32	block[1024];
 
 }__attribute__ ((packed)) VFS;
 
 
 typedef struct _MOUSE {
 
-	UINT32	x;
-	UINT32	y;
-	UINT32	z;
+	int	x;
+	int	y;
+	int	z;
 	UINT32	b;
 	UINT32	handle;
 

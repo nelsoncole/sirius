@@ -139,7 +139,7 @@ VOID keyboard_write(UINT8 write){
 
 
 // Esta rotina faz o Auto-teste 0xaa êxito, 0xfc erro
-static UINTN KEYBOARD_BAT_TEST(){
+UINTN KEYBOARD_BAT_TEST(){
     
     	UINT8 val;
 
@@ -163,36 +163,10 @@ static UINTN KEYBOARD_BAT_TEST(){
 }
 
 
-UINTN keyboard_install(){
+void keyboard_install(){
 
-    	//Reseta o teclado
-	kbdc_wait(1);
-	outportb(0x60,KBDC_RESET);
-	wait_ns(200);
-	
-    	// Espera os dados descer, ACK
-    	while(keyboard_read() != KBDC_ACK);
-    
-    	// Basic Assurance Test (BAT)
-    	if(KEYBOARD_BAT_TEST() != 0) {
-
-    	// Nelson aqui precisaremos de criar uma rotina de tratamento de erro do teclado
-
-        print("\nkeyboard error!");
-
-    	}  
-
-    	// espera nossa controladora termina
-	kbdc_wait(1);
-
-
-    	// Habilita IRQ1
-	//irq_enable(1);
-
-	
-	return 0;
-        
-
+    	// IRQ set Handler
+	// Enable IRQ Interrup
 }
 
 
@@ -200,7 +174,7 @@ UINTN keyboard_install(){
 // TODO: 
 // O Bit 7 (0x80) na scancode lido, nos informa se a tecla foi precionada ou solta  		
 // Exemplo: O shift left quando precionado gera o scancode 0x2A quando solto 0xAA (0x2A + 0x80 = 0xAA)
-VOID keyboard_handler(VOID){
+void keyboard_handler(void){
 	
 	if(count >= 2)count = 0;
 
@@ -273,5 +247,4 @@ VOID keyboard_handler(VOID){
 
  
 }
-
 

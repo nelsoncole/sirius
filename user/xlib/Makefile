@@ -11,6 +11,7 @@ xlib:
 	gcc ${CFLAGS} -c libc/unistd/*.c
 	gcc ${CFLAGS} -c sys/*.c
 	gcc ${CFLAGS} -c gui/*.c
+	gcc ${CFLAGS} -c gx/*.c
 	gcc ${CFLAGS} -c fs/*.c	
 	gcc ${CFLAGS} -c sys/stdx/*.c
 	ar -rcs xlib.a *.o
@@ -22,4 +23,6 @@ move:
 	mv *.o obj
 
 clean:
-	rm *.o
+	rm *.so
+	rm *.a
+	rm obj/*.o

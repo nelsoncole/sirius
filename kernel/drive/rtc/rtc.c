@@ -36,17 +36,24 @@
  
 #include <os.h>
 
+// convert BCD para Decimal
+#define convert_bcd(val)  ((val / 16) * 10 + (val & 0xf))
+
 UINT8 *clock = NULL;
 
 VOID disable_NMI(){
 
-    outportb(0x70,inportb(0x70)|0x80);
+	char val = inportb(0x70);
+	val |= 0x80;
+    	outportb(0x70,val);
 
 }
 
 VOID enable_NMI(){
 
-    outportb(0x70,inportb(0x70) & 0x7F);
+	char val = inportb(0x70);
+	val &=~0x80;
+    	outportb(0x70,val);
 }
  
 
@@ -54,6 +61,9 @@ VOID enable_NMI(){
 UINTN rtc_install(){
 
 	clock = (UINT8*) rtc;
+
+
+	disable_NMI();
 
     	UINT8 status;
 
@@ -69,13 +79,10 @@ UINTN rtc_install(){
     	//bit 5 : hablita interrupção de alarme ,
     	//bit 2 : caledário em formato binário,
     	//bit 1 : formato 24h
-    	outportb(0x71, status | 0x66); 
+    	outportb(0x71, status |/* 0x66*/ 0x62); 
 
 
     	enable_NMI();
-	
-    	// Habilita IRQ8
-    	// irq_enable(8);
 	
 
 	return 0;
@@ -92,14 +99,14 @@ VOID rtc_handler(VOID){
 
 
 	outportb(0x70,0);
-	clock[0] = inportb(0x71);
+	clock[0] = convert_bcd(inportb(0x71));
 
 	outportb(0x70,2);
-	clock[1] = inportb(0x71);
+	clock[1] = convert_bcd(inportb(0x71));
 
 
 	outportb(0x70,4);
-	clock[2] = inportb(0x71);
+	clock[2] = convert_bcd(inportb(0x71));
 
 }
 

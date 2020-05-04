@@ -145,7 +145,7 @@ int exit()
 		close(current->stdout);
 		close(current->stderr);
 		close(current->stdx);
-		free(current);
+		
 
 
 
@@ -175,11 +175,11 @@ int exit()
 
 
 		current->alpha->tail = NULL;
-		free(current);
 
 	}
 
-
+	if(current->prv&1)free((void*)current->esp0);
+	free(current);
 	return 0;
 
 }

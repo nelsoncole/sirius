@@ -413,6 +413,89 @@ UINTN mem_map(	IN PHYSICAL_ADDRESS phy_addr,
 
 }
 
+#define MEMORY_DEVICE_MAP 0xE0000000
+//E0000000h - FFFFFFFFh = 512MiB
+// align 4MiB
+unsigned int g_mm_mp = 0;
+int mm_mp( unsigned int phy_addr, unsigned int *virt_addr,unsigned size, int flag) {	
+	
+	if(size > 2048) {
+		*(unsigned int*)(virt_addr) = 0;
+		return (0);
+	
+	}
+
+	PAGE_DIRECTORY *pd = 0;
+	PAGE_TABLE *pt = 0;
+
+	unsigned int r = MEMORY_DEVICE_MAP + (g_mm_mp*0x1000);
+
+	// Ajustar
+	if(size <= 1024) g_mm_mp += 1024;
+	else {
+
+		g_mm_mp += 1024 * (size/1024);
+	
+		if( size%1024) g_mm_mp += 1024;
+
+	}
+
+	int d = (int) (r >> 22 &0x3FF);
+    	//int t = (int) (r >> 12 &0x3FF);
+    	//int o = (int) (r  &0xFFF); // unused
+
+	*(unsigned int*)(virt_addr) = r;
+
+	int alloc = size/1024;
+	if(size%1024) alloc +=1;
+
+	alloc_pages(0,alloc,(unsigned long *)&pt);
+	pd = (PAGE_DIRECTORY*)(((unsigned long)kernel_page_directory) + d*4);
+
+	PAGE_TABLE *_pt 	= pt; 
+	PAGE_DIRECTORY *_pd	= pd;
+	
+	int i;
+	unsigned long table_addr = 0;
+
+	memset( pt, 0, sizeof(PAGE_TABLE)*size);
+
+	// PTE de identidade 
+	for(i =0; i < size; i++){
+		
+		_pt->p = flag &1;
+		_pt->rw= (flag >>1)&1;
+		_pt->us= (flag >>2)&1;
+		_pt->pcd= (flag >>4)&1;
+		_pt->frames = ((phy_addr+(i*0x1000)) >>12) &0xFFFFF;
+		_pt++;
+	
+	}
+
+	r = i;
+
+	int x = size/1024;
+	if(size%1024) x += 1;
+
+	// PDE de identidade
+	for(i =0; i < x; i++){
+
+		_pd->p = flag &1;
+		_pd->rw= (flag >>1)&1;
+		_pd->us= (flag >>2)&1;
+		_pd->pcd= (flag >>4)&1;
+		table_addr =(unsigned long)(pt + (1024 *i));
+		_pd->addrpt = (table_addr >>12) &0xFFFFF;
+		_pd++;
+	}	
+
+	//flush_tlb(); // Actualiza TLB
+
+	wait_ns(10000);
+	return (r);
+
+}
+
 
 VOID *malloc(UINTN size) 
 {
@@ -433,5 +516,38 @@ VOID free(VOID *buffer)
 	if(!buffer) return;
 	free_pages(buffer);
 
-	//*(unsigned int*)(buffer) = 0;
-} 
+}
+
+
+
+void *malloc_virtual_to_physical(unsigned size,void *ptr)
+{
+	unsigned int phy, virt;
+
+	phy = virt = (unsigned int) malloc ( size);
+
+	*(unsigned int*)(ptr) = virt;
+
+	return (void*)phy;
+
+}
+
+void free_virtual_to_physical(void *ptr)
+{
+	free(ptr);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

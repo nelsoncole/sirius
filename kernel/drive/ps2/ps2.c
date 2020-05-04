@@ -40,7 +40,7 @@
 
 // Esta função é usada para a calibragem do IBF e OBF
 // Se a entra é 0 = IBF, se entrada é 1 = OBF
-VOID kbdc_wait(UINT8 type)
+/*VOID kbdc_wait(UINT8 type)
 {
 	INTN spin = 10000000; 
 
@@ -53,6 +53,28 @@ VOID kbdc_wait(UINT8 type)
                  while((inportb(0x64)&2)) { if(!spin)break; spin--; }
 
       	}else wait_ns(400);
+
+}*/
+
+#define outanyb(p) \
+__asm__ __volatile__(\
+"outb %%al,%0"::"dN"((p)) :"eax"\
+)  /* Valeu Fred */
+
+
+void kbdc_wait(int type){
+
+	int spin = 1000000;
+
+	if(type == 0) {
+
+                  while(!inportb(0x64)&1 && spin--)outanyb(0x80);
+
+        } else if (type == 1) {
+
+                  while(inportb(0x64)&2 && spin--)outanyb(0x80);
+
+      	}
 
 }
 

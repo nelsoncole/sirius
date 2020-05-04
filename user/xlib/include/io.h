@@ -73,7 +73,6 @@
 
 #include "typ.h"
 #include "gui/gui.h"
-#include "gui/bmp.h"
 
 
 #define DEBUG_MSG
@@ -128,13 +127,8 @@ VOID *setmem(IN VOID *Buffer,IN UINTN Size,IN UINT8 Value);
 VOID exit(INTN rc);
 
 
-UINTN BitMAP(	VOID *Data,	
-		UINTN X,
-		UINTN Y,
-		VOID *BankBuffer);
 
-
-
+char *utf8_convert(char *str,int *unicode);
 
 
 #endif

@@ -50,82 +50,84 @@ extern VOID irq9();	extern VOID irq19();
 
 UINTN scancode;
 
+extern void e1000_handler();
+
 VOID irq_function(INTN  n){
 
 	switch(n - 0x40){
 		
-		case 0: 
+		case 0: print("Null IRQ n: %d\n",n - 0x40); 
 			
 			break;
 		case 1:
  			keyboard_handler();
 			break;
-		case 2:
+		case 2: print("Null IRQ n: %d\n",n - 0x40);
 			
 			break;
-		case 3:
+		case 3: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 4:
+		case 4: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 5:
+		case 5: print("Null IRQ n: %d\n",n - 0x40);
  
 			break;
-		case 6:
+		case 6: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 7:
+		case 7: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
 		case 8:
 			rtc_handler();
 			break;
-		case 9:
+		case 9: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 10: 
+		case 10: print("Null IRQ n: %d\n",n - 0x40); 
 			
 			break;
-		case 11:
- 
+		case 11: print("Null IRQ n: %d\n",n - 0x40);
+ 	
 			break;
 		case 12:
  			// MOUSE
 			mouse_handler();
 			break;
-		case 13:
+		case 13: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 14:
+		case 14: //print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 15:
+		case 15: //print("Null IRQ n: %d\n",n - 0x40);
  
 			break;
-		case 16:
+		case 16: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 17:
+		case 17: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 18:
+		case 18: print("Null IRQ n: %d\n",n - 0x40);
  
 			break;
-		case 19:
+		case 19: print("Null IRQ n: %d\n",n - 0x40);
 
 			break;
-		case 20: 
+		case 20: print("Null IRQ n: %d\n",n - 0x40);
 			
 			break;
-		case 21:
+		case 21: print("Null IRQ n: %d\n",n - 0x40);
  
 			break;
-		case 22:
+		case 22: print("Null IRQ n: %d\n",n - 0x40);
  
 			break;
 		case 23:
-
+			print("Null IRQ n: %d\n",n - 0x40);
 			break;
 		
 		default:

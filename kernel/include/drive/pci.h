@@ -37,7 +37,7 @@
 #ifndef __PCI_H__
 #define __PCI_H__
 
-#define MAX_BUS 2  // 256
+#define MAX_BUS 256
 #define MAX_DEV 32 // 32
 #define MAX_FUN 8  // 8
 #define PCI_PORT_ADDR 0xCF8
@@ -94,7 +94,7 @@ UINTN pci_size(UINTN base, UINTN mask);
 
 
 
-
+unsigned int pci_scan_class(int class);
 
 
 

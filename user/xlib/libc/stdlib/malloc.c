@@ -1,25 +1,12 @@
 #include <mm.h>
 #include <stdlib.h>
 
-
-/*
-typedef struct _mm_ {
-	long mm;
-	long id;
-	long act;	
-	long len; 
-
-}__attribute__((packed)) _mm_t;*/
-
-
-_mm_t _mm_r[8192]; // 96 KiB
-
-
 _mm_t *_malloc_r(_mm_t *mm, size_t len) 
 {
 	int i;
 	_mm_t *_mm = mm;
-	for(i=0;i<8192;i++) {
+
+	for(i=0;i<_MM_R_SIZE;i++) {
 
 		if ( _mm->mm == 0 ) 
 		{
@@ -29,19 +16,20 @@ _mm_t *_malloc_r(_mm_t *mm, size_t len)
 			__asm__ __volatile__("\
 			int $0x72":"=a"(_mm->mm):"a"(2),"d"(len));
 
-			return _mm;
+			return (_mm_t *) _mm;
 
 		} else _mm++;
 	}
 
-	return 0;
+	return (_mm_t *)0;
 
 }
 
 
 _mm_t *_malloc_min_r(_mm_t *mm, size_t len) 
 {
-	if(len > 4096) return 0;
+
+	if(len > _MM_BLOCK_SIZE) return (_mm_t *)0;
 
 	int i;
 	_mm_t *_mm = mm;
@@ -49,9 +37,9 @@ _mm_t *_malloc_min_r(_mm_t *mm, size_t len)
 	long add = 0;
 	long id = 0;
 
-	for(i=0;i<8192;i++) {
+	for(i=0;i<_MM_R_SIZE;i++) {
 
-		if ( _mm->mm != 0 && (_mm->len+len <= 4096) && _mm->act != (-1) ) 
+		if ( _mm->mm != 0 && (_mm->len+len <= _MM_BLOCK_SIZE) && _mm->act != (-1) ) 
 		{
 			_mm->act++;
 			add = _mm->mm + _mm->len;
@@ -62,10 +50,10 @@ _mm_t *_malloc_min_r(_mm_t *mm, size_t len)
 		} else _mm++;
 	}
 
-	if(i >= 8192) return 0;
+	if(i >= _MM_R_SIZE) return (_mm_t *)0;
 
 	_mm = mm;
-	for(i=0;i<8192;i++) {
+	for(i=0;i< _MM_R_SIZE;i++) {
 
 		if ( _mm->mm == 0 ) 
 		{
@@ -73,12 +61,12 @@ _mm_t *_malloc_min_r(_mm_t *mm, size_t len)
 			_mm->id = id;
 			_mm->len = len;
 			_mm->mm = add;
-			return _mm;
+			return (_mm_t *)_mm;
 
 		} else _mm++;
 	}
 
-	return 0;
+	return (_mm_t *)0;
 
 }
 

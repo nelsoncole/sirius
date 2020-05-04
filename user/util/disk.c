@@ -192,7 +192,7 @@ int main(int argc, char **argv)
 
 static int cmd_l (SD *root)  {
 
-	int i;
+	int i,j;
 	SD *p_src = root;
 
 	unsigned size = 0;
@@ -206,8 +206,9 @@ static int cmd_l (SD *root)  {
 
 	for(i=0;i<STR_MENU_SIZE;i++)
 	{
-		set_cursor_x(SPACE*i);
+		//set_cursor_x(SPACE*i);
 		fputs(menu[i],stdout);
+		for(j=strlen(menu[i]);j < SPACE ; j++) fputc(' ',stdout);
 
 	}
 

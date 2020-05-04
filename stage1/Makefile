@@ -6,7 +6,7 @@ AS=nasm
 CC=gcc
 LD=ld
 
-OBJS= stage1.o io16.o vesa.o gdt.o main.o flush.o idt.o isrs.o exceptions.o pic.o irqs.o string.o mboot.o gui.o font8x16.o bmp.o console.o pci.o ata.o ahci.o disk.o fat.o media.o gpu.o
+OBJS= stage1.o io16.o vesa.o gdt.o main.o flush.o idt.o isrs.o exceptions.o pic.o irqs.o string.o mboot.o gui.o font8x16.o bmp.o console.o pci.o ata.o ahci.o disk.o fat.o media.o # gpu.o
 
 .PHONY: clearscreen stage1.bin move clean
 

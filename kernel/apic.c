@@ -274,9 +274,11 @@ UINTN ioapic_initialize()
 	//UINTN io_apic_base_addr;
 
 	// Mapear o IO APIC BASE
-	// mem_map((PHYSICAL_ADDRESS)IO_APIC_IND,(VIRTUAL_ADDRESS *)&io_apic_base_addr,0x1000/*4KiB*/,0x13);
+	// mem_map((PHYSICAL_ADDRESS)IO_APIC_BASE,(VIRTUAL_ADDRESS *)&io_apic_base_addr,0x1000/*4KiB*/,0x13);
+	mm_mp( (unsigned int) IO_APIC_BASE, (unsigned int *) &ioapic_base,1/*4KiB*/,0x13);
 
-	ioapic_base = IO_APIC_BASE;
+
+	//ioapic_base = /*lapicbase + 0x200000;*/ IO_APIC_BASE;
 
 	write_ioapic_register(ioapic_base,IO_APIC_ID,APIC_ID_0);
 

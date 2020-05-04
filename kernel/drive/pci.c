@@ -310,9 +310,12 @@ UINT32 pci_scan_bcc(UINTN bcc)
     for(bus = 0;bus < MAX_BUS; bus++) {
         for(dev = 0; dev < MAX_DEV; dev++){
             for(fun = 0; fun < MAX_FUN; fun++){
+
                 outportl(PCI_PORT_ADDR,CONFIG_ADDR(bus,dev,fun, 0x8));
                 data =inportl(PCI_PORT_DATA);
+
                 if((data >> 24 &0xff) == bcc){
+
                     return (fun + (dev * 8) + (bus * 32));
             
                 }
@@ -321,6 +324,37 @@ UINT32 pci_scan_bcc(UINTN bcc)
         }
      
     }
+
+    return (-1);
+
+}
+
+unsigned int pci_scan_class(int class)
+{
+    	unsigned int data = -1;
+
+    	unsigned int bus, dev, fun;
+
+	unsigned int r = 0;
+    
+    	for(bus = 0;bus < MAX_BUS; bus++) {
+        	for(dev = 0; dev < MAX_DEV; dev++){
+            		for(fun = 0; fun < MAX_FUN; fun++){
+
+                		outportl(PCI_PORT_ADDR,CONFIG_ADDR(bus,dev,fun, 0x8));
+                		data =inportl(PCI_PORT_DATA);
+
+                		if((data >> 24 &0xff) == class){
+
+					r = fun | dev << 16 | bus << 24;
+                    			return r;
+            
+                		}
+            		}
+     
+        	}
+     
+    	}
 
     return (-1);
 
