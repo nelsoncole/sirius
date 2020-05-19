@@ -22,6 +22,7 @@ FONT	:=font.o
 
 TRM	:=trm.o
 TASKBAR	:=taskbar.o
+LOGIN	:=login.o
 
 DISK	:=disk.o
 FORMAT	:=format.o
@@ -34,7 +35,23 @@ C4 	:=c4.o
 
 NASM 	:= nasm.o nasmlib.o ver.o raa.o saa.o rbtree.o float.o insnsa.o insnsb.o assemble.o labels.o hashtbl.o crc64.o parser.o outform.o outlib.o nulldbg.o outbin.o outaout.o outcoff.o outelf.o outelf32.o outelf64.o outobj.o outas86.o outrdf2.o outdbg.o outieee.o outmacho32.o outmacho64.o preproc.o quote.o pptok.o macros.o listing.o eval.o exprlib.o stdscan.o strfunc.o tokhash.o regvals.o regflags.o
 
-.PHONY: msgbox.bin gserver.bin xserver.bin shell.bin desktop.bin test.bin disk.bin format.bin init.bin pci.bin font.bin fasm.bin nanojpeg.bin c4.bin nasm.bin trm.bin taskbar.bin clean move
+
+H1	:=h1.o
+CAL	:=cal.o
+
+.PHONY: msgbox.bin gserver.bin xserver.bin shell.bin desktop.bin disk.bin format.bin init.bin pci.bin font.bin fasm.bin nanojpeg.bin c4.bin nasm.bin trm.bin taskbar.bin login.bin edit.bin test.bin h1.bin cal.bin clean move
+
+h1.bin: $(HEAD) $(H1) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+cal.bin: $(HEAD) $(CAL) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+edit.bin: $(HEAD) $(EDIT) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+login.bin: $(HEAD) $(LOGIN) $(XLIB)
+	$(LD) $(LDFLAGS) -o $@ $^
 
 trm.bin: $(HEAD) $(TRM) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
@@ -88,6 +105,9 @@ pci.bin: $(HEAD) $(PCI) $(XLIB)
 test.bin: $(HEAD) $(TEST) $(XLIB)
 	$(LD) $(LDFLAGS) -o $@ $^
 
+#EDIT
+%.o:edit/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
 
 #C4
 %.o:c4/%.c
@@ -129,7 +149,8 @@ test.bin: $(HEAD) $(TEST) $(XLIB)
 #PCI
 %.o:pci/%.c
 	$(CC) $(CFLAGS32) -c -o $@ $<
-NASM_CFLAGS32 :=-Wall -O0 -pedantic -DHAVE_CONFIG_H -W -ffreestanding -nostdlib -nostdinc -I ./nasm -I ./xlib/include
+
+NASM_CFLAGS32 :=-Wall -O0 -m32 -ffreestanding -nostdlib -nostdinc -I ./nasm -I ./xlib/include
 #NASM
 %.o:nasm/%.c
 	$(CC) $(NASM_CFLAGS32) -c -o $@ $<
@@ -141,6 +162,9 @@ NANOJPEG_CFLAGS32 :=-Wall -O0 -std=c99 -D_NJ_EXAMPLE_PROGRAM -m32 -ffreestanding
 %.o:nanojpeg/%.c
 	$(CC) $(NANOJPEG_CFLAGS32) -c -o $@ $<
 
+#HP
+%.o:hp/%.c
+	$(CC) $(CFLAGS32) -c -o $@ $<
 
 move:
 	-mv *.bin ../bin

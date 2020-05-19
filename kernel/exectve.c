@@ -81,7 +81,7 @@ int exectve(int argc,char **argv,char *pwd,FILE *fp)
 	}
 
 
-	int filesize = fp->header.size;
+	int filesize = fp->size;
 	int physize = (header->end -  (header->start - 0x1000));	
 
 
@@ -261,7 +261,7 @@ int exectve_child(int argc,char **argv,char *pwd,FILE *fp,THREAD *father_thread)
 	}
 
 
-	int filesize = fp->header.size;
+	int filesize = fp->size;
 	int physize = (header->end -  (header->start - 0x1000));	
 
 

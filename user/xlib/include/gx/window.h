@@ -15,6 +15,7 @@ typedef struct gx_hand {
 	unsigned int flag;
 	unsigned int style;
 	unsigned int type;
+	unsigned int subtype;
 	// font
 	struct font font;
 	// position x and y
@@ -27,7 +28,10 @@ typedef struct gx_hand {
 	
 	// memory message
 	unsigned int m[4];
+	// color: 0 = fg, 1 = bg, 2 = border, 3 = null
+	unsigned int c[4];
 	//
+	unsigned int f;
 	struct ps *ps;
 
 	int spin_lock;

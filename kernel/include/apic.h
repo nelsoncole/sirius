@@ -49,6 +49,8 @@
 #define APIC_ID 			0x20
 #define APIC_TPR 			0x80 
 #define APIC_EOI			0xb0
+#define APIC_LDR			0xd0
+#define APIC_DFR			0xe0
 #define APIC_S_INT_VECTOR 		0xf0
 #define APIC_LVT_TIMER 			0x320
 #define APIC_LVT_PERFORMANCE		0x340

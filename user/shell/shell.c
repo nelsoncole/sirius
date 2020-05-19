@@ -81,7 +81,7 @@ int cmd_cd(int argc,char **argv);
 
 int cmd_salve(int argc,char **argv) {
 
-	char *dp_str = (char*)stdout->header.buffer;
+	char *dp_str = (char*)stdout->buffer;
 
 	if(argc != 1) { 
 
@@ -102,7 +102,7 @@ int cmd_salve(int argc,char **argv) {
 
 	for(int i=0;i < (65536*2);i++){
 
-		if(i >= stdout->header.size)break;
+		if(i >= stdout->size)break;
 		if(!*dp_str)break;
 		if(fputc(*dp_str++,fp)  == EOF )break;
 
@@ -390,15 +390,6 @@ int cmd_del(int argc,char **argv)
 
 int cmd_dir(int argc,char **argv)
 {
-	FILE *fd = open(".",ATTR_DIRECTORY,"r");
-
-	if(fd != NULL) {
-		for(int i=0;i< fd->header.blocks;i++) printf("%s\n",(char*)(fd->header.buffer + (64*i)));
-		close(fd);
-
-	}
-
-
 	putchar('\n');
 	
 

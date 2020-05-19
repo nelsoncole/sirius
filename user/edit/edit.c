@@ -34,117 +34,118 @@
  *
  */
 
-#include <io.h> 
-#include <sys/sys.h>
+#include <gx.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+ 
+FILE *f;
 
-FILE *fp = NULL;
 
-char *mem = NULL;
-char *p_mem;
-char *line;
-long filesize = 0;
+static int cmd_salve(const char *name,gx_hand_t *edit) 
+{
+	if(!*name) return -1;
+	int rc = 0;
+	
+	char *buf = (char*) get_buffer_editbox(edit);
+	int len = strlen(buf);
+
+	if( len > get_len_editbox(edit) ) return -1;
+
+	f = fopen(name,"w");
+
+	if( f == NULL) return -1;
+	
+	if( fwrite(buf,1,len,f) != len ) rc = -1;
+
+	fclose(f);
+
+	return rc;
+}
+
+static int open(const char *name,gx_hand_t *edit,gx_hand_t *fname) 
+{
+
+	if(!*name) return -1;
+	
+	char *buf = (char*) malloc(get_len_editbox(edit));
+	memset(buf,0,get_len_editbox(edit));
+	
+	f = fopen(name,"r");
+	if( f == NULL) {
+
+		free(buf);
+		return -1;
+	}
+
+
+	fseek(f,0,SEEK_END);
+	int len = ftell(f);
+	fseek(f,0,SEEK_SET);
+
+	if( len > get_len_editbox(edit) ) {
+
+		fclose(f);
+		free(buf);
+		return -1;
+	}
+
+
+	
+	
+	if( fread(buf,1,len,f) != len ) {
+
+		fclose(f);
+		free(buf);
+		return -1;
+	}
+
+
+	
+	while(*buf && len--)r_motor_editbox(edit, *buf++);
+	while(*name)r_motor_editbox(fname, *name++);
+
+	fclose(f);
+	free(buf);
+	return 0;
+
+
+}
 
 int main(int argc, char **argv)
 {
 
-	GW_HAND *window = CreateWindow(TEXT("# Edit"),0,0,0,800,600,
-	GW_STYLE(FORE_GROUND(GW_BLACK) | BACK_GROUND(GW_DARKGRAY) | BACK_GROUND_STYLE(GW_WHITE)),GW_FLAG_VISIBLE);
+	gx_message_t m;
+	gx_mouse_init();
 
-	
+	gx_hand_t *window = create_window (0,0, 560, 500, 0);
+	create_title(window, "Simples Texto Editor", 1, 0);
 
-	/*GW_HAND *area = CreateObject(window,TEXT(argv[1]),GW_HANDLE_BOX,24,0,window->Area.Width - 24,
-	window->Area.Height,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_VISIBLE);*/
+	/*gx_hand_t *l1 = */create_label(window,"Nome do arquivo",8,32,window->font.cols*16,16,0);
 
+	gx_hand_t *fname = create_editbox(window,8,50,window->font.cols*32,window->font.rows+4,256, 0/*normal*/);
+	gx_hand_t *salve = create_button(window, "Salvar",fname->w+16,50, window->font.cols*8, window->font.rows+4, 0);
 
-	/*GW_HAND *box = CreateObject(window,TEXT("GW_HANDLE_BOX"),GW_HANDLE_BOX,24,24,window->Area.Width - 24,
-	window->Area.Height - 24,GW_STYLE(FORE_GROUND(GW_WHITE) | BACK_GROUND(GW_DARKGRAY)),GW_FLAG_INVISIBLE);*/
-
-
-	mem = (char*) malloc (0x10000);
-	long pool = (long) malloc (0x10000);
-	char **lines = (char **) malloc (0x1000);
-	int i,x;
-
-	memset((char*)pool,0,0x10000);
-	memset(lines,0,0x1000);
-	memset(mem,0,0x10000);
+	gx_hand_t *edit = create_editbox(window,8,74,window->w-16,window->h - 80, 65536, 0);
 
 
-	for ( i=0 ; i < 47; i++ ) {
 
-		lines[i] = (char*) pool + (128*i);
-	}
+	if(argc > 1) open(argv[1],edit,fname);
 
-	if (argc > 1) { fp = fopen(argv[1],"r+");
-	
-	if( fp != NULL) 
-	{
+	for(;;) {	
 
-		fseek(fp,0,SEEK_END);
-		filesize = ftell(fp);
-		rewind(fp);
+		m = gx_mouse (window);
 
-		if(fread (mem,sizeof(char),filesize,fp)) 
-		{
-			p_mem = mem;
+		switch(m.type) {
+			case GX_OK:
+				if( cmd_salve(get_buffer_editbox(fname), edit) );
 
-			for(i=0 ; i < 256 ; i++) 
-			{
-				line = lines[i];
+			break;
 
-				if(!*p_mem)break;
-				for( x=0; x < (64) ; x++ ) { 
-					
-					if(!*p_mem)break;
-					if( *p_mem == '\n' ) 
-					{ 
-						*line = '\0';
-						p_mem++;
-						break;
-					} else if (*p_mem == '\t') {
-						p_mem++;
-						*line++ = ' '; x++;
-						*line++ = ' '; x++;
-						*line++ = ' '; x++;
-						*line++ = ' '; x++;
-						*line++ = ' '; x++;
-						*line++ = ' '; x++;
-						*line++ = ' '; x++;							
-						*line++ = ' '; x++;
-
-					} else *line++ = *p_mem++;
-				}
-
-				
-
-			}
 
 		}
 
 
-		fclose(fp);
-
-		// enviar sms para box
-		//Send(box,GW_FLAG_VISIBLE,GW_SMG_FLAG_BIT);
-		//Send(box,(unsigned int)(lines),GW_SMG_NORMAL_BIT);
-		
-
-	} }
-
-
-	
-	// loop
-	while(TRUE) 
-	{
-
-		WindowFocus(window);
-
-		
 	}
-
-	//exit();
 	return 0;
 }

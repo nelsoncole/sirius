@@ -29,6 +29,11 @@ gx_hand_t *create_title(gx_hand_t *window, const char *title, int x, unsigned in
 	t->next = null;
 	t->tail = null;
 
+	//color
+	t->c[0] = 0x80808000;
+	t->c[1] = 0xc0c0c000;
+	t->c[2] = 0xc0c0c000;
+
 	// title
 
 	int len = strlen(title);
@@ -38,8 +43,6 @@ gx_hand_t *create_title(gx_hand_t *window, const char *title, int x, unsigned in
 	
 	t->m[0] = (unsigned int) malloc(len+1);
 	memset((void*)t->m[0],0,len+1);
-	
-	t->m[3] = 0xc0c0c000;
 
 
 	memcpy((void*)t->m[0],title,len);
@@ -78,8 +81,8 @@ int update_title(gx_hand_t *window, gx_hand_t *t)
 	t->x = t->x0 + window->x;
 	t->y = t->y0 + window->y;
 
-	gx_rect( t->x, t->y, t->w, t->h, 0xc0c0c000 /*bg*/, t->vmm);
-	gx_putchar(&t->font,'X',t->x + 8, t->y + 3, 0x80808000, t->m[3]/*0xc0c0c000*/ /*bg*/, t->vmm);
+	gx_rect( t->x, t->y, t->w, t->h, t->c[1] /*bg*/, t->vmm);
+	gx_putchar(&t->font,'X',t->x + 8, t->y + 3, t->c[0], t->c[2]/*bg*/, t->vmm);
 	//gx_line_horizontal (t->x, t->y + 24, t->w, -1, t->vmm);	
 
 
@@ -95,7 +98,7 @@ int update_title(gx_hand_t *window, gx_hand_t *t)
 
 		lstr = utf8_convert(lstr,&unicode);
 
-		gx_putchar(&t->font,unicode, t->x + t->font.cols * (i+ t->m[1]), t->y+3, 0,0xc0c0c000, t->vmm);
+		gx_putchar(&t->font,unicode, t->x + t->font.cols * (i+ t->m[1]), t->y+3, 0,t->c[1], t->vmm);
 			
 	}
 

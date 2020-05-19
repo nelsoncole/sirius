@@ -34,7 +34,7 @@ FILE *fopen (const char *path,const char *mode)
 	if(mode[0] == '\0') return NULL;
 
 
-	FILE *fp = open(path,ATTR_ARCHIVE,mode);
+	FILE *fp = open_r(path,ATTR_ARCHIVE,mode);
 
 	return fp;
 	

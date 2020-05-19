@@ -325,6 +325,13 @@ int AddFAT(VFS *vfs, FAT_BPB *bpb, unsigned int first_sector_of_cluster)
 	unsigned int new_n =0;
 	int i;
 
+	int r = vfs->tnb - 1;
+
+	int table_idex = r / 1024;
+	int block_idex = r % 1024;
+
+	unsigned int *block= (unsigned int *) vfs->table[table_idex];
+
 	FATDataUpdate(bpb,data);
 	// FirstSectorofCluster = ((N – 2) * BPB_SecPerClus) + FirstDataSector;
 	unsigned int n = (((first_sector_of_cluster - data->first_data_sector)/bpb->BPB_SecPerClus) + 2 );
@@ -368,18 +375,29 @@ int AddFAT(VFS *vfs, FAT_BPB *bpb, unsigned int first_sector_of_cluster)
 	if(SalveFat(bpb,fat_table,FATOffset,EOF)) {free(data); return EOF;} //ERROR
 
 
-	if(vfs->header.blocks >= 896) {
-		
-		//FIXME aqui devemos adicionar um novo bloco de 4KiB no *vfs 
+	if( vfs->tnb >= (1024 * 1024) ) {
 
+		//FIXME aqui devemos adicionar um novo bloco de 4KiB no *vfs 
 		free(data); return EOF;
-	}
-	else {
+		return EOF;
+	} else {
 		// FirstSectorofCluster = ((N – 2) * BPB_SecPerClus) + FirstDataSector;
-		vfs->block[vfs->header.blocks] = data->first_sector_of_cluster = \
+
+		if(block_idex >= 1023) {
+			table_idex++;
+			block_idex = 0;
+
+			vfs->table[table_idex] = (unsigned int ) malloc(0x1000);
+
+		}else block_idex++;
+
+		
+		block= (unsigned int *) vfs->table[table_idex];
+
+		block[block_idex] = first_sector_of_cluster = \
 		((new_n - 2) * bpb->BPB_SecPerClus) + data->first_data_sector;
 
-		vfs->header.blocks++;
+		vfs->tnb++;
 
 	}
 
@@ -721,6 +739,9 @@ UINTN FatOpenFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,CONST CHAR8 *
 	int count = 0;
 	unsigned char *cur_dir = NULL;
 
+	unsigned int *block = 0;
+	int block_idex	= 0;
+
 
 	// Directory Current
 	if((*filename == '.') && (attr == ATTR_DIRECTORY)) goto successfull;
@@ -777,17 +798,20 @@ successfull:
 
 	case ATTR_ARCHIVE:
 	// Aqui podemos carregar o VFS
-	strcpy(vfs->header.filename,filename);
+	strcpy(vfs->fname,filename);
 
-	vfs->header.attr 	= ATTR_ARCHIVE;
-	vfs->header.size 	= dir->DIR_FileSize;
-	vfs->header.dev		= bpb->specific.fat.BS_DrvNum;
-	vfs->header.bps 	= bpb->BPB_BytsPerSec;
-	vfs->header.count	= bpb->BPB_SecPerClus;
-	vfs->header.blocks	= 0;
+	//vfs->attr 	= ATTR_ARCHIVE;
+	vfs->size 	= dir->DIR_FileSize;
+	vfs->devn	= bpb->specific.fat.BS_DrvNum;
+	vfs->bps 	= bpb->BPB_BytsPerSec;
+	vfs->count	= bpb->BPB_SecPerClus;
+	vfs->tnb		= 0;
+	vfs->bsize	= vfs->bps*vfs->count;
 
+	block  = (unsigned int *) malloc(0x1000);
+	memset(block,0,0x1000);
+	vfs->table[block_idex++] =  (unsigned int) block;
 
-	//UINT32 *block		= (UINT32*)(vfs->block);
 
 	N = dir->DIR_FstClusLO | dir->DIR_FstClusHI << 16;
 	
@@ -797,8 +821,19 @@ successfull:
 
 		// FirstSectorofCluster = ((N – 2) * BPB_SecPerClus) + FirstDataSector;
 		lba = data->first_sector_of_cluster = ((N - 2) * bpb->BPB_SecPerClus) + data->first_data_sector;
-	
-		vfs->block[i] = lba; 
+
+		if(i == 1024) {
+
+			if(block_idex >= 1024) goto error; // error
+
+			i = 0;
+			block  = (unsigned int *) malloc(0x1000);
+			memset(block,0,0x1000);
+			vfs->table[block_idex++] =  (unsigned int) block;
+
+		}
+
+		block[i++] = lba; 
 
 		FATOffset = N *2; // For FAT16
 
@@ -815,89 +850,16 @@ successfull:
 
 		N = fat_table[TableEntry];
 
-		vfs->header.blocks += 1;
+		vfs->tnb += 1;
 
 		if( (N == 0xFFFF) || (N == 0xFFF8) ) break;
 		//For FAT16
 		if(TableEntry >= ((bpb->BPB_BytsPerSec/2)-1)) flag = 0;
 		 
-		i++;
 	
 	}
 		break;
 	case ATTR_DIRECTORY:
-	strcpy(vfs->header.filename,filename);
-	vfs->header.attr 	= ATTR_DIRECTORY;
-	vfs->header.size 	= dir->DIR_FileSize;
-	vfs->header.dev		= bpb->specific.fat.BS_DrvNum;
-	vfs->header.bps 	= bpb->BPB_BytsPerSec;
-	vfs->header.count	= 0;
-	vfs->header.blocks	= 0;
-	
-
-
-	for(i = 0;i < 512/*FIXME*/; i++) {
-
-		if((dir->DIR_Name[0] == 0)){break;}
-		else if((dir->DIR_Name[0] == 0xE5)) { dir++; continue; } // Avaliable
-		else if((dir->DIR_Name[0] == 0x20)) { dir++; continue; } // space
-		else if((dir->DIR_Attr == FAT_ATTR_LONG_NAME)) {
-
-			cur_dir = (unsigned char*)dir;
-			sum = cur_dir[13];
-
-			count++;
-
-			dir++; continue;
-
-		}
-		else if((dir->DIR_Attr == FAT_ATTR_HIDDEN)) { dir++; continue; }
-		else if((dir->DIR_Attr == FAT_ATTR_SYSTEM)) { dir++; continue; }
-		else if((dir->DIR_Attr == FAT_ATTR_VOLUME_ID)) { dir++; continue; }
-		else if((dir->DIR_Attr != FAT_ATTR_DIRECTORY) &&\
-	 	(dir->DIR_Attr != FAT_ATTR_ARCHIVE)) { dir++; continue; }
-		
-
-		// default 8.3
-		
-		// ChkSum (unsigned char *pFcbName)
-		if(sum == ChkSum ((unsigned char*)dir->DIR_Name)) {
-
-			// Estrair Long File Name
-
-			CHAR8 *p = (CHAR8*) (vfs->block + (vfs->header.blocks*64));
-			setmem(p,64,0);
-
-
-			FATReadLFN(p,--dir,count);
-			++dir;
-
-
-			*(UINT16*)(p + 60) = 0;
-			*(UINT16*)(p + 62) = 0;
-
-			vfs->header.blocks++;
-		
-			count = 0; dir++;
-			continue;
-
-
-		}
-		
-		// Entrada padrao 8.3
-		CHAR8 *p = (CHAR8*) (vfs->block + (vfs->header.blocks*64));
-		setmem(p,64,0);
-
-		FileMountShortName(p,(const char *)dir->DIR_Name);
-
-		*(UINT16*)(p + 60) = 0;
-		*(UINT16*)(p + 62) = 0;
-
-		vfs->header.blocks++;
-
-		count = 0; dir++;
-	}
-
 
 		break;
 
@@ -935,7 +897,7 @@ UINTN FatUpdateFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,VFS *_vfs)
 	int count = 0;
 	unsigned char *cur_dir;
 	// Comparar ate achar o SHORT NAME
-	FileShortName(shortname,vfs->header.filename);
+	FileShortName(shortname,vfs->fname);
 
 	for(i = 0;i < 512/*FIXME*/; i++) {
 
@@ -964,7 +926,7 @@ UINTN FatUpdateFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,VFS *_vfs)
 			++dir;
 
 			// compara LFN
-			if(!(strcmp (lonf_file_name,vfs->header.filename))) goto successfull;
+			if(!(strcmp (lonf_file_name,vfs->fname))) goto successfull;
 
 		}
 	
@@ -978,7 +940,7 @@ UINTN FatUpdateFile(FAT_BPB *_bpb,FAT_DATA *data,FAT_DIRECTORY *_dir,VFS *_vfs)
 successfull:
 
 	// Aqui podemos actualizar o directory padrao
-	dir->DIR_FileSize = vfs->header.size;
+	dir->DIR_FileSize = vfs->size;
 	//salvar no disco
 
 	sector_offset = (bpb->BPB_BytsPerSec * (i) / (bpb->BPB_BytsPerSec/32))/bpb->BPB_BytsPerSec + data->first_root_sector;

@@ -62,14 +62,14 @@ setmsr(UINT32 msr, UINT32 low, UINT32 hight)
 SD *request_sdx()
 {
 
-	unsigned int *bf = (unsigned int *) (sd->header.buffer);
+	unsigned int *bf = (unsigned int *) (sd->buffer);
 
 	int i;
 	for(i=0;i<64;i++)
 	{
 		if(bf[3] == 0) break;
 
-		bf = (unsigned int *) (sd->header.buffer + (i*1024));
+		bf = (unsigned int *) (sd->buffer + (i*1024));
 	}
 
 	if(i >= 64) return  (SD*)0;
@@ -177,7 +177,7 @@ int conect_sd(int dev)
 
 SD *read_sdx(const char *s)
 {
-	unsigned int *bf = (unsigned int*) (sd->header.buffer);
+	unsigned int *bf = (unsigned int*) (sd->buffer);
 	SD *_sd = NULL;
 
 	int i;
@@ -190,7 +190,7 @@ SD *read_sdx(const char *s)
 
 		}
 
-		bf = (unsigned int *) (sd->header.buffer + (i*1024));
+		bf = (unsigned int *) (sd->buffer + (i*1024));
 	}
 
 

@@ -113,21 +113,24 @@ static VOID atoi(INTN value, CHAR8* valuestring) {
   }
 }
 
-static VOID i2hex(UINTN val, CHAR8* dest, INTN len)
-{	
 
-	char* cp;
-	int i, x;
-	unsigned n;
-	
-	if(val == 0) {
-		cp = &dest[0];
-		*cp++ = '0';
-		*cp = '\0';
-		return;
+
+static char *_str_i2hex(char *s, int del)
+{
+	unsigned char *us = (unsigned char *)s;
+	while(*us) {  
+		if(*us != del) return (char*)us;
+		else us++;	
 	}
-	
 
+	return (char*)--us;;
+}
+
+static void i2hex(unsigned int val, char* dest, int len)
+{
+	char* cp;
+	char x;
+	int n;
 	n = val;
 	cp = &dest[len];
 	while (cp > dest)
@@ -136,26 +139,18 @@ static VOID i2hex(UINTN val, CHAR8* dest, INTN len)
 		n >>= 4;
 		*--cp = x + ((x > (HEX_LEN+1)) ? 'A' - 10 : '0');
 	}
-    
-	dest[len]='\0';
 
+    	dest[len]='\0';
 
-	cp = &dest[0];
-	for(i=0; i < len;i++) {
-	
-		if(*cp == '0') {
-			cp++;
-		}
-		else {
-			strcpy(dest,cp);
-			 break;
-		}
-			
-	}
+	cp = _str_i2hex(dest, '0');
 
-	n = strlen(cp) -1;
-	memset(dest + n,0,n);
+	strcpy(dest,cp);
 
+	n = cp - dest;
+
+	if(n >= HEX_LEN ) n = HEX_LEN - 1;
+
+	memset(dest + HEX_LEN - n,0,n);
 }
 
 

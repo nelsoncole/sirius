@@ -107,6 +107,8 @@ VOID thread_main()
 
 }
 
+
+extern void set_frequencia(uint32_t freq);
 extern unsigned int g_mm_mp;
 int main(BOOT_INFO *boot_info)
 {	
@@ -134,10 +136,6 @@ int main(BOOT_INFO *boot_info)
 	// intialize global
 	g_mm_mp = 0;
 	
-	// Mapear o  Linear Frame Buffer e alocar memoria virtal para o Bank Buffer
-	//mem_map((PHYSICAL_ADDRESS)G->FrameBuffer,
-	//(VIRTUAL_ADDRESS *)&G->FrameBuffer,1024/*4MiB*/,0x13+0x4);
-	
 	mm_mp( (unsigned int) G->FrameBuffer, (unsigned int *) &G->FrameBuffer,1024/*4MiB*/,0x13 | 0x4);
 
 	alloc_pages(0,1024/*4 MiB*/,(VIRTUAL_ADDRESS *)&G->BankBuffer);
@@ -145,16 +143,16 @@ int main(BOOT_INFO *boot_info)
 	alloc_pages(0,1024/*4 MiB*/,(VIRTUAL_ADDRESS *)&G->WindowScreen);
 
 	unsigned int phys = 0;
-	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
-	memset((void*)phys,0,0x1000);
+	alloc_pages(0,2,(VIRTUAL_ADDRESS *)&phys);
+	memset((void*)phys,0,0x2000);
 	G->l.l = (unsigned int ) phys;
 
-	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
-	memset((void*)phys,0,0x1000);
+	alloc_pages(0,2,(VIRTUAL_ADDRESS *)&phys);
+	memset((void*)phys,0,0x2000);
 	G->l.l2 = (unsigned int ) phys;	
 
-	alloc_pages(0,1,(VIRTUAL_ADDRESS *)&phys);
-	memset((void*)phys,0,0x1000);
+	alloc_pages(0,2,(VIRTUAL_ADDRESS *)&phys);
+	memset((void*)phys,0,0x2000);
 
 	G->l.pid = (unsigned int *) phys;
 	G->l.spin_lock = (unsigned int *) phys + 0x20;
@@ -200,11 +198,6 @@ int main(BOOT_INFO *boot_info)
 
 	// clear screen
 	ClearScreen();
-
-
-	//FIXME
-	BitMAP(	(UINTN*)0xA00000,300,100,G->BankBuffer); 
-	refreshrate();
 	
 	print("Initialize Kernel: Sirius v2.0...\n");
 
@@ -212,14 +205,6 @@ int main(BOOT_INFO *boot_info)
 	print("Install TSS\n");		tss_install();
 	print("Install IDTR\n");	idt_install();
 
-
-
-
-	//for(;;);
-
-	// Mapear o Local APIC BASE
-	//mem_map((PHYSICAL_ADDRESS)0xFEC00000/*IA32_LOCAL_APIC_BASE_ADDR*/,
-	//(VIRTUAL_ADDRESS *)&local_apic_virtual_addr,1024/*4MiB*/,0x13);
 
 	mm_mp( (unsigned int) IA32_LOCAL_APIC_BASE_ADDR, (unsigned int *) &local_apic_virtual_addr,1024/*4 MiB*/,0x13);
 	
@@ -229,15 +214,10 @@ int main(BOOT_INFO *boot_info)
 	print("I/O APIC initialize ");
 	ioapic_initialize();
 
-	// Keyboard
-	ioapic_umasked(1);
-	// Mouse
-	//ioapic_umasked(12);
+	// Umasked IRQs
+	for(int i=0;i<24;i++)ioapic_umasked(i);
 
-
-	//ioapic_umasked(8);
-
-	for(int i=3;i<24;i++)ioapic_umasked(i);
+	ioapic_masked(2);
 
 
 	// data initialize
@@ -254,9 +234,9 @@ int main(BOOT_INFO *boot_info)
 
 	print("Instal Keyboard\n");	keyboard_install();
 	print("Install Mouse\n");	mouse_install();
-
-
 	print("Install RTC\n");		rtc_install();
+
+	set_frequencia(100);
 	// RTC 
 
 
@@ -338,16 +318,19 @@ int main(BOOT_INFO *boot_info)
 	// FIXME debug
 	//clearscreen();
 	//ClearScreen(); 
-	//for(;;);	
+	//for(;;);
+
+
+	system_lock = (unsigned int *) malloc(0x1000);
+	memset(system_lock,0,0x1000);
+	*system_lock = 1234; //lock
 
 	// USER
-	do_exec("xserver.bin",1);
 	do_exec("gserver.bin",0x81);
-	do_exec("desktop.bin",1);
-
-	do_exec("taskbar.bin",1);
-	//do_exec("trm.bin",1);
-	//do_exec("test.bin",1);
+	do_exec("xserver.bin",0x1);
+	do_exec("taskbar.bin",0x1);
+	do_exec("desktop.bin",0x1);
+	//set_focus( do_exec("xserver.bin",1) );
 
 	apic_timer_umasked();
 
@@ -357,17 +340,16 @@ int main(BOOT_INFO *boot_info)
 		print("open \"logo.bmp\" error\n");
 	} else {
 
-		if(read(G->WindowScreen,1,f->header.size,f) != f->header.size);
+		if(read(G->WindowScreen,1,f->size,f) != f->size);
+
+		/*clearscreen();
+		BitMAP(	(UINTN*)G->WindowScreen,220,100,G->BankBuffer);
+		refreshrate(); */ //refresh_screen();
+
+
 		close(f);
 	}
 	
-
-	/*clearscreen();
-	BitMAP(	(UINTN*)G->WindowScreen,220,100,G->BankBuffer);
-	refreshrate(); */ //refresh_screen();
-
-
-
 	
 	sti(); //Enable eflag interrupt
 

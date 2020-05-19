@@ -48,7 +48,7 @@ int exectve2(int argc,char **argv)
 
 	}
 
-	FILE *fp = open(argv[0],ATTR_ARCHIVE,"rb");
+	FILE *fp = open_r(argv[0],ATTR_ARCHIVE,"rb");
 
 	if(fp == NULL) { 
 
@@ -61,7 +61,7 @@ int exectve2(int argc,char **argv)
 	// processo filho
 	//__asm__ __volatile__("int $0x72":"=a"(rc):"a"(6),"d"(argc),"c"(argv),"b"(0/*pwd*/),"D"(fp));
 
-	close(fp);
+	close_r(fp);
 
 	return rc;
 

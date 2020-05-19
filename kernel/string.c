@@ -37,9 +37,11 @@
 
 UINTN strlen(CONST CHAR8 *s)
 {
-	CHAR8 *tmp = (CHAR8*)s;
-	while(*tmp++ != '\0');
-	return (UINTN)(tmp - s);
+	char *tmp = (char*)s;
+	
+	while(*tmp != '\0')tmp++;
+
+	return (size_t)(tmp - s);
 }
 
 VOID  *copymem(IN VOID *Destination,IN VOID *Source,IN UINTN Length)

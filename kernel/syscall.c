@@ -35,7 +35,7 @@
  */
 #include <os.h>
 
-#define SYSCALL_NUM 24
+#define SYSCALL_NUM 25
 
 extern VOID interrupter(INTN n,UINT32 offset,UINT16 sel,UINT8 dpl );
 extern void int114(); // system call
@@ -187,6 +187,12 @@ void syscall_set_focus_kbdc(unsigned int pid)
 	set_focus(pid);
 }
 
+
+void *syscall_lock() 
+{	return (unsigned int*)system_lock;
+
+}
+
 extern int terminal;
 void syscall_unknown(void){
 
@@ -226,6 +232,7 @@ VOID *syscall_table[SYSCALL_NUM]={
 	&syscall_outpb,		// eax, 0x15	syscall_outpb, edx = port, ecx = val
 	&syscall_outpw,		// eax, 0x16	syscall_outpw, edx = port, ecx = val
 	&syscall_outpl,		// eax, 0x17	syscall_outpl, edx = port, ecx = val
+	&syscall_lock,		// eax, 0x18
 
 };
 

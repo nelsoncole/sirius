@@ -49,6 +49,7 @@
 
 // PS/2
 void kbdc_wait(int type);
+void kbdc_set_cmd(int val);
 UINTN ps2_install();
 
 
@@ -61,6 +62,7 @@ void keyboard_handler(void);
 //MOUSE
 #define MOUSE_DEFAULT 0xF6
 #define ENABLE_MOUSE 0xF4
+#define MOUSE_SET_RESOLUTION 0xE8
 void mouse_install();
 void mouse_handler(void);
 

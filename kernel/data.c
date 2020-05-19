@@ -72,7 +72,11 @@ UINT8 *rtc	= NULL;
 unsigned int *device = NULL;
 FILE *sd = NULL;
 FILE *xserver = NULL;
-FILE *gserver = NULL; 
+FILE *gserver = NULL;
+
+
+// lock
+unsigned int *system_lock = NULL; 
 
 
 

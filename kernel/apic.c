@@ -73,6 +73,7 @@ UINTN apic_initialize(UINTN _lapicbase) {
 
 
 	lapicbase = _lapicbase;
+	unsigned int val;
 
 
 	//Legacy PIC mask all off
@@ -82,7 +83,7 @@ UINTN apic_initialize(UINTN _lapicbase) {
 	outportb(0xA0,0x11);	// reset PIC 2
 
 	// Envia ICW2 start novo PIC 1 e 2
-	outportb(0x21,0x20);	// PIC 1 localiza no IDT 38-32 
+	outportb(0x21,0x20);	// PIC 1 localiza no IDT 39-32 
 	outportb(0xA1,0x28);	// PIC 2 localiza no IDT 47-40
 
 	// Envia ICW3
@@ -98,6 +99,14 @@ UINTN apic_initialize(UINTN _lapicbase) {
 	outportb(0x21,0xFF);
 	outportb(0xA1,0xFF);
 
+	// Destination Format Register (DFR)
+	*(volatile UINT32*)(lapicbase + APIC_DFR) = 0xFFFFFFFF; // Value after reset
+
+	// Logical Destination Register (LDR)
+	val = *(volatile UINT32*)(lapicbase + APIC_LDR) &0x00FFFFFF;
+	val |= 1;
+	*(volatile UINT32*)(lapicbase + APIC_LDR) =  val;
+	
 	// Local APIC ID Register
 	*(volatile UINT32*)(lapicbase + APIC_ID) = APIC_ID_0 << 24;
 	
@@ -160,7 +169,7 @@ VOID apic_timer_umasked(){
 	*(volatile UINT32*)(lapicbase + APIC_LVT_TIMER) = data &0xFFFEFFFF;
 
 	//Divide Configuration Register, to divide by 128 0xA divide by 32 0x8
-	*(volatile UINT32*)(lapicbase + APIC_DIVIDE_TIMER) = 0x8;
+	*(volatile UINT32*)(lapicbase + APIC_DIVIDE_TIMER) = 0xA;
 
 	// Initial Count Register
 	*(volatile UINT32*)(lapicbase + APIC_INITIAL_COUNT_TIMER) = 123456;
@@ -276,7 +285,6 @@ UINTN ioapic_initialize()
 	// Mapear o IO APIC BASE
 	// mem_map((PHYSICAL_ADDRESS)IO_APIC_BASE,(VIRTUAL_ADDRESS *)&io_apic_base_addr,0x1000/*4KiB*/,0x13);
 	mm_mp( (unsigned int) IO_APIC_BASE, (unsigned int *) &ioapic_base,1/*4KiB*/,0x13);
-
 
 	//ioapic_base = /*lapicbase + 0x200000;*/ IO_APIC_BASE;
 

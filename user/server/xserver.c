@@ -115,12 +115,12 @@ unsigned int read_idt(unsigned int pid)
 }
 
 
-int main(int argc,const char **argv)
+int main()
 {
 	int flg = 0;
+	int r;
 
 	idt = (unsigned int*) malloc(0x1000);
-
 	memset(idt,0,0x1000);
 
 	unsigned int pid = 0;
@@ -137,6 +137,30 @@ int main(int argc,const char **argv)
 	}
 
 
+
+
+	//inicializa tarefas
+
+	/*unsigned int phys = 0;
+	__asm__ __volatile__("int $0x72":"=a"(phys):"a"(0x18));
+	unsigned int *system_lock = (unsigned int *) phys;
+
+	char _argv[256];
+	char **argv = (char**) _argv;
+
+	argv[0] = (char*)malloc(0x1000);*/
+
+
+	/*strcpy(argv[0],"login.bin");
+	r = exectve2(1,argv);
+
+	while(*system_lock == 1234);*/
+
+	/*strcpy(argv[0],"desktop.bin");
+
+	r = exectve2(1,argv);
+	strcpy(argv[0],"taskbar.bin");
+	r = exectve2(1,argv);*/
 
 
 	while(true) 

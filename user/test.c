@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <io.h>
+#include <sys/sys.h>
 
 #include <gx.h>
 #include <stdint.h>
@@ -12,27 +13,24 @@ FILE *f;
 
 int main(int argc, char **argv) {
 
-	/*if(argc < 4) return (-1);
-	
-	char *u = malloc(0x400000); // $MIB
+	f = fopen("a.txt","w");
 
-	memset(u,0,0x400000);
+	if( f == NULL) {
+		
+		printf("open error\n");
 
-	
-	long x = atol (argv[1]);
-	long y = atol (argv[2]);
-	long rgb = strtoul (argv[3], 0,16);
+		return -1;
 
-	//gx_putpixel(400, 400,rgb, G->BankBuffer);
-	gx_rect(x, y, 200, 100, rgb, G->BankBuffer);
-	
-	
-
-	gx_refreshscreen(G->FrameBuffer,G->BankBuffer);
+	}
 
 
-	free(u);
-	return 0;*/
+	fputc('\r',f);
+	fputc('\n',f);
+	fputc('b',f);
+
+	fclose(f);
+
+	return 0;
 
 	if(argc < 2) return 5;
 
@@ -103,3 +101,13 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+

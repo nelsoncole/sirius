@@ -308,7 +308,7 @@ int SalveFat(FAT_BPB *bpb,void *_fat_table,int FATOffset,unsigned int val)
 
 }
 
-int AddFAT(FILE *fd, FAT_BPB *bpb, unsigned int first_sector_of_cluster) 
+int AddFAT(VFS *fd, FAT_BPB *bpb, unsigned int first_sector_of_cluster) 
 {
 	unsigned short *fat_table =(unsigned short*) malloc(0x1000);
 
@@ -1076,9 +1076,9 @@ successfull:
 }
 
 
-int FatOpenFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename,unsigned char attr,FILE *fd) 
+int FatOpenFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename,unsigned char attr,VFS *fd) 
 {
-	FILE *vfs = fd;
+	VFS *vfs = fd;
 	FAT_DIRECTORY *dir = _dir;
 	char shortname[11];
 	unsigned int lba = 0;
@@ -1305,9 +1305,9 @@ done:
 
 
 
-int FatUpdateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,FILE *fd) 
+int FatUpdateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,VFS *fd) 
 {
-	FILE *vfs = fd;
+	VFS *vfs = fd;
 	FAT_DIRECTORY *dir = _dir;
 	char shortname[11];
 
@@ -1379,7 +1379,9 @@ int FatUpdateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,FILE *fd)
 		else { count = 0; dir++;}
 	}
 	
-	{free(lonf_file_name); free(buf); return -1;}
+	free(lonf_file_name); 
+	free(buf); return -1;
+	
 
 successfull:
 

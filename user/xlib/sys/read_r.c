@@ -1,5 +1,5 @@
 /*
- * File Name: close.c
+ * File Name: read_r.c
  *
  *
  * BSD 3-Clause License
@@ -35,20 +35,33 @@
  */
  
 #include <sys/sys.h>
-#include <stdlib.h>
+
+#define EOF (-1)
+
+size_t read_r (void *buffer,size_t size, size_t count, FILE *fp)
+{
+	if(!fp) return (0);
 
 
-int close(FILE *fd) {
 
-	if(!fd)return (0);
+	size_t i;
+	int c;
+	size_t rc = 0;
 
-	if((fd->header.attr == ATTR_ARCHIVE) && ((fd->header.mode[0] == 'w') ||\
-	(fd->header.mode[0] == 'a') || (fd->header.mode[1] == '+')))flush(fd);
+	unsigned char *buf = (unsigned char*)buffer;
 
-	free((void*)fd->header.bpb);	
-	free((void*)fd->header.buffer);
-	free(fd);
+	for(i=0;i < size*count;i++)
+	{
+		c = getc_r (fp);
+			//feof(fp);
+		if(c == EOF) return (rc/size);
 
-	// EOF
-	return (-1);
+		*buf++ = c;
+		rc++;
+	}
+
+	return (rc/size);
 }
+
+
+

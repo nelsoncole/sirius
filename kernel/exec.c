@@ -90,7 +90,7 @@ UINTN do_exec(CONST CHAR8 *name,UINT8 prv)
 	}
 
 
-	int filesize = fpx->header.size;
+	int filesize = fpx->size;
 	int physize = (header->end -  (header->start - 0x1000));	
 
 
@@ -263,7 +263,7 @@ UINTN do_exec_child(THREAD *father_thread,CONST CHAR8 *name,UINT8 prv)
 	}
 
 
-	int filesize = fpx->header.size;
+	int filesize = fpx->size;
 	int physize = (header->end -  (header->start - 0x1000));	
 
 

@@ -339,7 +339,7 @@ static int cmd_n(int flag,SD *info)
 
 
 	for(n=0; n < 2048; n++) {
-		if(dev->header.dev == info->devnum) break;
+		if(dev->devn == info->devnum) break;
 		info++;
 	}
 
@@ -466,7 +466,7 @@ static int cmd_w(int flag)
 		
 	}
 
-	int devnum = dev->header.dev;
+	int devnum = dev->devn;
 
 	fclose(dev);
 	dev = NULL;
@@ -575,13 +575,13 @@ static int read_list(SD *src)
 {
 	SD *p_src = src;
 
-	SD *bf = (SD*) (stdsd->header.buffer);
+	SD *bf = (SD*) (stdsd->buffer);
 	SD *bf2 = NULL;
 
 	int i,t;
 	for(i=0;i<64;i++)
 	{
-		bf2 = bf = (SD*) (stdsd->header.buffer + (i*1024));
+		bf2 = bf = (SD*) (stdsd->buffer + (i*1024));
 
 		if(bf2->partnum == 12345)
 		{

@@ -57,6 +57,12 @@ void update_obj (gx_hand_t *w) {
 			case GX_TYPE_LABEL:
 				update_label(w,t);
 			break;
+			case GX_TYPE_EDITBOX:
+				update_editbox(w,t);
+			break;
+			case GX_TYPE_BUTTON:
+				update_button(w,t);
+			break;
 		}
 			
 		t = t->tail;

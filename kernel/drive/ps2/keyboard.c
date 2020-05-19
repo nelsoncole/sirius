@@ -118,11 +118,7 @@ UINT8 ascii_maiusculas[256] = {
 UINT8 keyboard_read()
 {
 	kbdc_wait(0);
-	
-	UINT8 rc = inportb(0x60);
-    	wait_ns(200);
-
-    	return (rc);
+	return inportb(0x60);
 
 }
 
@@ -131,10 +127,7 @@ UINT8 keyboard_read()
 VOID keyboard_write(UINT8 write){
 
 	kbdc_wait(1);
-
 	outportb(0x60,write);
-    	wait_ns(200);
-
 }
 
 
@@ -164,6 +157,12 @@ UINTN KEYBOARD_BAT_TEST(){
 
 
 void keyboard_install(){
+
+	// set current scan code set
+	//keyboard_write(0xF0);
+	// Set scan code set 2
+	//keyboard_write(2);
+	//keyboard_read();  // ACK
 
     	// IRQ set Handler
 	// Enable IRQ Interrup

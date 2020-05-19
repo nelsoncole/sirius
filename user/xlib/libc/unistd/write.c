@@ -23,6 +23,6 @@ ssize_t write(int fd, const void *buf, size_t count)
 
 	}
 
-	return (c_write(buf,1,count,(FILE*)stream[fd]));
+	return (write_r(buf,1,count,(FILE*)stream[fd]));
 
 }

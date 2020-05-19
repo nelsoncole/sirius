@@ -49,7 +49,7 @@ VOID lvt_function(INTN  n){
 	switch(n - 0x20){
 		
 		case 0: // APIC Timer
-			apic_initial_count_timer(4000);
+			apic_initial_count_timer(1234);
 		break;
 		case 1: // APIC_LVT_PERFORMANCE
 		

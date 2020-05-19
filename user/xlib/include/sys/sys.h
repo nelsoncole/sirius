@@ -43,27 +43,8 @@ extern char *pwd;
 #define pwd pwd
 
 
-
-
-
-FILE *open(const char *path,int attr,const char *mode);
-int close(FILE *fd);
-int flush(FILE *fp);
-
 int creat(const char *path,int attr);
 int rmove (const char *path);
-
-
-
-
-int c_putc (int ch, FILE *fp);
-int c_getc (FILE *fp);
-
-int c_fputs (const char *str,FILE *fp);
-char *c_fgets (char *str,int length,FILE *fp);
-
-size_t c_read (void *buffer,size_t size, size_t count, FILE *fp);
-size_t c_write (const void *buffer,size_t size, size_t count, FILE *fp);
 
 
 // 
@@ -73,6 +54,19 @@ int exectve2(int argc,char **argv);
 
 int set_cursor_x(int x);
 
+
+int getckey();
+int setkey();
+
+extern FILE *open_r(const char *path,int attr,const char *mode);
+extern int getc_r (FILE *fp);
+extern int putc_r (int c,FILE *fp);
+extern int fputs_r (const char *str,FILE *fp);
+extern char *fgets_r (char *str,int length,FILE *fp);
+extern size_t read_r (void *buffer,size_t size, size_t count, FILE *fp);
+extern size_t write_r (const void *buffer,size_t size, size_t count, FILE *fp);
+extern int flush_r(FILE *fp);
+extern int close_r(FILE *fp);
 
 
 #endif

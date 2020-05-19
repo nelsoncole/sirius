@@ -61,6 +61,15 @@ void exit_window(gx_hand_t *w)
 			case GX_TYPE_BOX:
 				exit_box(tail);
 			break;
+			case GX_TYPE_LABEL:
+				exit_label(tail);
+			break;
+			case GX_TYPE_EDITBOX:
+				exit_editbox(tail);
+			break;
+			case GX_TYPE_BUTTON:
+				exit_button(tail);
+			break;
 		}
 		tail = tail->tail;
 	}
@@ -71,8 +80,12 @@ void exit_window(gx_hand_t *w)
 
 int update_window(gx_hand_t *w)
 {	if(w->flag&1) return (-1);
-	gx_rect( w->x, w->y, w->w, w->h, 0x80808000 /*bg*/, w->vmm);
-	gx_border (w->x, w->y, w->w, w->h, 1, 0xE0FFFF00, w->vmm);
+	
+	int x = w->x;
+	int y = w->y;
+
+	gx_rect( x, y, w->w, w->h, 0x80808000 /*bg*/, w->vmm);
+	gx_border (x, y, w->w, w->h, 1, 0xE0FFFF00, w->vmm);
 
 	return (0);
 }

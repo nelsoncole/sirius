@@ -38,8 +38,16 @@
 #define __LIB_H__
 
 
-#define EOF		0xFFFFFFFF
-#define FOPEN_MAX	0
+#define EOF 		(-1)
+#define _IOFBF		0
+#define _IOLBF		1
+#define _IONBF		2
+
+#define BUFSIZ		65536
+
+#define FOPEN_MAX	16
+#define FILENAME_MAX	256
+
 #define SEEK_SET	0
 #define SEEK_CUR	1
 #define SEEK_END	2

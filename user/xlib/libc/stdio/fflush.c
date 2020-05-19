@@ -4,6 +4,6 @@
 
 int fflush(FILE *fp) {
 
-	return flush(fp);
+	return flush_r(fp);
 
 }

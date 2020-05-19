@@ -43,40 +43,35 @@
 
 struct _FAT_BPB;
 
-typedef struct _VFS_FILE_HEADER 
-{
-	// File Header 4 KiB
-	CHAR8	filename[256];
-	UINT8 	attr;
-	UINT32	size;
-	UINT32	size2;
-	UINT8	dev;
-	UINT8	p_entry;
-	UINT32	bps;
-	// números de sector por bloco
-	UINT32	count;
-	// número total de blocos
-	UINT32	blocks;	
-	UINT32	offset;
-	UINT32	offset2;
-	UINT32	buffer;
-	// definido em libc padrão
-	UINT8	mode[4];
-	UINT8	flag;
-	struct _FAT_BPB  *bpb; 
-	struct _VFS_FILE_HEADER *current;
-	struct _VFS_FILE_HEADER *next;
-	UINT8	rsvx[256 - 43];
-
-}__attribute__ ((packed)) VFS_FILE_HEADER;
-
 typedef struct _VFS 
 {
-	// File Header 512 Bytes
-	VFS_FILE_HEADER header;
+	short level;		// Nível do buffer cheio/vazio
+	unsigned flags;		// Sinalizadores de status
+	char fd;		// Descritor de arquivo
+	unsigned char hold;	// Caractere ungetc se não existir um buffer
+	unsigned bsize;		// Tamanho do buffer
+	unsigned char *buffer;	// Buffer de transferência
+	unsigned char *curp;	// Ponteiro activo atual
+	unsigned istemp;	// Indicador de arquivo temporário
+	short token;		// Usado para verificação de validade
+	//
+	unsigned char mode[4];
+	//
+	char fname[256];	// Nome do arquivo aberto
+	unsigned size;		// Tamanho do arquivo
+	unsigned int off;	// Deslocamento
+	unsigned int off2;
+	//
+	unsigned bps;		// Bytes por sector
+	unsigned tnb;		// Total numero de blocos 
+	unsigned count;		// Numero de sectores por bloco
+	unsigned devn;		// Numero do dispositivo
+	unsigned char *superblock;
+	unsigned char *root;	//
+	unsigned d_entry;	// Entrada no directorio  
+	unsigned fs_type;	// Tipo de sistema de arquivo  
 
-	// LBA block start
-	UINT32	block[1024-128];
+	unsigned int *table;	// 1024x1024
 
 }__attribute__ ((packed)) VFS;
 

@@ -51,7 +51,7 @@
 int write_stx(unsigned int id, unsigned int data1,unsigned int data2,FILE *fd)
 {
 
-	STDX *pipe = (STDX*) (fd->header.buffer + (32*1024));
+	STDX *pipe = (STDX*) (fd->buffer + (32*1024));
 	int i;
 
 	for(i=0;i<SIZE_NORMAL_MENSAGEM;i++)
@@ -85,7 +85,7 @@ int write_stx(unsigned int id, unsigned int data1,unsigned int data2,FILE *fd)
 
 STDX *read_stx(FILE *fd)
 {
-	STDX *pipe = (STDX*) (fd->header.buffer + (32*1024));
+	STDX *pipe = (STDX*) (fd->buffer + (32*1024));
 	int i;
 
 	for(i=0;i<SIZE_NORMAL_MENSAGEM;i++)

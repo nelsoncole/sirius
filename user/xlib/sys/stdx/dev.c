@@ -43,7 +43,7 @@
 static int checksum_sdx(int dev)
 {
 
-	SD *sdx = (SD*) (stdsd->header.buffer);
+	SD *sdx = (SD*) (stdsd->buffer);
 
 	int i;
 	for(i=0;i<64;i++)
@@ -52,7 +52,7 @@ static int checksum_sdx(int dev)
 			return -1;
 		}
 
-		sdx = (SD*) (stdsd->header.buffer + (i*1024));
+		sdx = (SD*) (stdsd->buffer + (i*1024));
 	}
 
 	if(i >= 64) return 0;
@@ -64,7 +64,7 @@ static int checksum_sdx(int dev)
 SD* loader_sdx(int dev)
 {
 
-	SD *sdx = (SD*) (stdsd->header.buffer);
+	SD *sdx = (SD*) (stdsd->buffer);
 
 	int i;
 	for(i=0;i<64;i++)
@@ -73,7 +73,7 @@ SD* loader_sdx(int dev)
 			return (sdx);
 		}
 
-		sdx = (SD*) (stdsd->header.buffer + (i*1024));
+		sdx = (SD*) (stdsd->buffer + (i*1024));
 	}
 
 
@@ -83,7 +83,7 @@ SD* loader_sdx(int dev)
 SD *request_sdx()
 {
 
-	unsigned int *bf = (unsigned int *) (stdsd->header.buffer);
+	unsigned int *bf = (unsigned int *) (stdsd->buffer);
 	SD *sdx = NULL;
 
 	int i;
@@ -95,7 +95,7 @@ SD *request_sdx()
 			break;
 		}
 
-		bf = (unsigned int *) (stdsd->header.buffer + (i*1024));
+		bf = (unsigned int *) (stdsd->buffer + (i*1024));
 	}
 
 	if(i >= 64) return  (SD*)0;
@@ -303,7 +303,7 @@ int update_mount_sd(int dev)
 
 SD *read_sdx(const char *s)
 {
-	unsigned int *bf = (unsigned int*) (stdsd->header.buffer);
+	unsigned int *bf = (unsigned int*) (stdsd->buffer);
 	SD *_sd = NULL;
 
 	int i;
@@ -316,7 +316,7 @@ SD *read_sdx(const char *s)
 
 		}
 
-		bf = (unsigned int *) (stdsd->header.buffer + (i*1024));
+		bf = (unsigned int *) (stdsd->buffer + (i*1024));
 	}
 
 

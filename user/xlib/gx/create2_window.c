@@ -61,6 +61,15 @@ void exit2_window(gx_hand_t *w)
 			case GX_TYPE_BOX:
 				exit_box(tail);
 			break;
+			case GX_TYPE_LABEL:
+				exit_label(tail);
+			break;
+			case GX_TYPE_EDITBOX:
+				exit_editbox(tail);
+			break;
+			case GX_TYPE_BUTTON:
+				exit_button(tail);
+			break;
 		}
 		tail = tail->tail;
 	}

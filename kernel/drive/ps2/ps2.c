@@ -40,21 +40,7 @@
 
 // Esta função é usada para a calibragem do IBF e OBF
 // Se a entra é 0 = IBF, se entrada é 1 = OBF
-/*VOID kbdc_wait(UINT8 type)
-{
-	INTN spin = 10000000; 
 
-	if(type == 0) {
-		while(!(inportb(0x64)&1)) { if(!spin)break; spin--; }
-       	}
-
-	else if(type == 1) {
-
-                 while((inportb(0x64)&2)) { if(!spin)break; spin--; }
-
-      	}else wait_ns(400);
-
-}*/
 
 #define outanyb(p) \
 __asm__ __volatile__(\
@@ -79,67 +65,9 @@ void kbdc_wait(int type){
 }
 
 
-// Aqui! Faremos a configuração do PS/2 habilitando o auxiliary device (mouse)
-UINTN ps2_install()
+void kbdc_set_cmd(int val)
 {
-	
-	UINT8 tmp;
-
-
-    	//Desativar os dispositivos PS/2, 
-    	//isto envita que os dispositivos PS/2 
-    	//envie dados no momento da configuração.
-
-    	//Desativar a primeira porta PS/2
-  	kbdc_wait(1);
-	outportb(0x64,0xAD);
-    
-    	//Desativar a segunda porta PS/2  
 	kbdc_wait(1);
-	outportb(0x64,0xA7);
-
-  
-    	//Defina a leitura do byte actual de configuração do controlador PS/2
-	kbdc_wait(1);    
-	outportb(0x64,0x20);
-
-	/*
-    	* 0 	First PS/2 port interrupt (1 = enabled, 0 = disabled)
-	* 1 	Second PS/2 port interrupt (1 = enabled, 0 = disabled, only if 2 PS/2 ports supported)
-	* 2 	System Flag (1 = system passed POST, 0 = your OS shouldn't be running)
-	* 3 	Should be zero
-	* 4 	First PS/2 port clock (1 = disabled, 0 = enabled)
-	* 5 	Second PS/2 port clock (1 = disabled, 0 = enabled, only if 2 PS/2 ports supported)
-	* 6 	First PS/2 port translation (1 = enabled, 0 = disabled)
-	* 7 	Must be zero 
-	*/
-	kbdc_wait(0);
-	tmp=inportb(0x60)|0x3; 
-
-	// defina, a escrita  de byte de configuração do controlador PS/2
-	kbdc_wait(1);
-	outportb(0x64,0x60);
-
-    	// devolvemos o byte de configuração modificado
-	kbdc_wait(1);
-	outportb(0x60,tmp);  
-	
-
-
-    	//Agora temos dois dispositivos sereais teclado e mouse (PS/2).
-	
-
-    	//Activar a primeira porta PS/2
-	kbdc_wait(1);
-	outportb(0x64,0xAE);  
-
-    	// activar a segunda porta PS/2
-	kbdc_wait(1);
-	outportb(0x64,0xA8);
-
-     	// espera   
-	kbdc_wait(1);
-	
-	return 0;
+  	outportb(0x64, val);
 
 }

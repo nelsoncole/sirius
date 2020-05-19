@@ -39,7 +39,7 @@
 
 UINTN Read(IN VFS *vfs,OUT VOID *buffer)
 {
-	UINT8* __buffer__ = (UINT8*)buffer;
+	/*UINT8* __buffer__ = (UINT8*)buffer;
 	UINTN p = vfs->header.dev;
 	UINTN count = vfs->header.count;
 
@@ -52,7 +52,7 @@ UINTN Read(IN VFS *vfs,OUT VOID *buffer)
 		if(read_sector(p,count,block[i],__buffer__)) return 1;
 
 		
-	}
+	}*/
 
 	
    	return 0;

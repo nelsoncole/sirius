@@ -57,7 +57,7 @@ VOID irq_function(INTN  n){
 	switch(n - 0x40){
 		
 		case 0: print("Null IRQ n: %d\n",n - 0x40); 
-			
+
 			break;
 		case 1:
  			keyboard_handler();

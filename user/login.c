@@ -1,5 +1,5 @@
 /*
- * File Name: _read.c
+ * File Name: login.c
  *
  *
  * BSD 3-Clause License
@@ -33,68 +33,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
-#include <sys/sys.h>
 
-#define EOF (-1)
+#include <gx.h> 
+#include <string.h>
 
-size_t c_read (void *buffer,size_t size, size_t count, FILE *fp)
+int main(int argc, char **argv)
 {
-	if(!fp) return (0);
+
+	char s1[] = "Usuário";
+	char s2[] = "Senha";
+	char s3[] = "Login";
+
+	int x1 = 300;
+	int x0 = (G->HorizontalResolution/2) - (x1/2);
+	int y1 = 200;
+	int y0 = (G->VerticalResolution/2) - (y1/2);
+
+	unsigned int phys = 0;
+	__asm__ __volatile__("int $0x72":"=a"(phys):"a"(0x18));
+	unsigned int *system_lock = (unsigned int *) phys;
 
 
+	gx_message_t m;
+	gx_mouse_init();
 
-	size_t i;
-	int c;
-	size_t rc = 0;
+	gx_hand_t *w = create_window ( x0,y0, x1, y1, 0);
+	create_title(w, "Login", 1, 0);
 
-	unsigned char *cache = (unsigned char*) (fp->header.buffer);
-	unsigned char *buf = (unsigned char*)buffer;
-	unsigned int offset = 0;
+	create_label(w,s1,8,32,(strlen(s1)*w->font.cols),w->font.rows,0);
+	gx_hand_t *user = create_editbox(w,8,32+24,w->w-16,w->font.rows+8,256, 0/*normal*/);
+
+	create_label(w,s2,8,32+60,(strlen(s2)*w->font.cols),w->font.rows,0);
+	gx_hand_t *password = create_editbox(w,8,32+24+60,w->w-16,w->font.rows+8,256, 1/*senha*/);
+
+	gx_hand_t *ok = create_button(w, s3,110,32+120, 80, w->font.rows+8, 0);
+
+	for(;;) {	
+
+		m = gx_mouse (w);
+
+		switch(m.type) {
+
+			case GX_OK:
+
+				exit_window(w);
+				*system_lock = 0;
+				exit(0);
+				
+			break;
 
 
-
-	if ((fp->header.mode[0] == 's') && \
-	(fp->header.mode[1] == 't') && (fp->header.mode[2] == 'd')) 
-	{ 
-		for(i=0;i < size*count;i++)
-		{
-			c = c_getc (fp);
-			if(c == EOF) return (rc/size);
-
-		       *buf++ = c;
-			rc++;
 		}
 
-		return (rc/size);
 
 	}
-
-
-
-	for(i=0;i < size*count;i++)
-	{
-		if(fp->header.offset >= fp->header.size) return (rc/size);
-
-		offset = fp->header.offset%0x10000;
-		if( ((offset == 0) && (fp->header.offset != 0)) || (!(fp->header.flag&0x10)) ) {
-
-			c = c_getc (fp);
-			//feof(fp);
-			if(c == EOF) return (rc/size);
-		} else {
-
-			c = *(unsigned char*)(cache + offset);
-			// Update offset
-			fp->header.offset +=1;
-		}
-
-		*buf++ = c;
-		rc++;
-	}
-
-	return (rc/size);
+	return 0;
 }
-
-
-

@@ -92,21 +92,23 @@ UINTN rtc_install(){
 
 // código c para o manipulador IRQ8 offset no IDT vetor 40
 VOID rtc_handler(VOID){
-
+	static unsigned char status;
 	outportb(0x70,0x0C);
 	// é importante ler do registro status C 
- 	inportb(0x71);
+ 	status = inportb(0x71);
 
+
+	if(status);
 
 	outportb(0x70,0);
-	clock[0] = convert_bcd(inportb(0x71));
+	clock[0] = convert_bcd(inportb(0x71)) &0x3f;
 
 	outportb(0x70,2);
-	clock[1] = convert_bcd(inportb(0x71));
+	clock[1] = convert_bcd(inportb(0x71)) &0x3f;
 
 
 	outportb(0x70,4);
-	clock[2] = convert_bcd(inportb(0x71));
+	clock[2] = convert_bcd(inportb(0x71)) &0x1f;
 
 }
 

@@ -39,8 +39,8 @@
 
 int creat(const char *path,int attr) {
 
-	FILE *fd = open(path,attr,"w");
-	if(!close(fd)) return (-1); //Error
+	FILE *fd = open_r(path,attr,"w");
+	if(!close_r(fd)) return (-1); //Error
 	return 0;
 }
 

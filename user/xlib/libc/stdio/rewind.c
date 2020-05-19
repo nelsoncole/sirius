@@ -6,19 +6,20 @@ void rewind (FILE *fp)
 {
 	if(!fp) return;
 
-	if ((fp->header.mode[0] != 's') && \
-	(fp->header.mode[1] != 't') && (fp->header.mode[2] != 'd')) 
+	if ((fp->mode[0] != 's') && \
+	(fp->mode[1] != 't') && (fp->mode[2] != 'd')) 
 	{ 
 
-		if((fp->header.offset >= 0x10000) && (fp->header.flag&0x10)) 
+		if((fp->off >= fp->bsize) && !(fp->flags & 0x10)) 
 		{
-			flush(fp);
-			fp->header.flag &=~0x10;
+			flush_r(fp);
+			fp->flags |= 0x10;
 		}
 
 	}
 
 
-	fp->header.offset = fp->header.offset2 = 0;
+	fp->off = fp->off2 = 0;
+	fp->level = 0;
 
 }

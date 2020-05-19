@@ -55,6 +55,21 @@
  *	
  */
 
+void free_file_table(FILE *fp)
+{
+	int i;
+	if(!fp->table)return;
+
+	for(i = 0; i <1024;i++) {
+
+		if(!fp->table[i]) break;
+
+		free((void*)fp->table[i]);
+	}
+
+	free(fp->table);
+}
+
 FILE *open (const char *filename,const char *mode) 
 {
 
@@ -62,38 +77,46 @@ FILE *open (const char *filename,const char *mode)
 
 	unsigned char flag = 0;
 
+	unsigned int phys;
+
 
 	FILE *stream;
 	if ((mode[0] == 's') && (mode[1] == 't') && (mode[2] == 'd')) {
 
-		stream = (FILE*)malloc(0x1000);
-
-		setmem(stream,0x1000,0);
+		stream = (FILE*)malloc(sizeof(FILE));
+		setmem(stream,sizeof(FILE),0);
 
 		flag = 2;
 
-		stream->header.flag = 1;
-		stream->header.mode[0] = mode[0];
-		stream->header.mode[1] = mode[1];
-		stream->header.mode[2] = mode[2];
+		//stream->flags = 1;
+		stream->mode[0] = mode[0];
+		stream->mode[1] = mode[1];
+		stream->mode[2] = mode[2];
 		if(mode[3] == 'i') {
-			stream->header.attr = 2;
+			stream->flags = 2;
 		}else if(mode[3] == 'o'){
 	
-			stream->header.attr = 3;
+			stream->flags = 3;
 
 
 		}else if(mode[3] == 'r'){
 	
-			stream->header.attr = 4;
+			stream->flags = 4;
 
 
-		}else 	stream->header.attr = 5;
+		}else 	stream->flags = 5;
 
 		// 64 KiB
-		alloc_pages(0,16,(VIRTUAL_ADDRESS *)&stream->header.buffer);
 
-		setmem((void*)(stream->header.buffer),0x10000,0);
+		int k = BUFSIZ/4096;
+		if(BUFSIZ%4096) k++;
+		alloc_pages(0,k,(VIRTUAL_ADDRESS *)&phys);
+
+		stream->buffer = (unsigned char *) phys;
+		setmem(stream->buffer,BUFSIZ,0);
+
+
+		stream->bsize = BUFSIZ;
 
 
 		return (FILE*) stream;
@@ -105,22 +128,30 @@ FILE *open (const char *filename,const char *mode)
 	if ((mode[0] == 'r') && (mode[1] == 'x')) {
 
 		stream = __vfs__;
+		setmem(stream,sizeof(FILE),0);
 
-		stream->header.mode[0] = 'r';
-		stream->header.mode[1] = 'x';
+		stream->mode[0] = 'r';
+		stream->mode[1] = 'x';
 
 		flag = 1;
 		
-	} else stream = (FILE*)malloc(0x1000);
+	} else { 
 
+		stream = (FILE*)malloc(sizeof(FILE));
+		setmem(stream,sizeof(FILE),0);
+
+	}
+
+
+
+	stream->table = (unsigned int *)malloc(0x1000);
+	setmem(stream->table,0x1000,0);
 
 
 	FAT_DATA *data 	= (FAT_DATA*)malloc(sizeof(FAT_DATA));
 	MBR *mbr	= (MBR*)malloc(0x200);
 	VOLUME *volume	= (VOLUME*)malloc(sizeof(VOLUME));
-	
 
-	setmem(stream,0x1000,0);
 
 	// FIXME Nelson tem que pensar em ler o mbr fora desta rotina
 	if(read_sector(DEV,1,0,mbr) ) goto error;
@@ -136,7 +167,7 @@ FILE *open (const char *filename,const char *mode)
 	if(bpb == NULL) goto error;
 
 	// salve bpb
-	stream->header.bpb = bpb;
+	stream->superblock = (unsigned char*) bpb;
 
 	FAT_DIRECTORY *root =FatOpenRoot(bpb,data);
 
@@ -168,16 +199,13 @@ FILE *open (const char *filename,const char *mode)
 	free_pages(root);
 	free(data);
 
-
-	stream->header.flag = 1;
-	stream->header.current 	= NULL;
-	stream->header.next 	= NULL;
-	if(flag == 1)stream->header.buffer = (unsigned int)__vfsbuf__;
+	if(flag == 1)stream->buffer = (unsigned char*)__vfsbuf__;
 	else if(flag == 2);
-	else stream->header.buffer = (unsigned int)malloc(0x10000);
+	else stream->buffer = (unsigned char*)malloc(BUFSIZ);
 	return (FILE*) stream;
 
 error:
+	free_file_table(stream);
 	free(volume);
 	free(mbr);
 	free(data);
@@ -188,55 +216,33 @@ error:
 int close (FILE *stream) 
 {
 
-	if(stream->header.mode[0] == '\0') return 0;
+	if(stream->mode[0] == '\0') return 0;
 
-	if((stream->header.mode[0] == 'r') && (stream->header.mode[1] == 'x')) {
+	if((stream->mode[0] == 'r') && (stream->mode[1] == 'x')) {
 
 
-		stream->header.flag = 0;
+		stream->flags = 0;
 		return EOF;
 
 
 	}
 
 
-	if ((stream->header.mode[0] == 's') \
-	&& (stream->header.mode[1] == 't') && (stream->header.mode[2] == 'd')) {
+	if ((stream->mode[0] == 's') \
+	&& (stream->mode[1] == 't') && (stream->mode[2] == 'd')) {
 
-		stream->header.flag = 0;
-		free_pages((void*)stream->header.buffer);
+		stream->flags = 0;
+		free_pages(stream->buffer);
 		free(stream);
 
-
 		return EOF;
 	}
 
+	stream->flags = 0;
 
-
-
-	FAT_DATA *data 	= (FAT_DATA*)malloc(sizeof(FAT_DATA));
-
-
-	if(stream->header.bpb == NULL) goto error;
-
-	FAT_DIRECTORY *root =FatOpenRoot(stream->header.bpb,data);
-
-	if(root == NULL) { goto error; }
-
-	
-
-	if(FatUpdateFile(stream->header.bpb,data,root,stream)) {
-		free(root); goto error;
-	}
-
-	free(root);
-error:
-	free(data);
-
-
-	stream->header.flag = 0;
-	free((void*)(stream->header.buffer));
-	free(stream->header.bpb);
+	free(stream->buffer);
+	free(stream->superblock);
+	free_file_table(stream);
 	free(stream);
 
 	return EOF; // successfull
@@ -245,7 +251,7 @@ error:
 int flush(FILE *stream) {
 
 	// error
-	if(stream->header.mode[0] == '\0') return EOF;
+	/*if(stream->header.mode[0] == '\0') return EOF;
 
 
 	// rx
@@ -291,7 +297,7 @@ int flush(FILE *stream) {
 	return 0;
 
 error:
-	free(data);
+	free(data);*/
 
 	
 	return EOF;
@@ -300,33 +306,26 @@ error:
 
 int putc (int ch, FILE *stream) 
 {
-	unsigned char* buffer = (unsigned char*) (stream->header.buffer);
-	unsigned dev_n = stream->header.dev;
-	unsigned count = stream->header.count;
-	unsigned int offset = stream->header.offset;
-	unsigned int total_blocks = stream->header.blocks;
-	unsigned int *block	= (unsigned int*)(stream->block);
-	unsigned int bps = stream->header.bps;
-	unsigned int lba_start;
-	unsigned int local_offset;
+	unsigned char* buffer = (unsigned char*) (stream->buffer);
+	unsigned int offset = stream->off;
 	
 	
 
 	// error
-	if(stream->header.mode[0] == '\0') return EOF;
+	if(stream->mode[0] == '\0') return EOF;
 
 	
 
 	// std
-	if ((stream->header.mode[0] == 's') \
-	&& (stream->header.mode[1] == 't') && (stream->header.mode[2] == 'd')) {
+	if ((stream->mode[0] == 's') \
+	&& (stream->mode[1] == 't') && (stream->mode[2] == 'd')) {
 
 
-		if(offset >= 65536) {
+		if(offset >= BUFSIZ) {
 
-			setmem((unsigned char*)(buffer),65536,0);
-			stream->header.offset = 0;
-			stream->header.offset2 = 0;
+			setmem((unsigned char*)(buffer),BUFSIZ,0);
+			stream->off = 0;
+			stream->off2 = 0;
 			return EOF;
 
 		}
@@ -335,87 +334,35 @@ int putc (int ch, FILE *stream)
 		*(unsigned char*)(buffer + offset) = ch;
 
 		// Update offset
-		offset = stream->header.offset +=1;
+		offset = stream->off +=1;
 
 		return  (ch&0xff); // successfull
 	}
 
-
-
-	if(!total_blocks) return EOF;
-
-
-	if ((stream->header.mode[0] != 'w') \
-	&& (stream->header.mode[0] != 'a') && (stream->header.mode[1] != '+')) return EOF;
-
-
 	// Outros modos default lib C
-
-
-	// FAT
-
-	if(offset >= (total_blocks*bps*count)) {
-		// new block 
-		AddFAT(stream,stream->header.bpb,stream->block[total_blocks-1]);
-		// Update
-		total_blocks = stream->header.blocks;
-
-	}
-
-	lba_start = block[offset/bps/count] + (offset/bps%count);
-	
-	local_offset = offset%bps;
-
-	if(read_sector(dev_n,1,lba_start,buffer)) return EOF;
-
-	// write character
-	*(unsigned char*)(buffer + local_offset) = ch;
-
-	// gravar no disco
-	if(write_sector(dev_n,1,lba_start,buffer)) return EOF;
-	
-	if(offset >= stream->header.size )stream->header.size += 1;
-
-	if(stream->header.offset < 0xFFFFFFFF) {
-		// Update offset
-		offset = stream->header.offset +=1;
-	}
-	else {return EOF;/* Arquivo superior a 4GiB*/};
-
-	return  (ch&0xff); // successfull
-
-	// unused
-	return (count);
+	return (EOF);
 }
 
 int getc (FILE *stream)
 {
-	unsigned char* buffer = (unsigned char*) (stream->header.buffer);
-	unsigned dev_n = stream->header.dev;
-	unsigned count = stream->header.count;
-	unsigned int offset = stream->header.offset;
-	unsigned int offset2 = stream->header.offset2;
-	unsigned int total_blocks = stream->header.blocks;
-	unsigned int *block	= (unsigned int*)(stream->block);
-	unsigned int bps = stream->header.bps;
-	unsigned int lba_start;
-	unsigned int local_offset;
+	unsigned char* buffer = (unsigned char*) (stream->buffer);
+	unsigned int offset2 = stream->off2;
 	int ch;
 	
 	
 	// error
-	if(stream->header.mode[0] == '\0') return EOF;
+	if(stream->mode[0] == '\0') return EOF;
 
 	
 
 	// std
-	if ((stream->header.mode[0] == 's') \
-	&& (stream->header.mode[1] == 't') && (stream->header.mode[2] == 'd')) {
+	if ((stream->mode[0] == 's') \
+	&& (stream->mode[1] == 't') && (stream->mode[2] == 'd')) {
 
 
-		if(offset2 >= 65536) {
+		if(offset2 >= BUFSIZ) {
 
-			stream->header.offset2 = 0;
+			stream->off2 = 0;
 			return EOF;
 
 		}
@@ -423,131 +370,43 @@ int getc (FILE *stream)
 		ch = *(unsigned char*)(buffer + offset2);
 
 		// Update offset
-		if(ch) offset2 = stream->header.offset2 +=1;
+		if(ch) offset2 = stream->off2 +=1;
 
 		return ch; // successfull
 	}
 
-
-
-
-	if(!total_blocks) return EOF;
-
 	// Outros modos default lib C
 
-
-	// FAT
-
-	if(offset >= (total_blocks*bps*count)) {
-		// FINAL DO ARQUIVO, leu todos os blocos
-		return EOF;
-
-	}
-
-	// FINAL DO ARQUIVO, leu todos os bytes
-	if(offset >= stream->header.size) return EOF;
-
-	lba_start = block[offset/bps/count] + (offset/bps%count);
-	
-	local_offset = offset%bps;
-
-	if(read_sector(dev_n,1,lba_start,buffer)) return EOF;
-
-	if(stream->header.offset < 0xFFFFFFFF){
-		// Update offset
-		offset = stream->header.offset +=1;
-	}
-	else {return EOF;/* Arquivo superior a 4GiB*/};
-
-	return *(unsigned char*)(buffer + local_offset); // successfull
-
-	// unused
-	return (count);
+	return EOF;
 
 }
 
 size_t write (const void *buffer,size_t num_bytes, size_t count, FILE *stream)
 {
-	unsigned char *cache = (unsigned char*) (stream->header.buffer);
-	unsigned char *__buffer__ = (unsigned char*) (buffer);
-	unsigned dev_n = stream->header.dev;
-	unsigned __count__ = stream->header.count;
-	unsigned int offset = stream->header.offset;
-	unsigned int total_blocks = stream->header.blocks;
-	unsigned int *block	= (unsigned int*)(stream->block);
-	unsigned int bps = stream->header.bps;
-	unsigned int lba_start;
-	unsigned int local_offset;
-	unsigned tmp_count = (count*num_bytes);
-	unsigned tmp2_count = 0;
-	int i;
-	int operation = ((num_bytes*count)/bps);
-	if(((num_bytes*count)%bps))operation++;
-
-	if(!total_blocks) return EOF;
-
-	for(i = 0;i < operation;i++) {
-		if(offset >= (total_blocks*bps*__count__)) {
-			// new block 
-			AddFAT(stream,stream->header.bpb,stream->block[total_blocks-1]);
-			// Update
-			total_blocks = stream->header.blocks;
-
-		}
-
-		lba_start = block[offset/bps/__count__] + (offset/bps%__count__);
-		local_offset = offset%bps;
-
-
-		if(read_sector(dev_n,2,lba_start,cache)) return 0;
-
-		// write character
-		if(tmp_count >= bps) { 
-			tmp2_count = bps; 
-			tmp_count  -= bps;
-
-		}
-		else { 
-			tmp2_count = tmp_count;
-
-		}
-
-		copymem(cache + local_offset,__buffer__ + (i*bps),tmp2_count);
-
-		// gravar no disco
-		if(write_sector(dev_n,2,lba_start,cache)) return 0;
-		
-		if((offset >= stream->header.size) || ((offset+tmp2_count) >= stream->header.size ) )
-			stream->header.size += (tmp2_count);
-
-		if(stream->header.offset < 0xFFFFFFFF) { 
-			// update offset
-			offset = stream->header.offset += (tmp2_count);
-			
-		}
-		else {return 0;/* Arquivo superior a 4GiB*/};
-
-	}
-
-	return ((i-1)*bps + tmp2_count);
+	
+	return (0);
 }
 
 size_t read (void *buffer,size_t num_bytes, size_t count, FILE *stream)
-{	unsigned char *cache = (unsigned char*) (stream->header.buffer);
+{	unsigned char *cache = (unsigned char*) (stream->buffer);
 	unsigned char *__buffer__ = (unsigned char*) (buffer);
-	unsigned dev_n = stream->header.dev;
-	unsigned __count__ = stream->header.count;
-	unsigned int offset = stream->header.offset;
-	unsigned int total_blocks = stream->header.blocks;
-	unsigned int *block	= (unsigned int*)(stream->block);
-	unsigned int bps = stream->header.bps;
-	unsigned int lba_start;
+	unsigned __count__ = stream->count;
+	unsigned int offset = stream->off;
+	unsigned int total_blocks = stream->tnb;
+	unsigned int bps = stream->bps;
 	unsigned int local_offset;
 	unsigned tmp_count = (count*num_bytes);
 	unsigned tmp2_count = 0;
 	int i;
-	int operation = ((num_bytes*count)/bps);
-	if(((num_bytes*count)%bps))operation++;
+
+	unsigned int *block;
+	unsigned sector_start;
+	int block_idex;
+	int table_idex;
+	int r;
+
+	int operation = ((num_bytes*count)/(bps*__count__));
+	if(((num_bytes*count)%(bps*__count__)))operation++;
 	
 	if(!total_blocks) return EOF;
 
@@ -559,37 +418,42 @@ size_t read (void *buffer,size_t num_bytes, size_t count, FILE *stream)
 
 		}
 
-		lba_start = block[(offset/bps)/__count__] + ((offset/bps)%__count__);
-		local_offset = offset%bps;
+		// FIXME
+		r = stream->off / stream->bsize;
+		table_idex = r / 1024;
+		block_idex = r % 1024;
 
+		block= (unsigned int *) stream->table[table_idex];
+		sector_start = block[block_idex];
 
-		if(read_sector(dev_n,2,lba_start,cache)) return 0;
+		local_offset = offset%(bps*__count__);
+
+		// read
+		if( read_sector(stream->devn, __count__, sector_start,cache) ) 
+			return (0);
 
 		// write character
-		if(tmp_count >= bps) { 
-			tmp2_count = bps; 
-			tmp_count  -= bps;
+		if(tmp_count >= (bps*__count__)) { 
+			tmp2_count = bps*__count__; 
+			tmp_count -= bps*__count__;
 
-		}
-		else { 
+		} else { 
 			tmp2_count = tmp_count;
 
 		}
 
-		copymem(__buffer__ + (i*bps) ,cache + local_offset,tmp2_count);
+		copymem(__buffer__ + (i*bps*__count__) ,cache + local_offset,tmp2_count);
 
-		if(stream->header.offset < 0xFFFFFFFF) { 
+		if(stream->off < 0xFFFFFFFF) { 
 			// update offset
-			offset = stream->header.offset += (tmp2_count);
+			offset = stream->off += (tmp2_count);
 			
 		}
 		else {return 0;/* Arquivo superior a 4GiB*/};
 
-		
-		
 	}
 
-	return ((i-1)*bps + tmp2_count);
+	return ((i-1)*(bps*__count__) + tmp2_count);
 
 
 	return (count);
@@ -603,7 +467,7 @@ int eof (FILE *stream)
 
 void rewind (FILE *stream)
 {
-	stream->header.offset = 0;
+	stream->off2 = stream->off = 0;
 
 }
 

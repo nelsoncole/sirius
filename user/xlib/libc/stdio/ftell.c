@@ -7,6 +7,6 @@ long int ftell(FILE *fp)
 {
 	if(!fp) return (0);
 
-	return (fp->header.offset);
+	return (fp->off);
 
 }

@@ -27,10 +27,10 @@ mount:
 	sudo cp bmp/*.psf /mnt/
 	sudo cp bmp/*.tf /mnt/
 	sudo cp bmp/*.otf /mnt/
-	sudo cp bmp/*.jpg /mnt/
-	sudo cp bmp/*.ppm /mnt/
-	sudo cp file.txt /mnt/
-	sudo cp main.asm /mnt/
+	#sudo cp bmp/*.jpg /mnt/
+	#sudo cp bmp/*.ppm /mnt/
+	#sudo cp file.txt /mnt/
+	#sudo cp main.asm /mnt/
 	sudo umount /mnt
 
 	./pcopy bin/stage0.bin part.img sirius.vhd

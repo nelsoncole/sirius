@@ -38,7 +38,8 @@ gx_hand_t *create_label(gx_hand_t *window, const char *str,int x, int y, int w, 
 
 	l->m[2] = 0;
 	
-	l->m[3] = -1; // color fg 
+	l->c[0] = -1; // color fg 
+	l->c[1] = 0x80808000; // color bg
 
 	
 	int len = strlen(str);
@@ -102,10 +103,7 @@ int update_label(gx_hand_t *window, gx_hand_t *l)
 	if(l->flag&1) return (-1);
 
 	l->x = l->x0 + window->x;
-	l->y = l->y0 + window->y;
-
-	// gx_rect( t->x, t->y, t->w, t->h, 0xc0c0c000 /*bg*/, t->vmm);
-	// gx_line_horizontal (t->x, t->y + 24, t->w, -1, t->vmm);	
+	l->y = l->y0 + window->y;	
 
 
 	char *lstr = (char *) ((l->m[2]&1)? l->m[1] : l->m[0]); // buffer
@@ -119,7 +117,7 @@ int update_label(gx_hand_t *window, gx_hand_t *l)
 
 		lstr = utf8_convert(lstr,&unicode);
 
-		gx_putchar(&l->font,unicode, l->x + l->font.cols * i, l->y+3, l->m[3],0x80808000, l->vmm);
+		gx_putchar(&l->font,unicode, l->x + l->font.cols * i, l->y+3, l->c[0],l->c[1], l->vmm);
 			
 	}
 

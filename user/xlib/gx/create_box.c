@@ -97,7 +97,8 @@ int update_box(gx_hand_t *window, gx_hand_t *box)
 
 	int unicode;
 	char *lstr;
-	int i,j;
+	int i = 0,j = 0,c = 0;
+
 	for(i=0;i < box->h/box->font.rows;i++) {
 
 		lstr = (char *)lines[i];
@@ -105,6 +106,9 @@ int update_box(gx_hand_t *window, gx_hand_t *box)
 			box->spin_lock = 0;
 		 	return (-1);
 		}
+
+		if(!*lstr) continue;
+
 		for(j=0;j < box->w/box->font.cols;j++) {
 			if(!*lstr) break;
 			lstr = utf8_convert(lstr,&unicode);
@@ -112,6 +116,23 @@ int update_box(gx_hand_t *window, gx_hand_t *box)
 			box->y + box->font.rows*i, -1 ,0x80808000, box->vmm);
 			
 		}
+
+		if(i)c++;
+
+	}
+
+
+	if(box->m[3] && G->l.pid[0] == window->pid) {
+
+		box->m[3] = 0;
+
+	}else { 
+		box->m[3] += 1;
+
+		gx_putchar(&box->font,unicode, box->x + box->font.cols*j, 
+		box->y + box->font.rows * c, -1 ,-1, box->vmm);
+
+
 	}
 
 	box->spin_lock = 0;

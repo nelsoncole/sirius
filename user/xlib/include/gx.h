@@ -2,6 +2,7 @@
 #define __GX_H__
 
 #include <io.h>
+#include <sys/sys.h>
 #include <gx/font.h>
 #include <gx/window.h>
 #include <gx/bmp.h>
@@ -62,6 +63,21 @@ extern gx_hand_t *create_label(gx_hand_t *window, const char *str,int x, int y, 
 extern void exit_label(gx_hand_t *l);
 extern int update_label(gx_hand_t *window, gx_hand_t *l);
 extern int update_str_label(gx_hand_t *l, const char *str);
+
+extern gx_hand_t *create_editbox(gx_hand_t *window,int x, int y, int w, int h, unsigned int len, unsigned int style);
+extern void exit_editbox(gx_hand_t *e);
+extern int update_editbox(gx_hand_t *window, gx_hand_t *e);
+extern void *get_buffer_editbox(gx_hand_t *e);
+extern unsigned int get_len_editbox(gx_hand_t *e);
+extern void clrs_editbox(gx_hand_t *e);
+extern void motor_editbox(gx_hand_t *e);
+extern void r_motor_editbox(gx_hand_t *e, int c);
+extern int get_cursor_editbox(gx_hand_t *e);
+extern void update_cursor_editbox(gx_hand_t *e, int x);
+
+extern gx_hand_t *create_button(gx_hand_t *window, const char *str,int x, int y, int w, int h, unsigned int style);
+extern void exit_button(gx_hand_t *b);
+extern int update_button(gx_hand_t *window, gx_hand_t *b);
 
 extern void gx_mouse_init();
 extern gx_message_t gx_mouse (gx_hand_t *w);

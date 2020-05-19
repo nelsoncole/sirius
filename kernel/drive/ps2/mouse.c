@@ -159,6 +159,15 @@ void mouse_install(){
 	mouse_write(MOUSE_DEFAULT);
 	mouse_read();  // ACK
 
+	// Set resolution
+	/*kbdc_wait(1);
+	outportb(0x64,MOUSE_SET_RESOLUTION);
+	kbdc_wait(0);
+	tmp = inportb(0x60);
+	tmp |= 0x2;
+	kbdc_wait(1);
+	outportb(0x60, tmp);	*/
+
 	// Enable the mouse
 	mouse_write(ENABLE_MOUSE);
 	mouse_read();  // ACK
@@ -201,7 +210,7 @@ void mouse_handler(void) {
 			break;
 			case 2:
 				if(buttons & 0x20) // negative
-					mouse_y = (int) inportb(0x60) | 0xFFFFFF00;
+					mouse_y = (int) mouse_read() | 0xFFFFFF00;
 				else
 					mouse_y = (int) inportb(0x60);
 				

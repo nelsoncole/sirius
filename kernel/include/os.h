@@ -154,6 +154,10 @@ extern FILE *xserver;
 extern FILE *gserver;
 
 
+// lock
+extern unsigned int *system_lock;
+
+
 // OS
 VOID wait_ns(UINTN count);
 

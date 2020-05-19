@@ -200,8 +200,8 @@ int main(int argc, char **argv) {
 	int x = getmouse_x();
 	int y = getmouse_y();
 
-	gx_hand_t *w = create_window (x/*100*/,y/* 100*/, 500, 400, 0);
-	gx_hand_t *t = create_title(w, "Terminal Virtual", 1, 0);
+	gx_hand_t *w = create_window (x/*100*/,y/* 100*/, 560, 400, 0);
+	create_title(w, "Terminal Virtual", 1, 0);
 	gx_hand_t *b = create_box(w,2, 32, w->w - 4, w->h - 34, 0);
 
 	gx_mouse_init();
@@ -257,6 +257,4 @@ int main(int argc, char **argv) {
 	}
 	return 0;
 
-	//unused
-	t = t;
 }

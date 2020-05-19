@@ -4,6 +4,6 @@
 
 int fclose (FILE *fp) 
 {
-	return close(fp);
+	return close_r(fp);
 }
 

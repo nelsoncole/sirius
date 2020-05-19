@@ -136,15 +136,21 @@ int FatUpdateRoot(FAT_BPB *bpb,FAT_DIRECTORY *root);
 int FatCreateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename,unsigned char attr);
 int FatRemveFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename);
 int FatCheckFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename);
-int FatOpenFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename,unsigned char attr,FILE *fd);
-int FatUpdateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,FILE *fd);
+int FatOpenFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,const char *filename,unsigned char attr,VFS *fd);
+int FatUpdateFile(FAT_BPB *bpb,FAT_DIRECTORY *_dir,VFS *fd);
 
 unsigned char ChkSum (unsigned char *pFcbName);
 
-int AddFAT(FILE *fd, FAT_BPB *bpb, unsigned int first_sector_of_cluster);
+int AddFAT(VFS *fd, FAT_BPB *bpb, unsigned int first_sector_of_cluster);
 
 
 FAT_DIRECTORY *FatOpenRoot2(FAT_BPB *bpb);
+
+// FIXME
+#include <stdio.h>
+extern int fileopen(FILE *fp);
+extern int updatefile(FILE *fp); 
+extern int addfat(FILE *fp);
 
 
 #endif
